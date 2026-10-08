@@ -1,0 +1,33 @@
+<div class="card mb-8!">
+
+    <div class="flex justify-between items-center mb-5">
+
+        <div>
+            <div class="font-semibold text-xl">
+                Évolution du marché
+            </div>
+
+            <div class="text-gray-500">
+                Performance du marché
+            </div>
+        </div>
+
+        <p-selectButton
+            [options]="periods"
+            [(ngModel)]="selectedPeriod"
+            optionLabel="label"
+            optionValue="value"
+            (onChange)="onPeriodChange()">
+        </p-selectButton>
+
+    </div>
+
+    <div style="height: 350px;">
+        <p-chart
+            type="line"
+            [data]="chartData"
+            [options]="chartOptions">
+        </p-chart>
+    </div>
+
+</div>

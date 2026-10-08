@@ -1,0 +1,32 @@
+/* You can add global styles to this file, and also import other style files */
+@use 'primeicons/primeicons.css';
+@use '@/assets/layout/layout.scss';
+@use '@/assets/demo/demo.scss';
+
+/* =========================================================
+   IDENTITÉ VISUELLE
+   ========================================================= */
+
+:root {
+    //--app-primary: #2563eb;
+    --app-primary: #FB923C;
+    --app-primary-dark: #1d4ed8;
+    --app-coral: #f97360;
+    --app-beige: #f8f5ef;
+
+    --app-text: #1f2937;
+    --app-text-secondary: #6b7280;
+
+    --app-radius: 12px;
+}
+
+/* =========================================================
+   STYLES GLOBAUX
+   ========================================================= */
+
+body {
+    margin: 0;
+    font-family: var(--font-family);
+    color: var(--text-color);
+    background: var(--surface-ground);
+}

@@ -1,0 +1,254 @@
+
+<div class="wrapper flex flex-col gap-6">
+
+    <!-- En-tête -->
+    <div class="flex flex-col gap-1">
+        <h1 class="text-3xl font-bold tracking-tight text-surface-900 dark:text-surface-0">
+            Actualités financières
+        </h1>
+        <p class="text-surface-500 dark:text-surface-400">
+            Restez informé des dernières actualités du marché.
+        </p>
+    </div>
+
+    <!-- Menu des catégories  -->
+    <div class="flex flex-wrap justify-center gap-2">
+        <p-button
+            *ngFor="let type of menuActualites"
+            [label]="type.label"
+            [outlined]="selectedMenuActualite !== type.value"
+            (onClick)="selectMenu(type.value)"
+            size="large"
+            styleClass="px-6 py-3 rounded-full"
+        />
+    </div>
+
+    <!-- Recherche + affichage -->
+    <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+
+        <!-- Recherche -->
+        <div class="w-full md:w-3/4">
+            <p-iconfield class="w-full">
+                <p-inputicon class="pi pi-search" />
+                <input
+                    type="text"
+                    pInputText
+                    [(ngModel)]="searchTerm"
+                    placeholder="Rechercher une actualité..."
+                    class="w-full !rounded-xl"
+                />
+            </p-iconfield>
+        </div>
+
+        <!-- Mode d'affichage -->
+        <p-select-button
+            [(ngModel)]="layout"
+            [options]="options"
+            [allowEmpty]="false"
+        >
+            <ng-template #item let-option>
+                <i
+                    class="pi"
+                    [ngClass]="{
+                        'pi-bars': option === 'list',
+                        'pi-table': option === 'grid'
+                    }"
+                ></i>
+            </ng-template>
+        </p-select-button>
+    </div>
+
+    <!-- Actualités -->
+    <div class="card !p-0 overflow-hidden">
+        <p-dataview [value]="filteredActualites" [layout]="layout">
+
+            <!-- ================= HEADER ================= -->
+            <ng-template #header>
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                        </span>
+                        <span class="font-semibold text-lg">Dernières actualités</span>
+                    </div>
+                    <span class="text-sm text-surface-500">
+                        {{ filteredActualites.length }} article(s)
+                    </span>
+                </div>
+            </ng-template>
+
+            <!-- ================= LISTE ================= -->
+            <ng-template #list let-items>
+                <div class="flex flex-col">
+                    @for (item of items; track item.id; let i = $index) {
+                        <article
+                            class="group relative p-4 md:p-5 cursor-pointer transition-colors
+                                   hover:bg-surface-50 dark:hover:bg-surface-800/60"
+                            [ngClass]="{ 'border-t border-surface-200 dark:border-surface-700': i !== 0 }"
+                            (click)="openArticle(item)"
+                        >
+                            <!-- Barre d'accent à gauche pour les articles à la une -->
+                            @if (item.featured) {
+                                <span class="absolute left-0 top-4 bottom-4 w-1 rounded-r bg-red-500"></span>
+                            }
+
+                            <div class="flex flex-col sm:flex-row gap-5 items-start">
+
+                                <!-- Image -->
+                                <div class="w-full sm:w-44 flex-shrink-0 relative overflow-hidden rounded-xl">
+                                    <img
+                                        [src]="item.image"
+                                        [alt]="item.title"
+                                        loading="lazy"
+                                        class="w-full h-32 sm:h-28 object-cover transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                    @if (item.featured) {
+                                        <p-tag
+                                            value="À la une"
+                                            severity="danger"
+                                            class="absolute top-2 left-2"
+                                        />
+                                    }
+                                </div>
+
+                                <!-- Contenu -->
+                                <div class="flex flex-col flex-1 gap-2 min-w-0">
+
+                                    <!-- Catégorie + date -->
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <span
+                                            class="px-2 py-0.5 rounded-md text-xs font-semibold"
+                                            [ngClass]="categoryClass(item.category)"
+                                        >
+                                            {{ item.category }}
+                                        </span>
+                                        <span class="text-surface-500 flex items-center gap-1">
+                                            <i class="pi pi-clock text-xs"></i>
+                                            {{ item.date }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Titre -->
+                                    <h2 class="text-lg md:text-xl font-semibold leading-snug text-surface-900 dark:text-surface-0 line-clamp-2
+                                               group-hover:text-primary transition-colors">
+                                        {{ item.title }}
+                                    </h2>
+
+                                    <!-- Résumé -->
+                                    <p class="text-sm text-surface-600 dark:text-surface-300 line-clamp-2">
+                                        {{ item.description }}
+                                    </p>
+
+                                    <!-- Source + action -->
+                                    <div class="flex items-center justify-between mt-1">
+                                        <div class="flex items-center gap-2 text-sm text-surface-500">
+                                            <i class="pi pi-globe"></i>
+                                            <span>{{ item.source }}</span>
+                                        </div>
+
+                                        <span class="flex items-center gap-1 text-sm font-medium text-primary
+                                                     opacity-70 group-hover:opacity-100 transition-all">
+                                            Lire l'article
+                                            <i class="pi pi-chevron-right text-xs transition-transform group-hover:translate-x-1"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </ng-template>
+
+            <!-- ================= GRILLE ================= -->
+            <ng-template #grid let-items>
+                <div class="grid grid-cols-12 gap-5 p-4">
+                    @for (item of items; track item.id) {
+                        <div class="col-span-12 sm:col-span-6 lg:col-span-4">
+                            <article
+                                class="group h-full flex flex-col cursor-pointer
+                                       border border-surface-200 dark:border-surface-700
+                                       rounded-2xl overflow-hidden
+                                       bg-surface-0 dark:bg-surface-900
+                                       hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+                                (click)="openArticle(item)"
+                            >
+                                <!-- Image -->
+                                <div class="relative overflow-hidden">
+                                    <img
+                                        [src]="item.image"
+                                        [alt]="item.title"
+                                        loading="lazy"
+                                        class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                    <!-- Dégradé pour la lisibilité du badge -->
+                                    <div class="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/40 to-transparent"></div>
+
+                                    <span
+                                        class="absolute bottom-3 left-3 px-2 py-0.5 rounded-md text-xs font-semibold backdrop-blur"
+                                        [ngClass]="categoryClass(item.category)"
+                                    >
+                                        {{ item.category }}
+                                    </span>
+
+                                    @if (item.featured) {
+                                        <p-tag
+                                            value="À la une"
+                                            severity="danger"
+                                            class="absolute top-3 left-3"
+                                        />
+                                    }
+                                </div>
+
+                                <!-- Contenu -->
+                                <div class="p-5 flex flex-col gap-3 flex-1">
+
+                                    <span class="text-xs text-surface-500 flex items-center gap-1">
+                                        <i class="pi pi-clock text-xs"></i>
+                                        {{ item.date }}
+                                    </span>
+
+                                    <h2 class="text-lg font-semibold leading-snug text-surface-900 dark:text-surface-0 line-clamp-2
+                                               group-hover:text-primary transition-colors">
+                                        {{ item.title }}
+                                    </h2>
+
+                                    <p class="text-sm text-surface-600 dark:text-surface-300 line-clamp-3">
+                                        {{ item.description }}
+                                    </p>
+
+                                    <!-- Source -->
+                                    <div class="flex items-center gap-2 text-sm text-surface-500 mt-auto pt-2">
+                                        <i class="pi pi-globe"></i>
+                                        {{ item.source }}
+                                    </div>
+
+                                    <!-- Bouton -->
+                                    <p-button
+                                        label="Lire l'article"
+                                        icon="pi pi-arrow-right"
+                                        iconPos="right"
+                                        [outlined]="true"
+                                        class="w-full"
+                                        styleClass="w-full"
+                                        (onClick)="openArticle(item); $event.stopPropagation()"
+                                    />
+                                </div>
+                            </article>
+                        </div>
+                    }
+                </div>
+            </ng-template>
+
+            <!-- ================= VIDE ================= -->
+            <ng-template #empty>
+                <div class="flex flex-col items-center gap-2 py-12 text-surface-500">
+                    <i class="pi pi-search text-3xl"></i>
+                    <span class="font-medium">Aucune actualité trouvée</span>
+                    <span class="text-sm">Essayez un autre mot-clé ou une autre catégorie.</span>
+                </div>
+            </ng-template>
+
+        </p-dataview>
+    </div>
+</div>
