@@ -32,63 +32,64 @@
                         Sakai<span class="text-indigo-300">HR</span>
                     </div>
                     <p class="m-0 text-xs text-blue-200">
-                        Votre PME, Notre Intelligence
+<!--                        Votre PME, Notre Intelligence-->
                     </p>
                 </div>
             </div>
 
             <!-- Message principal -->
             <div class="relative z-10 my-12">
-                <span class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs text-blue-100">
-                    <i class="pi pi-sparkles text-indigo-300"></i>
-                    Votre espace de gestion RH
-                </span>
+<!--                <span class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs text-blue-100">-->
+<!--                    <i class="pi pi-sparkles text-indigo-300"></i>-->
+<!--&lt;!&ndash;                    Votre espace de gestion RH&ndash;&gt;-->
+<!--                </span>-->
 
                 <h1 class="max-w-md text-4xl font-bold leading-tight">
-                    Gérez vos équipes,
-                    <span class="text-indigo-300">simplifiez vos processus.</span>
+<!--                    Gérez vos équipes,-->
+<!--                    <span class="text-indigo-300">simplifiez vos processus.</span>-->
                 </h1>
 
-                <p class="mt-5 max-w-md text-sm leading-7 text-blue-100/80">
-                    Centralisez la gestion de vos employés, organisez vos
-                    départements et optimisez votre productivité grâce
-                    à une plateforme intelligente.
-                </p>
+<!--                <p class="mt-5 max-w-md text-sm leading-7 text-blue-100/80">-->
+<!--                    Centralisez la gestion de vos employés, organisez vos-->
+<!--                    départements et optimisez votre productivité grâce-->
+<!--                    à une plateforme intelligente.-->
+<!--                </p>-->
 
                 <!-- Avantages -->
                 <div class="mt-8 flex flex-col gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
-                            <i class="pi pi-shield text-indigo-300"></i>
-                        </div>
-                        <span class="text-sm text-blue-50">
-                            Accès sécurisé à votre espace
-                        </span>
-                    </div>
+<!--                    <div class="flex items-center gap-3">-->
+<!--                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">-->
+<!--                            <i class="pi pi-shield text-indigo-300"></i>-->
+<!--                        </div>-->
+<!--                        <span class="text-sm text-blue-50">-->
+<!--&lt;!&ndash;                            Accès sécurisé à votre espace&ndash;&gt;-->
+<!--                        </span>-->
+<!--                    </div>-->
 
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
-                            <i class="pi pi-users text-indigo-300"></i>
-                        </div>
-                        <span class="text-sm text-blue-50">
-                            Gestion centralisée du personnel
-                        </span>
-                    </div>
+<!--                    <div class="flex items-center gap-3">-->
+<!--                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">-->
+<!--                            <i class="pi pi-users text-indigo-300"></i>-->
+<!--                        </div>-->
+<!--                        <span class="text-sm text-blue-50">-->
+<!--&lt;!&ndash;                            Gestion centralisée du personnel&ndash;&gt;-->
+<!--                        </span>-->
+<!--                    </div>-->
 
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
-                            <i class="pi pi-bolt text-indigo-300"></i>
-                        </div>
-                        <span class="text-sm text-blue-50">
-                            Des outils conçus pour votre PME
-                        </span>
-                    </div>
+<!--                    <div class="flex items-center gap-3">-->
+<!--                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">-->
+<!--                            <i class="pi pi-bolt text-indigo-300"></i>-->
+<!--                        </div>-->
+<!--                        <span class="text-sm text-blue-50">-->
+<!--&lt;!&ndash;                            Des outils conçus pour votre PME&ndash;&gt;-->
+<!--                        </span>-->
+<!--                    </div>-->
                 </div>
             </div>
 
             <div class="relative z-10 border-t border-white/15 pt-5">
                 <p class="m-0 text-xs text-blue-200/70">
-                    © {{ currentYear }} SakaiHR. Tous droits réservés.
+                    © {{ currentYear }}
+<!--                    SakaiHR. Tous droits réservés.-->
                 </p>
             </div>
         </div>
@@ -189,11 +190,6 @@
                             inputStyleClass="w-full"
                         />
 
-                        @if (isInvalid('password')) {
-                            <small class="text-red-500">
-                                Le mot de passe est obligatoire.
-                            </small>
-                        }
                     </div>
 
                     <!-- Mémorisation -->
@@ -207,13 +203,20 @@
                         <label for="remember" class="cursor-pointer text-sm text-surface-600 dark:text-surface-300">
                             Se souvenir de moi
                         </label>
+
+                        @if (isInvalid('password')) {
+                            <small class="text-red-500">
+                                Le mot de passe est obligatoire.
+                            </small>
+                        }
                     </div>
 
                     <!-- Connexion -->
+<!--                    class="!mt-2 !w-full !justify-center !rounded-xl !bg-or-600 !py-3 !font-semibold hover:!bg-indigo-700"-->
                     <button
                         pButton
                         type="submit"
-                        class="!mt-2 !w-full !justify-center !rounded-xl !bg-indigo-600 !py-3 !font-semibold hover:!bg-indigo-700"
+                        class="!mt-2 !w-full !justify-center !rounded-xl !py-3 !font-semibold "
                         [disabled]="loading">
 
                         @if (loading) {

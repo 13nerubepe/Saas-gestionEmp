@@ -7,7 +7,15 @@ import { Notfound } from './app/pages/notfound/notfound';
 import { AppConstantRoute } from '@/app/constants';
 
 export const appRoutes: Routes = [
+    // Redirection par défaut vers la page Login
+    // {
+    //     path: '',
+    //     redirectTo: 'auth/login',
+    //     pathMatch: 'full' },
+
     {
+
+        // Pages protégées avec le layout principal
         path: '',
         component: AppLayout,
         children: [
@@ -48,6 +56,7 @@ export const appRoutes: Routes = [
     },
     { path: 'landing', component: Landing },
     { path: 'notfound', component: Notfound },
+    // Routes d'authentification
     { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },
     { path: '**', redirectTo: '/notfound' }
 ];
