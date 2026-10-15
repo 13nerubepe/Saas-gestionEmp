@@ -1,0 +1,23 @@
+# French translations of user-facing API messages.
+# Regenerate with `django-admin makemessages -l fr` and compile with
+# `django-admin compilemessages` (both need GNU gettext installed).
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: fr\n"
+
+#: accounts/serializers.py
+msgid "A user with this email already exists."
+msgstr "Un compte existe déjà avec cette adresse email."
+
+#: agents/serializers.py
+msgid "This answer is general information based on the cited texts, not legal advice. Check with a lawyer before any important decision."
+msgstr "Cette réponse est une information générale fondée sur les textes cités, et non un conseil juridique. Vérifiez auprès d'un avocat avant toute décision importante."
+
+#: agents/services.py
+msgid "No applicable legal text was found for this question. Consult a legal professional before deciding."
+msgstr "Aucun texte juridique applicable n'a été trouvé pour cette question. Consultez un professionnel du droit avant de décider."
+
+#: agents/views.py
+msgid "The AI service is temporarily unavailable. Try again later."
+msgstr "Le service d'IA est momentanément indisponible. Réessayez plus tard."

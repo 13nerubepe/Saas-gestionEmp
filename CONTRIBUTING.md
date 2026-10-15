@@ -20,6 +20,19 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+PostgreSQL listens on host port **5434** (5432 and 5433 are often taken by
+other local servers). Tests need it: vector search does not exist in SQLite.
+
+To try the legal agent, put a Gemini key in `.env` (`GEMINI_API_KEY`, free at
+https://aistudio.google.com/), then load texts:
+
+```
+python manage.py load_legal_texts path/to/texts.json
+```
+
+`python manage.py help load_legal_texts` shows the file format. Without a key,
+set `LLM_PROVIDER=fake` to exercise the whole flow with canned answers.
+
 - API: http://localhost:8000/api/v1/
 - Interactive API docs: http://localhost:8000/api/docs/
 - Admin: http://localhost:8000/admin/
@@ -94,3 +107,9 @@ request, and the frontend regenerates its TypeScript types from it.
 
 The active company is sent in the `X-Company-ID` header. It may be omitted
 when the user belongs to a single company.
+
+Authentication: `POST /api/v1/auth/login/` returns an `access` token to send
+as `Authorization: Bearer <token>`. The refresh token is an httpOnly cookie:
+call `POST /api/v1/auth/refresh/` with `withCredentials: true` when the access
+token expires (15 minutes). Errors carry a stable `code` (e.g.
+`not_authenticated`, `llm_unavailable`) to translate on the client.

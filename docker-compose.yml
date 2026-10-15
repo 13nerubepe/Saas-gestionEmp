@@ -9,8 +9,10 @@ services:
       POSTGRES_DB: app
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
+    # Host port 5434 by default, to avoid PostgreSQL servers already running on
+    # 5432/5433. Override with DB_PORT and match it in rest-finance/.env.
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5434}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -23,7 +25,7 @@ services:
     build: ./rest-finance
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     environment:
-      SECRET_KEY: local-development-only
+      SECRET_KEY: local-development-only-not-secret-but-long-enough
       DEBUG: "True"
       ALLOWED_HOSTS: localhost,127.0.0.1
       DATABASE_URL: postgres://app:app@db:5432/app

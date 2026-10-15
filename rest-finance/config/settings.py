@@ -34,13 +34,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     # Third party
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "corsheaders",
     # Project apps
     "core",
     "accounts",
+    "agents",
 ]
 
 MIDDLEWARE = [
@@ -119,21 +122,60 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "core.exceptions.exception_handler",
+    # Scopes used through ScopedRateThrottle on sensitive or costly endpoints.
+    "DEFAULT_THROTTLE_RATES": {
+        "auth": "10/min",
+        "llm": "10/min",
+    },
 }
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    # Each refresh issues a new refresh token and invalidates the old one.
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
 }
+
+# The refresh token lives in an httpOnly cookie, out of reach of JavaScript,
+# and is only sent to the auth routes. Local HTTP needs Secure=False; a
+# frontend on another site (Vercel) needs SameSite=None in production.
+REFRESH_COOKIE_NAME = "refresh_token"
+REFRESH_COOKIE_PATH = "/api/v1/auth/"
+REFRESH_COOKIE_SECURE = env.bool("REFRESH_COOKIE_SECURE", default=True)
+REFRESH_COOKIE_SAMESITE = env("REFRESH_COOKIE_SAMESITE", default="Lax")
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Saas-gestionEmp API",
     "DESCRIPTION": "Virtual back office for entrepreneurs.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # Separate request and response components: cleaner generated TypeScript types.
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {"persistAuthorization": True},
 }
 
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+# The browser must send the refresh cookie on cross-origin calls.
+CORS_ALLOW_CREDENTIALS = True
+
+
+# AI agents
+# Calls go through agents.llm.get_provider(); "fake" is used by the tests.
+
+LLM_PROVIDER = env("LLM_PROVIDER", default="gemini")
+GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
+# A pinned version, not a "-latest" alias: answers stay reproducible and each
+# stored Answer names the model that really produced it.
+GEMINI_MODEL = env("GEMINI_MODEL", default="gemini-3.5-flash")
+GEMINI_EMBEDDING_MODEL = env("GEMINI_EMBEDDING_MODEL", default="gemini-embedding-001")
+LLM_TIMEOUT_SECONDS = env.int("LLM_TIMEOUT_SECONDS", default=30)
+# Size of the vector column: changing it requires a migration and re-embedding.
+EMBEDDING_DIMENSIONS = 768
+# Cosine distance above which a legal passage is considered unrelated.
+LEGAL_SEARCH_MAX_DISTANCE = env.float("LEGAL_SEARCH_MAX_DISTANCE", default=0.45)
 
 
 # Internationalization

@@ -6,12 +6,24 @@ single company may omit it.
 
 import uuid
 
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
 
 from accounts.models import Membership
 
 COMPANY_HEADER = "X-Company-ID"
+
+# Add to @extend_schema(parameters=[...]) on company-scoped views so the header
+# shows up in the OpenAPI schema and in Swagger.
+COMPANY_HEADER_PARAMETER = OpenApiParameter(
+    COMPANY_HEADER,
+    OpenApiTypes.UUID,
+    OpenApiParameter.HEADER,
+    required=False,
+    description="Active company. Optional when the user belongs to a single company.",
+)
 
 
 def get_active_membership(request):
