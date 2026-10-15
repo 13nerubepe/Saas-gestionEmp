@@ -126,10 +126,10 @@
                 </div>
 
                 <!-- Erreur de connexion -->
-                @if (errorMessage) {
+                @if (errorMessage()) {
                     <div class="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300" role="alert">
                         <i class="pi pi-exclamation-circle mt-0.5"></i>
-                        <span>{{ errorMessage }}</span>
+                        <span>{{ errorMessage() }}</span>
                     </div>
                 }
 
@@ -217,9 +217,9 @@
                         pButton
                         type="submit"
                         class="!mt-2 !w-full !justify-center !rounded-xl !py-3 !font-semibold "
-                        [disabled]="loading">
+                        [disabled]="loading()">
 
-                        @if (loading) {
+                        @if (loading()) {
                             <i class="pi pi-spin pi-spinner"></i>
                             <span>Connexion en cours...</span>
                         } @else {
@@ -235,6 +235,11 @@
                     <p class="m-0 text-xs leading-6 text-surface-500 dark:text-surface-400">
                         En vous connectant, vous accédez à votre espace
                         professionnel sécurisé.
+                    </p>
+
+                    <p class="mb-0 mt-4 text-sm text-surface-500">
+                        Pas encore de compte ?
+                        <a routerLink="/auth/register" class="font-medium text-primary">Créer un compte</a>
                     </p>
 
                     <div class="mt-4 flex items-center justify-center gap-2 text-xs text-surface-400">

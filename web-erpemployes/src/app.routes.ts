@@ -5,6 +5,7 @@ import { Documentation } from './app/pages/documentation/documentation';
 import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
 import { AppConstantRoute } from '@/app/constants';
+import { authGuard } from '@/app/core/auth/auth.guard';
 
 export const appRoutes: Routes = [
     // Redirection par défaut vers la page Login
@@ -18,6 +19,7 @@ export const appRoutes: Routes = [
         // Pages protégées avec le layout principal
         path: '',
         component: AppLayout,
+        canActivate: [authGuard],
         children: [
 
             { path: '', component: Dashboard },

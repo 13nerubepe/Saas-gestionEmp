@@ -1,12 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
+import { AuthService } from '@/app/core/auth/auth.service';
+import { apiErrorMessage } from '@/app/core/api-errors';
 
 @Component({
     selector: 'app-login',
@@ -23,10 +25,14 @@ export class Login {
 
     private readonly fb = inject(FormBuilder);
     private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly auth = inject(AuthService);
 
     currentYear = new Date().getFullYear();
-    loading = false;
-    errorMessage = '';
+    // Signals: the app runs without zone.js, so plain fields changed in an HTTP
+    // callback would not refresh the view.
+    readonly loading = signal(false);
+    readonly errorMessage = signal('');
 
     loginForm = this.fb.nonNullable.group({
         email: ['', [Validators.required, Validators.email]],
@@ -41,14 +47,25 @@ export class Login {
     }
 
     onSubmit(): void {
-        this.errorMessage = '';
+        this.errorMessage.set('');
 
         if (this.loginForm.invalid) {
             this.loginForm.markAllAsTouched();
             return;
         }
 
-        // À remplacer par l'appel à ton service d'authentification.
-        this.errorMessage = 'Le service de connexion doit être configuré avec le backend.';
+        this.loading.set(true);
+        const { email, password } = this.loginForm.getRawValue();
+        this.auth.login(email, password).subscribe({
+            next: () => {
+                // Back to the page that required the login, if any.
+                const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+                this.router.navigateByUrl(returnUrl);
+            },
+            error: (error) => {
+                this.loading.set(false);
+                this.errorMessage.set(apiErrorMessage(error));
+            }
+        });
     }
 }

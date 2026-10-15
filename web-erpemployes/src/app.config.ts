@@ -1,4 +1,4 @@
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 // import Aura from '@primeuix/themes/aura';
@@ -6,6 +6,7 @@ import Lara from '@primeuix/themes/lara';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import { definePreset } from '@primeuix/themes';
+import { authInterceptor } from '@/app/core/auth/auth.interceptor';
 
 // import
 const AppPreset = definePreset(Lara, {
@@ -95,7 +96,7 @@ const AppPreset = definePreset(Lara, {
 export const appConfig: ApplicationConfig = {
     providers: [
         provideRouter(appRoutes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation()),
-        provideHttpClient(withFetch()),
+        provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
         provideZonelessChangeDetection(),
         // providePrimeNG({ theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } } })
         providePrimeNG({ theme: { preset: AppPreset, options: { darkModeSelector: '.app-dark' } } })

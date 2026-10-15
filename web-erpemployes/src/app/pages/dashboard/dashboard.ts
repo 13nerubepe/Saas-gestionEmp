@@ -7,10 +7,11 @@ import { RevenueStreamWidget } from '@/app/commons/revenuestreamwidget';
 import { MarketEvolutionWidget } from '@/app/commons/marketEvolution/market-evolution-widge';
 import { AssistantAi } from '@/app/commons/assistant-ai/assistant-ai';
 import {ProchainEvent} from "@/app/commons/prochain-event/prochain-event";
+import { LegalQuestion } from '@/app/commons/legal-question/legal-question';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [StatsWidget,  AssistantAi, ProchainEvent],
+    imports: [StatsWidget,  AssistantAi, ProchainEvent, LegalQuestion],
     templateUrl: './dashboard.html'
     // template: `
     //     <div class="grid grid-cols-12 gap-8">
