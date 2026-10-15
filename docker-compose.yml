@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
     # Host port 5434 by default, to avoid PostgreSQL servers already running on
-    # 5432/5433. Override with DB_PORT and match it in rest-finance/.env.
+    # 5432/5433. Override with DB_PORT and match it in rest-erpemployes/.env.
     ports:
       - "${DB_PORT:-5434}:5432"
     volumes:
@@ -22,7 +22,7 @@ services:
       retries: 10
 
   api:
-    build: ./rest-finance
+    build: ./rest-erpemployes
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     environment:
       SECRET_KEY: local-development-only-not-secret-but-long-enough
@@ -33,7 +33,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./rest-finance:/app
+      - ./rest-erpemployes:/app
     depends_on:
       db:
         condition: service_healthy

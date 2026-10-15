@@ -50,10 +50,20 @@ class GeminiProvider:
             response_schema=schema,
             temperature=0.2,
         )
-        try:
-            response = self.client.models.generate_content(
-                model=self.model_name, contents=prompt, config=config
-            )
-            return schema.model_validate_json(response.text or "")
-        except (errors.APIError, httpx.HTTPError, pydantic.ValidationError) as exc:
-            raise LLMUnavailable(str(exc)) from exc
+        models = [settings.GEMINI_MODEL, settings.GEMINI_FALLBACK_MODEL]
+        for model in dict.fromkeys(filter(None, models)):
+            try:
+                response = self.client.models.generate_content(
+                    model=model, contents=prompt, config=config
+                )
+                result = schema.model_validate_json(response.text or "")
+            except errors.ServerError as exc:
+                # Overloaded or failing on Google's side: try the next model.
+                last_error = exc
+                continue
+            except (errors.APIError, httpx.HTTPError, pydantic.ValidationError) as exc:
+                raise LLMUnavailable(str(exc)) from exc
+            # Record the model that actually answered.
+            self.model_name = model
+            return result
+        raise LLMUnavailable(str(last_error)) from last_error

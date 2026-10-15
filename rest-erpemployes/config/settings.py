@@ -11,6 +11,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import environ
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -160,6 +161,18 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 # The browser must send the refresh cookie on cross-origin calls.
 CORS_ALLOW_CREDENTIALS = True
+# Custom headers must be allowed explicitly, or the browser blocks the request.
+CORS_ALLOW_HEADERS = (*default_headers, "x-company-id")
+
+
+# Logging: warnings and errors to the console (picked up by Docker / the host).
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": env("LOG_LEVEL", default="WARNING")},
+}
 
 
 # AI agents
@@ -170,6 +183,8 @@ GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
 # A pinned version, not a "-latest" alias: answers stay reproducible and each
 # stored Answer names the model that really produced it.
 GEMINI_MODEL = env("GEMINI_MODEL", default="gemini-3.5-flash")
+# Used only when the main model is overloaded (5xx), frequent on the free tier.
+GEMINI_FALLBACK_MODEL = env("GEMINI_FALLBACK_MODEL", default="gemini-2.5-flash")
 GEMINI_EMBEDDING_MODEL = env("GEMINI_EMBEDDING_MODEL", default="gemini-embedding-001")
 LLM_TIMEOUT_SECONDS = env.int("LLM_TIMEOUT_SECONDS", default=30)
 # Size of the vector column: changing it requires a migration and re-embedding.

@@ -10,7 +10,7 @@ Requires Python 3.13 and Docker.
 ```
 docker compose up -d db
 
-cd rest-finance
+cd rest-erpemployes
 python -m venv venv
 venv\Scripts\activate            # Windows; on macOS/Linux: source venv/bin/activate
 pip install -r requirements-dev.txt
@@ -43,7 +43,7 @@ To run the API in Docker instead of a venv: `docker compose up`.
 
 ## Before opening a pull request
 
-From `rest-finance/`:
+From `rest-erpemployes/`:
 
 ```
 ruff check .

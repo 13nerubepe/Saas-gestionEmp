@@ -54,8 +54,8 @@ structured the same way so it can be learned by imitation.
 
 | Layer | Choice | Status |
 |---|---|---|
-| Backend | Django 6.1 + Django REST Framework on Python 3.13, in `rest-finance/` | in place |
-| Frontend | Angular 21 + PrimeNG + Tailwind (Sakai template), in `web-finance/` | scaffolded |
+| Backend | Django 6.1 + Django REST Framework on Python 3.13, in `rest-erpemployes/` | in place |
+| Frontend | Angular 21 (zoneless) + PrimeNG + Tailwind (Sakai template), in `web-erpemployes/` | auth and legal question wired to the API |
 | Database | PostgreSQL + pgvector, from `DATABASE_URL`; Docker exposes it on host port 5434. Tests need it (vector search) | in place |
 | Async tasks | Celery + Redis (LLM calls, alerts, reminders) | planned |
 | Auth | Email + password with JWT (`djangorestframework-simplejwt`), refresh token in an httpOnly cookie scoped to `/api/v1/auth/`, rotated and blacklisted; Google sign-in added afterwards | in place (US-01), Google pending |
@@ -70,14 +70,21 @@ assuming a tool is installed.
 ## Repository layout
 
 ```
-rest-finance/   Django project (settings package: config/)
-web-finance/    Angular application
+rest-erpemployes/   Django project (settings package: config/)
+web-erpemployes/    Angular application
 diagrams/       Use case and class diagrams (interactive HTML, labels in French)
 ```
 
-The frontend
-pages `actif`, `actualites` and `comparaison-actif` and the template demo pages
-come from another project.
+Frontend API wiring lives in `web-erpemployes/src/app/core/`: `auth/`
+(`AuthService`, `authInterceptor`, `authGuard`), `api-errors.ts` (messages per
+API error `code`) and `agents/`. The API URL is in `src/environments/`.
+
+- The access token stays in memory; the refresh cookie restores the session
+  after a reload (`authGuard` → `restoreSession()`).
+- The app runs without zone.js: state changed in an HTTP callback must be a
+  signal, or the view does not update.
+- Screens still on demo data (no API yet): create user / company, activation,
+  departments, events, stats widgets. The sidebar still lists template pages.
 
 ## Backend architecture
 
@@ -173,7 +180,7 @@ Rules:
 # database (from the repository root; host port 5434)
 docker compose up -d db
 
-# backend (from rest-finance/, venv active, .env copied from .env.example)
+# backend (from rest-erpemployes/, venv active, .env copied from .env.example)
 python manage.py runserver
 python manage.py makemigrations
 python manage.py migrate
@@ -181,7 +188,7 @@ pytest
 ruff check . && ruff format .
 python manage.py load_legal_texts <file.json>   # format: manage.py help load_legal_texts
 
-# frontend (from web-finance/)
+# frontend (from web-erpemployes/)
 npm start
 npm run build
 npm test
@@ -198,7 +205,9 @@ npm run format
   matching question sits at 0.25-0.31, an unrelated legal question at
   0.38-0.45. The model is the second filter: it cites nothing when the
   passages do not answer.
-- Gemini model pinned to `gemini-3.5-flash`. On 2026-10-15, `gemini-flash-latest`
+- Gemini model pinned to `gemini-3.5-flash`, with `GEMINI_FALLBACK_MODEL`
+  (`gemini-2.5-flash`) used when the main one is overloaded; the stored Answer
+  names the model that answered. On 2026-10-15, `gemini-flash-latest`
   and `gemini-3.7-flash` were overloaded (503) and `gemini-3.8-flash` took about
   15 minutes; `gemini-2.5-flash` is a fast fallback.
 - French translations are compiled by hand (`locale/fr/LC_MESSAGES/django.mo`)

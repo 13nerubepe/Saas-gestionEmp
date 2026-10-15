@@ -1,3 +1,5 @@
+import logging
+
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, status
@@ -16,6 +18,8 @@ from agents.serializers import (
     ConversationSerializer,
 )
 from agents.services import ask_legal_question
+
+logger = logging.getLogger(__name__)
 
 
 class AIServiceUnavailable(APIException):
@@ -52,6 +56,7 @@ class AskLegalQuestionView(APIView):
                 conversation=conversation,
             )
         except LLMUnavailable as exc:
+            logger.warning("Legal question failed, LLM unavailable: %s", exc)
             raise AIServiceUnavailable() from exc
 
         answer = (

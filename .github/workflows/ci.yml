@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: rest-finance
+        working-directory: rest-erpemployes
     services:
       postgres:
         image: pgvector/pgvector:pg17
@@ -34,7 +34,7 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-          cache-dependency-path: rest-finance/requirements*.txt
+          cache-dependency-path: rest-erpemployes/requirements*.txt
       - run: pip install -r requirements-dev.txt
       - name: Lint
         run: ruff check .

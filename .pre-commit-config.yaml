@@ -4,6 +4,6 @@ repos:
     hooks:
       - id: ruff-check
         args: [--fix]
-        files: ^rest-finance/
+        files: ^rest-erpemployes/
       - id: ruff-format
-        files: ^rest-finance/
+        files: ^rest-erpemployes/
