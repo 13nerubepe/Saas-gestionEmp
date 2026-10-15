@@ -1,0 +1,13 @@
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+extend-exclude = ["venv", "migrations"]
+
+[tool.ruff.lint]
+# E/F: errors, I: import order, B: likely bugs, UP: modern syntax, DJ: Django pitfalls
+select = ["E", "F", "I", "B", "UP", "DJ"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py"]
+addopts = "--strict-markers"

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagramme de Classes UML 2 - Système d'Entreprise & Agents IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .grid-bg {
+            background-color: #0f172a;
+            background-image: radial-gradient(#1e293b 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .class-node {
+            transition: transform 0.15s ease, filter 0.15s ease;
+            cursor: pointer;
+        }
+        .class-node:hover {
+            filter: drop-shadow(0px 0px 10px rgba(59, 130, 246, 0.5));
+        }
+        .class-node.selected {
+            filter: drop-shadow(0px 0px 14px rgba(245, 158, 11, 0.8));
+        }
+        .relation-line {
+            transition: stroke 0.2s ease, stroke-width 0.2s ease;
+        }
+        .relation-line.highlighted {
+            stroke: #f59e0b !important;
+            stroke-width: 3.5px !important;
+            filter: drop-shadow(0px 0px 6px rgba(245, 158, 11, 0.6));
+        }
+        .relation-line.dimmed {
+            opacity: 0.15;
+        }
+        .class-node.dimmed {
+            opacity: 0.25;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col overflow-hidden">
+
+    <!-- Header Controls -->
+    <header class="bg-slate-950 border-b border-slate-800 px-4 py-3 flex flex-wrap justify-between items-center z-20 gap-3">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/30">
+                <i class="fa-solid fa-sitemap text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-base font-bold text-slate-100 flex items-center gap-2">
+                    Diagramme de Classes UML 2
+                    <span class="text-xs font-normal px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">30 Classes</span>
+                </h1>
+                <p class="text-xs text-slate-400">Architecture Modèle de Données & Orchestration Agents IA</p>
+            </div>
+        </div>
+
+        <!-- Search and Domain Filters -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-xs text-slate-400"></i>
+                <input type="text" id="class-search" placeholder="Rechercher une classe..." 
+                       oninput="filterClasses(this.value)"
+                       class="pl-8 pr-3 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 w-48">
+            </div>
+
+            <select id="domain-filter" onchange="filterByDomain(this.value)" class="py-1.5 px-3 text-xs bg-slate-900 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500">
+                <option value="ALL">Tous les domaines</option>
+                <option value="ADMIN">1. Administration & Core</option>
+                <option value="IA">2. IA & Agents</option>
+                <option value="CRM">3. Relation Client (CRM)</option>
+                <option value="FINANCE">4. Finance & Facturation</option>
+                <option value="RH">5. Ressources Humaines</option>
+                <option value="PILOTAGE">6. Pilotage & Conformité</option>
+            </select>
+
+            <div class="h-4 w-px bg-slate-800 mx-1"></div>
+
+            <!-- View Controls -->
+            <button onclick="zoomIn()" class="p-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-xs text-slate-300 transition" title="Zoomer">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+            <button onclick="zoomOut()" class="p-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-xs text-slate-300 transition" title="Dézoomer">
+                <i class="fa-solid fa-minus"></i>
+            </button>
+            <button onclick="resetView()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-xs text-slate-300 transition flex items-center gap-1" title="Réinitialiser la vue">
+                <i class="fa-solid fa-expand"></i> Ajuster
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex relative overflow-hidden">
+
+        <!-- Sidebar Inspector -->
+        <aside class="w-80 bg-slate-950/90 backdrop-blur border-r border-slate-800 flex flex-col z-10 shadow-2xl">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-info text-blue-400"></i> Inspecteur UML
+                </h2>
+                <span id="selected-badge" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Aucune sélection</span>
+            </div>
+
+            <div id="inspector-content" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <div class="text-center py-10 text-slate-500 text-xs">
+                    <i class="fa-solid fa-hand-pointer text-3xl mb-3 text-slate-600 block"></i>
+                    Cliquez sur une classe du diagramme pour inspecter ses attributs, ses compositions (`*--`) et ses associations (`--`).
+                </div>
+            </div>
+
+            <!-- UML Legend -->
+            <div class="p-3 border-t border-slate-800 bg-slate-950 text-[11px] space-y-2 text-slate-400">
+                <div class="font-semibold text-slate-300 text-xs mb-1">Légende Formalisme UML 2</div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-6 h-3"><path d="M 0 6 L 12 6" stroke="#38bdf8" stroke-width="2"/><polygon points="12,6 18,3 24,6 18,9" fill="#38bdf8"/></svg>
+                    <span>Composition (`*--`) : Losange plein</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-6 h-3"><path d="M 0 6 L 24 6" stroke="#94a3b8" stroke-width="2"/></svg>
+                    <span>Association simple (`--`)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="font-mono text-amber-400 text-[10px] font-bold">1..* / 0..1</span>
+                    <span>Multiplicités UML sur les extrémités</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Graphic Canvas Area -->
+        <main class="flex-1 grid-bg relative overflow-hidden cursor-grab active:cursor-grabbing" id="canvas-container">
+            <svg id="uml-svg" class="w-full h-full min-w-full min-h-full">
+                <defs>
+                    <!-- UML 2 Composition Marker (Filled Diamond) -->
+                    <marker id="diamond-filled" viewBox="0 0 12 12" refX="0" refY="6" markerWidth="10" markerHeight="10" orient="auto">
+                        <polygon points="0,6 6,1, 12,6 6,11" fill="#38bdf8" stroke="#0284c7" stroke-width="1.5"/>
+                    </marker>
+                    <!-- Association Arrow -->
+                    <marker id="arrow-assoc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9" fill="none" stroke="#94a3b8" stroke-width="2"/>
+                    </marker>
+                </defs>
+
+                <!-- Zoom/Pan Canvas Group -->
+                <g id="viewport-group">
+                    <!-- Layer 1: Relations / Connectors -->
+                    <g id="relations-layer"></g>
+
+                    <!-- Layer 2: Class Boxes -->
+                    <g id="classes-layer"></g>
+                </g>
+            </svg>
+        </main>
+    </div>
+
+    <script>
+        // Data Structure for all 30 UML Classes
+        const domainColors = {
+            ADMIN: { bg: '#1e1b4b', header: '#312e81', border: '#6366f1', text: '#a5b4fc', tag: 'Admin & Core' },
+            IA: { bg: '#064e3b', header: '#065f46', border: '#10b981', text: '#6ee7b7', tag: 'IA & Agents' },
+            CRM: { bg: '#451a03', header: '#78350f', border: '#f59e0b', text: '#fde68a', tag: 'CRM & Clients' },
+            FINANCE: { bg: '#0c4a6e', header: '#075985', border: '#0284c7', text: '#7dd3fc', tag: 'Finance & Doc' },
+            RH: { bg: '#4c1d95', header: '#5b21b6', border: '#8b5cf6', text: '#c4b5fd', tag: 'Ressources Humaines' },
+            PILOTAGE: { bg: '#831843', header: '#9f1239', border: '#f43f5e', text: '#fca5a5', tag: 'Pilotage & Conformité' }
+        };
+
+        const classesData = [
+            // Domain 1: Admin
+            { id: 'Entreprise', domain: 'ADMIN', x: 750, y: 80, attributes: ['nom', 'pays', 'devise', 'formeJuridique', 'identifiantFiscal'] },
+            { id: 'Utilisateur', domain: 'ADMIN', x: 380, y: 80, attributes: ['email', 'motDePasse', 'langue'] },
+            { id: 'Adhesion', domain: 'ADMIN', x: 565, y: 250, attributes: ['role', 'dateAdhesion', 'active'] },
+            { id: 'DemandeRGPD', domain: 'ADMIN', x: 1120, y: 80, attributes: ['type', 'personneConcernee', 'statut', 'date'] },
+            { id: 'ConnexionExterne', domain: 'ADMIN', x: 80, y: 80, attributes: ['fournisseur', 'jeton', 'derniereSynchro'] },
+
+            // Domain 2: IA & Agents
+            { id: 'Agent', domain: 'IA', x: 750, y: 380, attributes: ['domaine', 'niveauAutonomie', 'actif'] },
+            { id: 'Conversation', domain: 'IA', x: 380, y: 380, attributes: ['dateDebut', 'titre'] },
+            { id: 'Demande', domain: 'IA', x: 380, y: 620, attributes: ['texte', 'date'] },
+            { id: 'Reponse', domain: 'IA', x: 380, y: 860, attributes: ['texte', 'niveauConfiance', 'avertissement'] },
+            { id: 'Source', domain: 'IA', x: 80, y: 860, attributes: ['reference', 'url', 'extrait'] },
+            { id: 'ReferenceJuridique', domain: 'IA', x: 80, y: 620, attributes: ['juridiction', 'titre', 'reference', 'dateEffet', 'url'] },
+            { id: 'Orientation', domain: 'IA', x: 80, y: 1040, attributes: ['typeProfessionnel', 'motif'] },
+            { id: 'ActionProposee', domain: 'IA', x: 750, y: 860, attributes: ['type', 'contenu', 'statut', 'dateDecision'] },
+            { id: 'EntreeJournal', domain: 'IA', x: 750, y: 1100, attributes: ['horodatage', 'evenement', 'details'] },
+            { id: 'UsageAgent', domain: 'IA', x: 1120, y: 380, attributes: ['tokens', 'cout', 'date'] },
+
+            // Domain 3: CRM
+            { id: 'Client', domain: 'CRM', x: 1500, y: 80, attributes: ['nom', 'email', 'telephone', 'statut'] },
+            { id: 'Interaction', domain: 'CRM', x: 1880, y: 80, attributes: ['type', 'date', 'resume'] },
+            { id: 'Relance', domain: 'CRM', x: 1500, y: 380, attributes: ['dateEcheance', 'statut', 'note'] },
+            { id: 'Opportunite', domain: 'CRM', x: 1880, y: 380, attributes: ['titre', 'montant', 'etape', 'probabilite'] },
+
+            // Domain 4: Finance & Doc
+            { id: 'Facture', domain: 'FINANCE', x: 1500, y: 680, attributes: ['numero', 'dateEmission', 'dateEcheance', 'statut', 'totalTTC', 'devise'] },
+            { id: 'LigneFacture', domain: 'FINANCE', x: 1880, y: 680, attributes: ['designation', 'quantite', 'prixUnitaire', 'tauxTVA'] },
+            { id: 'Paiement', domain: 'FINANCE', x: 1500, y: 960, attributes: ['date', 'montant', 'moyen'] },
+            { id: 'MouvementTresorerie', domain: 'FINANCE', x: 1120, y: 960, attributes: ['date', 'montant', 'sens', 'categorie'] },
+            { id: 'Document', domain: 'FINANCE', x: 1880, y: 960, attributes: ['type', 'titre', 'contenu', 'statut'] },
+
+            // Domain 5: RH
+            { id: 'Collaborateur', domain: 'RH', x: 380, y: 1320, attributes: ['poste', 'dateEntree', 'typeContrat'] },
+            { id: 'DemandeConge', domain: 'RH', x: 80, y: 1320, attributes: ['dateDebut', 'dateFin', 'type', 'statut'] },
+            { id: 'ParcoursOnboarding', domain: 'RH', x: 750, y: 1320, attributes: ['dateDebut', 'statut'] },
+            { id: 'EtapeOnboarding', domain: 'RH', x: 1120, y: 1320, attributes: ['libelle', 'faite'] },
+
+            // Domain 6: Pilotage & Conformité
+            { id: 'Obligation', domain: 'PILOTAGE', x: 1120, y: 215, attributes: ['libelle', 'nature', 'dateEcheance', 'recurrence', 'statut'] },
+            { id: 'Alerte', domain: 'PILOTAGE', x: 1120, y: 620, attributes: ['type', 'message', 'date', 'lue'] }
+        ];
+
+        // UML Relationships Definition
+        const relationsData = [
+            // Compositions (Entreprise)
+            { from: 'Entreprise', to: 'Adhesion', type: 'COMPOSITION', multFrom: '1', multTo: '1..*' },
+            { from: 'Utilisateur', to: 'Adhesion', type: 'ASSOCIATION', multFrom: '1', multTo: '*', role: 'membre de' },
+            { from: 'Entreprise', to: 'Collaborateur', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+            { from: 'Entreprise', to: 'Client', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+            { from: 'Entreprise', to: 'Agent', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+            { from: 'Entreprise', to: 'Obligation', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+            { from: 'Entreprise', to: 'MouvementTresorerie', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+            { from: 'Entreprise', to: 'DemandeRGPD', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+
+            // Utilisateur Associations
+            { from: 'Utilisateur', to: 'Conversation', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'Utilisateur', to: 'Alerte', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'Utilisateur', to: 'ConnexionExterne', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'Utilisateur', to: 'Collaborateur', type: 'ASSOCIATION', multFrom: '0..1', multTo: '*' },
+
+            // IA Pipeline
+            { from: 'Conversation', to: 'Demande', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+            { from: 'Demande', to: 'Reponse', type: 'ASSOCIATION', multFrom: '1', multTo: '0..1' },
+            { from: 'Demande', to: 'Agent', type: 'ASSOCIATION', multFrom: '*', multTo: '1', role: 'routée vers' },
+            { from: 'Reponse', to: 'Source', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+            { from: 'Source', to: 'ReferenceJuridique', type: 'ASSOCIATION', multFrom: '*', multTo: '0..1', role: 'cite' },
+            { from: 'Reponse', to: 'Orientation', type: 'ASSOCIATION', multFrom: '1', multTo: '0..1' },
+            { from: 'Reponse', to: 'ActionProposee', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'Agent', to: 'ActionProposee', type: 'ASSOCIATION', multFrom: '1', multTo: '*', role: 'propose' },
+            { from: 'Agent', to: 'UsageAgent', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'Agent', to: 'EntreeJournal', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'ActionProposee', to: 'EntreeJournal', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'ActionProposee', to: 'Utilisateur', type: 'ASSOCIATION', multFrom: '*', multTo: '0..1', role: 'décidée par' },
+
+            // CRM
+            { from: 'Client', to: 'Interaction', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+            { from: 'Client', to: 'Relance', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+            { from: 'Client', to: 'Opportunite', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'Client', to: 'Facture', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'Client', to: 'Document', type: 'ASSOCIATION', multFrom: '0..1', multTo: '*' },
+            { from: 'Relance', to: 'ActionProposee', type: 'ASSOCIATION', multFrom: '0..1', multTo: '0..1', role: 'brouillon email' },
+
+            // Finance
+            { from: 'Facture', to: 'LigneFacture', type: 'COMPOSITION', multFrom: '1', multTo: '1..*' },
+            { from: 'Facture', to: 'Paiement', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'Paiement', to: 'MouvementTresorerie', type: 'ASSOCIATION', multFrom: '1', multTo: '0..1' },
+
+            // RH
+            { from: 'Collaborateur', to: 'DemandeConge', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'Collaborateur', to: 'Document', type: 'ASSOCIATION', multFrom: '1', multTo: '*' },
+            { from: 'Collaborateur', to: 'ParcoursOnboarding', type: 'ASSOCIATION', multFrom: '1', multTo: '0..1' },
+            { from: 'ParcoursOnboarding', to: 'EtapeOnboarding', type: 'COMPOSITION', multFrom: '1', multTo: '*' },
+
+            // Conformité
+            { from: 'Obligation', to: 'Alerte', type: 'ASSOCIATION', multFrom: '1', multTo: '*' }
+        ];
+
+        // Global State & Pan/Zoom
+        let selectedClassId = null;
+        let scale = 0.85;
+        let translateX = 80;
+        let translateY = 20;
+        let isDragging = false;
+        let startX, startY;
+
+        const BOX_WIDTH = 210;
+        const HEADER_HEIGHT = 32;
+        const ATTR_HEIGHT = 18;
+
+        function getClassHeight(cls) {
+            return HEADER_HEIGHT + (cls.attributes.length * ATTR_HEIGHT) + 12;
+        }
+
+        function getClassCenter(cls) {
+            const height = getClassHeight(cls);
+            return { x: cls.x + BOX_WIDTH / 2, y: cls.y + height / 2 };
+        }
+
+        // Render Classes
+        function renderClasses() {
+            const layer = document.getElementById('classes-layer');
+            layer.innerHTML = '';
+
+            classesData.forEach(cls => {
+                const colors = domainColors[cls.domain];
+                const height = getClassHeight(cls);
+
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("class", "class-node");
+                g.setAttribute("id", `node-${cls.id}`);
+                g.setAttribute("transform", `translate(${cls.x}, ${cls.y})`);
+                g.onclick = (e) => { e.stopPropagation(); selectClass(cls.id); };
+
+                // Main Box Container
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("width", BOX_WIDTH);
+                rect.setAttribute("height", height);
+                rect.setAttribute("rx", "6");
+                rect.setAttribute("fill", colors.bg);
+                rect.setAttribute("stroke", colors.border);
+                rect.setAttribute("stroke-width", "2");
+
+                // Header Bar
+                const header = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                header.setAttribute("width", BOX_WIDTH);
+                header.setAttribute("height", HEADER_HEIGHT);
+                header.setAttribute("rx", "6");
+                header.setAttribute("fill", colors.header);
+
+                // Title Text
+                const title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                title.setAttribute("x", BOX_WIDTH / 2);
+                title.setAttribute("y", "21");
+                title.setAttribute("text-anchor", "middle");
+                title.setAttribute("fill", "#ffffff");
+                title.setAttribute("font-size", "13");
+                title.setAttribute("font-weight", "bold");
+                title.textContent = cls.id;
+
+                // Separator Line
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", "0");
+                line.setAttribute("y1", HEADER_HEIGHT);
+                line.setAttribute("x2", BOX_WIDTH);
+                line.setAttribute("y2", HEADER_HEIGHT);
+                line.setAttribute("stroke", colors.border);
+                line.setAttribute("stroke-width", "1.5");
+
+                g.appendChild(rect);
+                g.appendChild(header);
+                g.appendChild(title);
+                g.appendChild(line);
+
+                // Attributes List
+                cls.attributes.forEach((attr, idx) => {
+                    const attrText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    attrText.setAttribute("x", "12");
+                    attrText.setAttribute("y", HEADER_HEIGHT + 18 + (idx * ATTR_HEIGHT));
+                    attrText.setAttribute("fill", colors.text);
+                    attrText.setAttribute("font-size", "11");
+                    attrText.setAttribute("font-family", "monospace");
+                    attrText.textContent = `+ ${attr}`;
+                    g.appendChild(attrText);
+                });
+
+                layer.appendChild(g);
+            });
+        }
+
+        function renderRelations() {
+            const layer = document.getElementById('relations-layer');
+            layer.innerHTML = '';
+
+            relationsData.forEach((rel, index) => {
+                const sourceCls = classesData.find(c => c.id === rel.from);
+                const targetCls = classesData.find(c => c.id === rel.to);
+
+                if (!sourceCls || !targetCls) return;
+
+                const c1 = getClassCenter(sourceCls);
+                const c2 = getClassCenter(targetCls);
+
+                // Connection calculation
+                const dx = c2.x - c1.x;
+                const dy = c2.y - c1.y;
+
+                let startX = c1.x;
+                let startY = c1.y;
+                let endX = c2.x;
+                let endY = c2.y;
+
+                // Simple bounding anchor offset
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    startX += (dx > 0 ? BOX_WIDTH / 2 : -BOX_WIDTH / 2);
+                    endX += (dx > 0 ? -BOX_WIDTH / 2 : BOX_WIDTH / 2);
+                } else {
+                    const h1 = getClassHeight(sourceCls) / 2;
+                    const h2 = getClassHeight(targetCls) / 2;
+                    startY += (dy > 0 ? h1 : -h1);
+                    endY += (dy > 0 ? -h2 : h2);
+                }
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const pathId = `rel-${rel.from}-${rel.to}-${index}`;
+                
+                // Curve or straight
+                const midX = (startX + endX) / 2;
+                const midY = (startY + endY) / 2;
+                const d = `M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`;
+                
+                path.setAttribute("d", d);
+                path.setAttribute("class", `relation-line rel-from-${rel.from} rel-to-${rel.to}`);
+                path.setAttribute("id", pathId);
+                path.setAttribute("fill", "none");
+
+                if (rel.type === 'COMPOSITION') {
+                    path.setAttribute("stroke", "#38bdf8");
+                    path.setAttribute("stroke-width", "2");
+                    path.setAttribute("marker-start", "url(#diamond-filled)");
+                } else {
+                    path.setAttribute("stroke", "#64748b");
+                    path.setAttribute("stroke-width", "1.8");
+                }
+
+                layer.appendChild(path);
+
+                // Multiplicity / Role Labels
+                if (rel.multFrom) {
+                    const textFrom = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    textFrom.setAttribute("x", startX + (dx > 0 ? 10 : -20));
+                    textFrom.setAttribute("y", startY + (dy > 0 ? 15 : -10));
+                    textFrom.setAttribute("fill", "#0284c7");
+                    textFrom.setAttribute("font-size", "10");
+                    textFrom.setAttribute("font-weight", "bold");
+                    textFrom.textContent = rel.multFrom;
+                    layer.appendChild(textFrom);
+                }
+
+                if (rel.multTo) {
+                    const textTo = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    textTo.setAttribute("x", endX + (dx > 0 ? -20 : 10));
+                    textTo.setAttribute("y", endY + (dy > 0 ? -10 : 15));
+                    textTo.setAttribute("fill", "#f59e0b");
+                    textTo.setAttribute("font-size", "10");
+                    textTo.setAttribute("font-weight", "bold");
+                    textTo.textContent = rel.multTo;
+                    layer.appendChild(textTo);
+                }
+
+                if (rel.role) {
+                    const textRole = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    textRole.setAttribute("x", midX);
+                    textRole.setAttribute("y", midY - 6);
+                    textRole.setAttribute("text-anchor", "middle");
+                    textRole.setAttribute("fill", "#cbd5e1");
+                    textRole.setAttribute("font-size", "10");
+                    textRole.setAttribute("font-style", "italic");
+                    textRole.textContent = `«${rel.role}»`;
+                    layer.appendChild(textRole);
+                }
+            });
+        }
+
+        function selectClass(id) {
+            selectedClassId = id;
+            const cls = classesData.find(c => c.id === id);
+            if (!cls) return;
+
+            // Highlight Node
+            document.querySelectorAll('.class-node').forEach(el => {
+                el.classList.remove('selected', 'dimmed');
+                if (el.id !== `node-${id}`) el.classList.add('dimmed');
+            });
+
+            document.getElementById(`node-${id}`)?.classList.add('selected');
+
+            // Highlight Relations
+            document.querySelectorAll('.relation-line').forEach(el => {
+                el.classList.remove('highlighted', 'dimmed');
+                if (el.classList.contains(`rel-from-${id}`) || el.classList.contains(`rel-to-${id}`)) {
+                    el.classList.add('highlighted');
+                } else {
+                    el.classList.add('dimmed');
+                }
+            });
+
+            // Update Inspector Panel
+            const colors = domainColors[cls.domain];
+            const badge = document.getElementById('selected-badge');
+            badge.textContent = colors.tag;
+            badge.style.backgroundColor = colors.header;
+            badge.style.color = '#ffffff';
+
+            const connectedRels = relationsData.filter(r => r.from === id || r.to === id);
+
+            const panel = document.getElementById('inspector-content');
+            panel.innerHTML = `
+                <div class="space-y-4">
+                    <!-- Title Box -->
+                    <div class="p-3 rounded-lg border border-slate-700 bg-slate-900">
+                        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Classe UML</div>
+                        <h3 class="text-lg font-bold text-slate-100 flex items-center justify-between">
+                            ${cls.id}
+                            <span class="text-xs px-2 py-0.5 rounded text-white" style="background-color: ${colors.header}">${cls.domain}</span>
+                        </h3>
+                    </div>
+
+                    <!-- Attributes -->
+                    <div>
+                        <h4 class="text-xs font-semibold uppercase text-slate-400 mb-2 flex items-center gap-1">
+                            <i class="fa-solid fa-list text-blue-400"></i> Attributs (${cls.attributes.length})
+                        </h4>
+                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-2 space-y-1 font-mono text-xs text-slate-300">
+                            ${cls.attributes.map(a => `<div class="p-1 rounded bg-slate-950/60 border border-slate-800/80">+ ${a}</div>`).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Associated Relations -->
+                    <div>
+                        <h4 class="text-xs font-semibold uppercase text-slate-400 mb-2 flex items-center gap-1">
+                            <i class="fa-solid fa-diagram-project text-amber-400"></i> Relations UML 2 (${connectedRels.length})
+                        </h4>
+                        <div class="space-y-2 text-xs">
+                            ${connectedRels.map(r => {
+                                const isSource = r.from === id;
+                                const otherCls = isSource ? r.to : r.from;
+                                const isComp = r.type === 'COMPOSITION';
+                                return `
+                                    <div onclick="selectClass('${otherCls}')" class="p-2 bg-slate-900 border border-slate-800 hover:border-blue-500 rounded-lg cursor-pointer transition flex items-center justify-between">
+                                        <div>
+                                            <span class="font-bold ${isSource ? 'text-blue-400' : 'text-amber-400'}">${otherCls}</span>
+                                            <p class="text-[10px] text-slate-400">
+                                                ${isComp ? 'Composition (*--)' : 'Association (--)'} ${r.role ? `• «${r.role}»` : ''}
+                                            </p>
+                                        </div>
+                                        <span class="font-mono text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">
+                                            ${r.multFrom} ➔ ${r.multTo}
+                                        </span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Search & Filter
+        function filterClasses(query) {
+            const q = query.toLowerCase().trim();
+            document.querySelectorAll('.class-node').forEach(el => {
+                const id = el.id.replace('node-', '').toLowerCase();
+                if (!q || id.includes(q)) {
+                    el.classList.remove('dimmed');
+                } else {
+                    el.classList.add('dimmed');
+                }
+            });
+        }
+
+        function filterByDomain(domain) {
+            document.querySelectorAll('.class-node').forEach(el => {
+                const id = el.id.replace('node-', '');
+                const cls = classesData.find(c => c.id === id);
+                if (domain === 'ALL' || cls.domain === domain) {
+                    el.classList.remove('dimmed');
+                } else {
+                    el.classList.add('dimmed');
+                }
+            });
+        }
+
+        // Pan and Zoom logic
+        const viewportGroup = document.getElementById('viewport-group');
+        const container = document.getElementById('canvas-container');
+
+        function updateTransform() {
+            viewportGroup.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
+        }
+
+        function zoomIn() { scale = Math.min(scale * 1.2, 2.5); updateTransform(); }
+        function zoomOut() { scale = Math.max(scale / 1.2, 0.3); updateTransform(); }
+        function resetView() {
+            scale = 0.85;
+            translateX = 80;
+            translateY = 20;
+            updateTransform();
+            document.querySelectorAll('.class-node, .relation-line').forEach(el => el.classList.remove('selected', 'dimmed', 'highlighted'));
+            document.getElementById('inspector-content').innerHTML = `
+                <div class="text-center py-10 text-slate-500 text-xs">
+                    <i class="fa-solid fa-hand-pointer text-3xl mb-3 text-slate-600 block"></i>
+                    Cliquez sur une classe du diagramme pour inspecter ses attributs, ses compositions (\`*--\`) et ses associations (\`--\`).
+                </div>
+            `;
+        }
+
+        container.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.class-node')) return;
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+            scale = Math.min(Math.max(scale * zoomFactor, 0.3), 2.5);
+            updateTransform();
+        }, { passive: false });
+
+        window.onload = () => {
+            renderClasses();
+            renderRelations();
+            updateTransform();
+            // Default selection
+            selectClass('Entreprise');
+        };
+    </script>
+</body>
+</html>
