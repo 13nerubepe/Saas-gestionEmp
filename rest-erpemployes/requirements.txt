@@ -1,0 +1,9 @@
+Django~=6.1.2
+djangorestframework~=3.18.3
+djangorestframework-simplejwt~=5.5.1
+drf-spectacular~=0.30.0
+django-environ~=0.14.0
+django-cors-headers~=4.9.0
+psycopg[binary]~=3.3.6
+google-genai~=2.30.1
+pgvector~=0.5.1

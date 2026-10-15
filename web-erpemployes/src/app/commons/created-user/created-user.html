@@ -1,0 +1,100 @@
+
+<div class="card">
+    <h2>Créer un utilisateur</h2>
+    <p>Renseignez les informations du nouvel utilisateur.</p>
+
+    <form #userForm="ngForm" (ngSubmit)="createUser(userForm)">
+
+        <div class="field">
+            <label for="nom">Nom</label>
+            <input
+                pInputText
+                id="nom"
+                name="nom"
+                [(ngModel)]="user.nom"
+                required
+                class="w-full"
+            />
+        </div>
+
+        <div class="field">
+            <label for="prenom">Prénom</label>
+            <input
+                pInputText
+                id="prenom"
+                name="prenom"
+                [(ngModel)]="user.prenom"
+                required
+                class="w-full"
+            />
+        </div>
+
+        <div class="field">
+            <label for="email">Adresse e-mail</label>
+            <input
+                pInputText
+                id="email"
+                name="email"
+                type="email"
+                [(ngModel)]="user.email"
+                required
+                email
+                class="w-full"
+            />
+        </div>
+
+        <div class="field">
+            <label for="role">Rôle</label>
+            <p-select
+                id="role"
+                name="role"
+                [options]="roles"
+                optionLabel="label"
+                optionValue="value"
+                [(ngModel)]="user.role"
+                placeholder="Sélectionner un rôle"
+                required
+                styleClass="w-full"
+            />
+        </div>
+
+        <div class="field">
+            <label for="password">Mot de passe temporaire</label>
+            <p-password
+                inputId="password"
+                name="password"
+                [(ngModel)]="user.password"
+                [feedback]="true"
+                [toggleMask]="true"
+                required
+                styleClass="w-full"
+                [inputStyle]="{ width: '100%' }"
+            />
+        </div>
+
+        <div class="flex gap-2 mt-4">
+            <p-button
+                type="submit"
+                label="Créer l'utilisateur"
+                icon="pi pi-user-plus"
+                [disabled]="userForm.invalid"
+            />
+
+            <p-button
+                type="button"
+                label="Annuler"
+                severity="secondary"
+                [outlined]="true"
+                (onClick)="resetForm(userForm)"
+            />
+        </div>
+
+        @if (successMessage) {
+            <p class="text-green-600 mt-3">
+                {{ successMessage }}
+            </p>
+        }
+    </form>
+</div>
+
+

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagramme de Cas d'Utilisation UML 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .actor-icon {
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));
+        }
+        .usecase-ellipse {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .usecase-ellipse:hover {
+            fill: #eff6ff;
+            stroke: #2563eb;
+            stroke-width: 2.5;
+            filter: drop-shadow(0px 4px 6px rgba(37, 99, 235, 0.2));
+        }
+        .usecase-ellipse.selected {
+            fill: #dbeafe;
+            stroke: #1d4ed8;
+            stroke-width: 3;
+        }
+        .relation-include {
+            stroke: #2563eb;
+            stroke-dasharray: 6, 4;
+        }
+        .relation-extend {
+            stroke: #d97706;
+            stroke-dasharray: 6, 4;
+        }
+        .relation-actor {
+            stroke: #64748b;
+            stroke-width: 1.5;
+        }
+        .relation-highlight {
+            stroke-width: 2.5 !important;
+            filter: drop-shadow(0px 0px 4px rgba(37, 99, 235, 0.5));
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white p-4 shadow-md flex justify-between items-center z-10">
+        <div>
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-project-diagram text-blue-400"></i>
+                Diagramme de Cas d'Utilisation UML 2
+            </h1>
+            <p class="text-xs text-slate-400">Système de gestion globale & assistance IA</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-xs px-2.5 py-1 rounded-full bg-blue-900/60 text-blue-300 border border-blue-700">
+                <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i> Inclusion : UC-01
+            </span>
+            <button onclick="resetZoom()" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-200 transition">
+                <i class="fa-solid fa-arrows-rotate mr-1"></i> Réinitialiser Vue
+            </button>
+        </div>
+    </header>
+
+    <!-- Content Area -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Sidebar Controls & Legend -->
+        <aside class="w-80 bg-white border-r border-slate-200 p-4 flex flex-col gap-4 shadow-sm z-10 overflow-y-auto">
+            <div>
+                <h2 class="text-sm font-semibold text-slate-800 mb-2 uppercase tracking-wider">Légende UML 2</h2>
+                <div class="space-y-2 text-xs">
+                    <div class="flex items-center gap-2 p-2 rounded bg-slate-50 border border-slate-200">
+                        <svg class="w-8 h-4"><line x1="0" y1="8" x2="32" y2="8" stroke="#2563eb" stroke-dasharray="4,3" stroke-width="2" marker-end="url(#arrow-blue)"/></svg>
+                        <div>
+                            <span class="font-semibold text-blue-700">«include» (Inclusion)</span>
+                            <p class="text-slate-500 text-[10px]">Exécution obligatoire (ex: authentification)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 rounded bg-slate-50 border border-slate-200">
+                        <svg class="w-8 h-4"><line x1="0" y1="8" x2="32" y2="8" stroke="#d97706" stroke-dasharray="4,3" stroke-width="2" marker-end="url(#arrow-orange)"/></svg>
+                        <div>
+                            <span class="font-semibold text-amber-700">«extend» (Extension)</span>
+                            <p class="text-slate-500 text-[10px]">Comportement optionnel / conditionnel</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 rounded bg-slate-50 border border-slate-200">
+                        <div class="w-6 h-6 rounded-full border-2 border-blue-600 bg-blue-50 flex items-center justify-center text-[10px] font-bold text-blue-700">UC</div>
+                        <div>
+                            <span class="font-semibold text-slate-700">Cas d'utilisation</span>
+                            <p class="text-slate-500 text-[10px]">Cliquer pour inspecter les détails & US</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Panel (Dynamic) -->
+            <div class="flex-1 flex flex-col border-t border-slate-200 pt-4">
+                <h2 class="text-sm font-semibold text-slate-800 mb-2 uppercase tracking-wider">Détails de la sélection</h2>
+                <div id="details-panel" class="flex-1 bg-slate-50 rounded-lg border border-slate-200 p-3 text-xs text-slate-600 overflow-y-auto">
+                    <p class="italic text-slate-400 text-center mt-6">Cliquez sur un cas d'utilisation (ellipse) dans le diagramme pour voir ses User Stories et ses relations UML.</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Graphic Canvas -->
+        <main class="flex-1 bg-slate-50 relative overflow-hidden flex items-center justify-center" id="canvas-container">
+            <svg id="uml-svg" viewBox="0 0 1350 920" class="w-full h-full max-w-full max-h-full">
+                <defs>
+                    <!-- Marker for include arrow -->
+                    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+                    </marker>
+                    <!-- Marker for extend arrow -->
+                    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706"/>
+                    </marker>
+                    <!-- Shadow Filter -->
+                    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+                        <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.08"/>
+                    </filter>
+                </defs>
+
+                <!-- System Boundary Box -->
+                <rect x="270" y="20" width="810" height="880" rx="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#shadow)"/>
+                <text x="290" y="52" font-family="sans-serif" font-size="16" font-weight="bold" fill="#334155">Système : ERP & Plateforme d'Agents IA</text>
+
+                <!-- ACTORS LEFT -->
+                <!-- Actor: Fondateur -->
+                <g id="actor-fondateur" class="actor-group cursor-pointer">
+                    <!-- Stick figure -->
+                    <circle cx="120" cy="380" r="18" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+                    <line x1="120" y1="398" x2="120" y2="440" stroke="#1d4ed8" stroke-width="3"/>
+                    <line x1="90" y1="415" x2="150" y2="415" stroke="#1d4ed8" stroke-width="3"/>
+                    <line x1="120" y1="440" x2="95" y2="480" stroke="#1d4ed8" stroke-width="3"/>
+                    <line x1="120" y1="440" x2="145" y2="480" stroke="#1d4ed8" stroke-width="3"/>
+                    <text x="120" y="505" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#1e293b">Fondateur</text>
+                    <text x="120" y="522" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#64748b">(Acteur Principal)</text>
+                </g>
+
+                <!-- Actor: Collaborateur -->
+                <g id="actor-collaborateur" class="actor-group cursor-pointer">
+                    <circle cx="120" cy="730" r="16" fill="#60a5fa" stroke="#2563eb" stroke-width="2"/>
+                    <line x1="120" y1="746" x2="120" y2="780" stroke="#2563eb" stroke-width="3"/>
+                    <line x1="95" y1="760" x2="145" y2="760" stroke="#2563eb" stroke-width="3"/>
+                    <line x1="120" y1="780" x2="100" y2="815" stroke="#2563eb" stroke-width="3"/>
+                    <line x1="120" y1="780" x2="140" y2="815" stroke="#2563eb" stroke-width="3"/>
+                    <text x="120" y="838" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#1e293b">Collaborateur</text>
+                </g>
+
+                <!-- ACTORS RIGHT (Secondary / System Actors) -->
+                <!-- Actor: Agent IA -->
+                <g id="actor-ia" class="actor-group cursor-pointer">
+                    <rect x="1150" y="180" width="130" height="60" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+                    <text x="1215" y="205" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#15803d">«System»</text>
+                    <text x="1215" y="225" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#166534">Agent IA</text>
+                </g>
+
+                <!-- Actor: Service Email -->
+                <g id="actor-email" class="actor-group cursor-pointer">
+                    <rect x="1150" y="480" width="130" height="50" rx="8" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+                    <text x="1215" y="502" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="bold" fill="#64748b">«Service Externe»</text>
+                    <text x="1215" y="520" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#334155">Service Email</text>
+                </g>
+
+                <!-- Actor: Temps -->
+                <g id="actor-temps" class="actor-group cursor-pointer">
+                    <rect x="1150" y="610" width="130" height="50" rx="8" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+                    <text x="1215" y="632" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="bold" fill="#64748b">«System Clock»</text>
+                    <text x="1215" y="650" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#334155">Temps / Horloge</text>
+                </g>
+
+                <!-- Actor: Services Externes -->
+                <g id="actor-ext" class="actor-group cursor-pointer">
+                    <rect x="1150" y="740" width="130" height="50" rx="8" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+                    <text x="1215" y="762" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="bold" fill="#64748b">«API Externe»</text>
+                    <text x="1215" y="780" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#334155">Services Externes</text>
+                </g>
+
+                <!-- USE CASES (ELLIPSES) -->
+
+                <!-- UC-01 : Centré en haut -->
+                <g id="uc-01" class="usecase-node" onclick="selectUseCase('UC-01')">
+                    <ellipse cx="675" cy="100" rx="150" ry="32" fill="#ffffff" stroke="#2563eb" stroke-width="2.5" class="usecase-ellipse"/>
+                    <text x="675" y="96" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1e3a8a">UC-01: S'authentifier &</text>
+                    <text x="675" y="112" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#1e40af">gérer ses données personnelles</text>
+                </g>
+
+                <!-- UC-02 -->
+                <g id="uc-02" class="usecase-node" onclick="selectUseCase('UC-02')">
+                    <ellipse cx="430" cy="220" rx="125" ry="30" fill="#ffffff" stroke="#475569" stroke-width="1.8" class="usecase-ellipse"/>
+                    <text x="430" y="216" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">UC-02: Consulter un agent IA</text>
+                    <text x="430" y="231" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">(Juridique, Comptable, Fiscale)</text>
+                </g>
+
+                <!-- UC-03 -->
+                <g id="uc-03" class="usecase-node" onclick="selectUseCase('UC-03')">
+                    <ellipse cx="880" cy="220" rx="125" ry="30" fill="#ffffff" stroke="#475569" stroke-width="1.8" class="usecase-ellipse"/>
+                    <text x="880" y="216" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">UC-03: Superviser les agents</text>
+                    <text x="880" y="231" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">(Validations, autonomie, coûts)</text>
+                </g>
+
+                <!-- UC-04 -->
+                <g id="uc-04" class="usecase-node" onclick="selectUseCase('UC-04')">
+                    <ellipse cx="430" cy="370" rx="125" ry="30" fill="#ffffff" stroke="#475569" stroke-width="1.8" class="usecase-ellipse"/>
+                    <text x="430" y="366" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">UC-04: Gérer les clients</text>
+                    <text x="430" y="381" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">(Fiches, interactions, import)</text>
+                </g>
+
+                <!-- UC-05 -->
+                <g id="uc-05" class="usecase-node" onclick="selectUseCase('UC-05')">
+                    <ellipse cx="880" cy="370" rx="130" ry="32" fill="#ffffff" stroke="#475569" stroke-width="1.8" class="usecase-ellipse"/>
+                    <text x="880" y="366" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">UC-05: Suivre l'activité commerciale</text>
+                    <text x="880" y="381" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">(Relances, pipeline, emails)</text>
+                </g>
+
+                <!-- UC-06 -->
+                <g id="uc-06" class="usecase-node" onclick="selectUseCase('UC-06')">
+                    <ellipse cx="430" cy="520" rx="125" ry="30" fill="#ffffff" stroke="#475569" stroke-width="1.8" class="usecase-ellipse"/>
+                    <text x="430" y="516" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">UC-06: Générer des documents</text>
+                    <text x="430" y="531" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">(Contrats, CGV, NDA, RH)</text>
+                </g>
+
+                <!-- UC-07 -->
+                <g id="uc-07" class="usecase-node" onclick="selectUseCase('UC-07')">
+                    <ellipse cx="880" cy="520" rx="130" ry="32" fill="#ffffff" stroke="#475569" stroke-width="1.8" class="usecase-ellipse"/>
+                    <text x="880" y="516" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">UC-07: Facturer & suivre trésorerie</text>
+                    <text x="880" y="531" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">(Factures, impayés, trésorerie)</text>
+                </g>
+
+                <!-- UC-08 -->
+                <g id="uc-08" class="usecase-node" onclick="selectUseCase('UC-08')">
+                    <ellipse cx="430" cy="670" rx="125" ry="30" fill="#ffffff" stroke="#475569" stroke-width="1.8" class="usecase-ellipse"/>
+                    <text x="430" y="666" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">UC-08: Gérer les collaborateurs</text>
+                    <text x="430" y="681" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">(Dossiers, congés, onboarding)</text>
+                </g>
+
+                <!-- UC-09 -->
+                <g id="uc-09" class="usecase-node" onclick="selectUseCase('UC-09')">
+                    <ellipse cx="880" cy="670" rx="130" ry="32" fill="#ffffff" stroke="#475569" stroke-width="1.8" class="usecase-ellipse"/>
+                    <text x="880" y="666" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#0f172a">UC-09: Piloter son quotidien</text>
+                    <text x="880" y="681" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">(« Ma journée », calendrier, synchro)</text>
+                </g>
+
+
+                <!-- UML RELATIONS : INCLUDES (Pointent TOUS vers UC-01) -->
+                <!-- UC-02 -> UC-01 -->
+                <path d="M 490 195 L 600 125" class="relation-include" marker-end="url(#arrow-blue)"/>
+                <text x="530" y="150" font-family="sans-serif" font-size="10" font-weight="bold" fill="#2563eb">«include»</text>
+
+                <!-- UC-03 -> UC-01 -->
+                <path d="M 820 195 L 725 128" class="relation-include" marker-end="url(#arrow-blue)"/>
+                <text x="790" y="150" font-family="sans-serif" font-size="10" font-weight="bold" fill="#2563eb">«include»</text>
+
+                <!-- UC-04 -> UC-01 -->
+                <path d="M 460 342 L 640 130" class="relation-include" marker-end="url(#arrow-blue)"/>
+                <!-- UC-05 -> UC-01 -->
+                <path d="M 850 340 L 700 130" class="relation-include" marker-end="url(#arrow-blue)"/>
+                <!-- UC-06 -> UC-01 -->
+                <path d="M 440 491 L 650 130" class="relation-include" marker-end="url(#arrow-blue)"/>
+                <!-- UC-07 -> UC-01 -->
+                <path d="M 870 489 L 690 130" class="relation-include" marker-end="url(#arrow-blue)"/>
+                <!-- UC-08 -> UC-01 -->
+                <path d="M 430 640 L 660 132" class="relation-include" marker-end="url(#arrow-blue)"/>
+                <!-- UC-09 -> UC-01 -->
+                <path d="M 860 640 L 685 132" class="relation-include" marker-end="url(#arrow-blue)"/>
+
+                <!-- UML RELATIONS : EXTENDS -->
+                <!-- UC-06 extends UC-04 (UC-06 est l'extension, flèche pointe vers UC-04) -->
+                <path d="M 430 490 L 430 400" class="relation-extend" marker-end="url(#arrow-orange)"/>
+                <text x="438" y="450" font-family="sans-serif" font-size="10" font-weight="bold" fill="#d97706">«extend»</text>
+
+                <!-- UC-02 extends UC-05 (UC-02 étend UC-05 lors d'un suivi commercial) -->
+                <path d="M 545 235 L 760 350" class="relation-extend" marker-end="url(#arrow-orange)"/>
+                <text x="630" y="280" font-family="sans-serif" font-size="10" font-weight="bold" fill="#d97706">«extend»</text>
+
+
+                <!-- ACTOR ASSOCIATIONS (Solid Lines) -->
+
+                <!-- Fondateur -->
+                <line x1="150" y1="410" x2="525" y2="100" class="relation-actor"/> <!-- UC-01 -->
+                <line x1="150" y1="410" x2="310" y2="220" class="relation-actor"/> <!-- UC-02 -->
+                <line x1="150" y1="410" x2="755" y2="220" class="relation-actor"/> <!-- UC-03 -->
+                <line x1="150" y1="410" x2="305" y2="370" class="relation-actor"/> <!-- UC-04 -->
+                <line x1="150" y1="410" x2="750" y2="370" class="relation-actor"/> <!-- UC-05 -->
+                <line x1="150" y1="410" x2="305" y2="520" class="relation-actor"/> <!-- UC-06 -->
+                <line x1="150" y1="410" x2="750" y2="520" class="relation-actor"/> <!-- UC-07 -->
+                <line x1="150" y1="410" x2="305" y2="670" class="relation-actor"/> <!-- UC-08 -->
+                <line x1="150" y1="410" x2="750" y2="670" class="relation-actor"/> <!-- UC-09 -->
+
+                <!-- Collaborateur -->
+                <line x1="145" y1="760" x2="525" y2="105" class="relation-actor" stroke-dasharray="3,3"/> <!-- UC-01 -->
+                <line x1="145" y1="760" x2="305" y2="670" class="relation-actor"/> <!-- UC-08 -->
+
+                <!-- Secondary Actors to UCs -->
+                <!-- Agent IA -->
+                <line x1="1150" y1="210" x2="555" y2="220" class="relation-actor"/> <!-- UC-02 -->
+                <line x1="1150" y1="210" x2="1010" y2="370" class="relation-actor"/> <!-- UC-05 -->
+                <line x1="1150" y1="210" x2="555" y2="520" class="relation-actor"/> <!-- UC-06 -->
+                <line x1="1150" y1="210" x2="1010" y2="520" class="relation-actor"/> <!-- UC-07 -->
+
+                <!-- Service Email -->
+                <line x1="1150" y1="500" x2="1010" y2="370" class="relation-actor"/> <!-- UC-05 -->
+
+                <!-- Temps -->
+                <line x1="1150" y1="630" x2="1010" y2="520" class="relation-actor"/> <!-- UC-07 -->
+                <line x1="1150" y1="630" x2="1010" y2="670" class="relation-actor"/> <!-- UC-09 -->
+
+                <!-- Services Externes -->
+                <line x1="1150" y1="760" x2="1010" y2="670" class="relation-actor"/> <!-- UC-09 -->
+
+            </svg>
+        </main>
+    </div>
+
+    <!-- Script JS pour l'interactivité -->
+    <script>
+        const ucData = {
+            'UC-01': {
+                title: "UC-01 : S'authentifier et gérer ses données personnelles",
+                actors: ["Fondateur", "Collaborateur"],
+                us: ["US-01", "US-22"],
+                desc: "Permet la connexion sécurisée, le choix de l'entreprise active (un fondateur peut en avoir plusieurs), la langue de l'interface (français / anglais) et l'export ou l'effacement des données personnelles.",
+                includes: "Requis par tous les autres cas d'utilisation.",
+                extends: "Aucune"
+            },
+            'UC-02': {
+                title: "UC-02 : Consulter un agent IA",
+                actors: ["Fondateur", "Agent IA"],
+                us: ["US-02", "US-11", "US-12", "US-16", "US-19", "US-20"],
+                desc: "Consultation spécialisée en droit, comptabilité ou fiscalité via un point d'entrée unique. Les réponses citent les textes de la juridiction de l'entreprise (Cameroun / OHADA en priorité). Quand l'agent atteint ses limites, il recommande de consulter un professionnel humain, qui reste extérieur au système.",
+                includes: "UC-01 (S'authentifier)",
+                extends: "UC-05 (Étend le suivi commercial pour obtenir des conseils)"
+            },
+            'UC-03': {
+                title: "UC-03 : Superviser les agents",
+                actors: ["Fondateur"],
+                us: ["US-07", "US-09", "US-21", "US-28"],
+                desc: "Validation/rejet des propositions d'actions, consultation du journal, réglage du niveau d'autonomie et suivi des coûts.",
+                includes: "UC-01 (S'authentifier)",
+                extends: "Aucune"
+            },
+            'UC-04': {
+                title: "UC-04 : Gérer les clients",
+                actors: ["Fondateur"],
+                us: ["US-03", "US-04", "US-23"],
+                desc: "Gestion des fiches clients, historique des interactions et import de contacts.",
+                includes: "UC-01 (S'authentifier)",
+                extends: "Étendu par UC-06 (Génération directe de contrat/devis)"
+            },
+            'UC-05': {
+                title: "UC-05 : Suivre l'activité commerciale",
+                actors: ["Fondateur", "Agent IA", "Service email"],
+                us: ["US-05", "US-08", "US-18"],
+                desc: "Suivi des relances, rédaction automatique d'emails par l'agent IA et gestion du pipeline d'opportunités.",
+                includes: "UC-01 (S'authentifier)",
+                extends: "Étendu par UC-02 (Consultation IA en cours de vente)"
+            },
+            'UC-06': {
+                title: "UC-06 : Générer des documents",
+                actors: ["Fondateur", "Agent IA"],
+                us: ["US-13", "US-26"],
+                desc: "Génération automatique de contrats, CGV, NDA et documents RH basés sur les modèles du système.",
+                includes: "UC-01 (S'authentifier)",
+                extends: "UC-04 (Optionnel lors de la fiche client)"
+            },
+            'UC-07': {
+                title: "UC-07 : Facturer et suivre la trésorerie",
+                actors: ["Fondateur", "Agent IA", "Temps"],
+                us: ["US-14", "US-15", "US-17"],
+                desc: "Émission et relance de factures, suivi des impayés et prévisions de trésorerie.",
+                includes: "UC-01 (S'authentifier)",
+                extends: "Aucune"
+            },
+            'UC-08': {
+                title: "UC-08 : Gérer les collaborateurs",
+                actors: ["Fondateur", "Collaborateur"],
+                us: ["US-24", "US-25", "US-27"],
+                desc: "Gestion des dossiers du personnel, traitement des congés et suivi du processus d'onboarding.",
+                includes: "UC-01 (S'authentifier)",
+                extends: "Aucune"
+            },
+            'UC-09': {
+                title: "UC-09 : Piloter son quotidien",
+                actors: ["Fondateur", "Temps", "Services externes"],
+                us: ["US-06", "US-10", "US-29"],
+                desc: "Tableau de bord « Ma journée », calendrier des obligations fiscales/légales et synchronisation agenda/messagerie.",
+                includes: "UC-01 (S'authentifier)",
+                extends: "Aucune"
+            }
+        };
+
+        function selectUseCase(id) {
+            // Remove previous active styles
+            document.querySelectorAll('.usecase-ellipse').forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            // Highlight selected ellipse
+            const selectedGroup = document.getElementById(id.toLowerCase());
+            if (selectedGroup) {
+                const ellipse = selectedGroup.querySelector('.usecase-ellipse');
+                if (ellipse) ellipse.classList.add('selected');
+            }
+
+            // Update Panel
+            const data = ucData[id];
+            const panel = document.getElementById('details-panel');
+
+            if (data) {
+                panel.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="border-b border-slate-200 pb-2">
+                            <h3 class="font-bold text-slate-800 text-sm">${data.title}</h3>
+                            <p class="text-slate-600 mt-1">${data.desc}</p>
+                        </div>
+
+                        <div>
+                            <span class="font-semibold text-slate-700 block mb-1"><i class="fa-solid fa-users text-blue-500 mr-1"></i> Acteurs :</span>
+                            <div class="flex flex-wrap gap-1">
+                                ${data.actors.map(a => `<span class="px-2 py-0.5 bg-slate-200 text-slate-700 rounded-full text-[10px] font-medium">${a}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="font-semibold text-slate-700 block mb-1"><i class="fa-solid fa-list-check text-green-500 mr-1"></i> User Stories associées :</span>
+                            <div class="flex flex-wrap gap-1">
+                                ${data.us.map(u => `<span class="px-2 py-0.5 bg-blue-100 text-blue-800 font-mono rounded text-[10px] font-bold">${u}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50 p-2 rounded border border-blue-100">
+                            <span class="font-semibold text-blue-900 block text-[11px]"><i class="fa-solid fa-link text-blue-600 mr-1"></i> Inclusion (UML 2) :</span>
+                            <p class="text-blue-800 text-[10px]">${data.includes}</p>
+                        </div>
+
+                        <div class="bg-amber-50 p-2 rounded border border-amber-100">
+                            <span class="font-semibold text-amber-900 block text-[11px]"><i class="fa-solid fa-code-branch text-amber-600 mr-1"></i> Extension (UML 2) :</span>
+                            <p class="text-amber-800 text-[10px]">${data.extends}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function resetZoom() {
+            document.querySelectorAll('.usecase-ellipse').forEach(el => el.classList.remove('selected'));
+            document.getElementById('details-panel').innerHTML = `
+                <p class="italic text-slate-400 text-center mt-6">Cliquez sur un cas d'utilisation (ellipse) dans le diagramme pour voir ses User Stories et ses relations UML.</p>
+            `;
+        }
+
+        // Initialize with UC-01
+        window.onload = () => selectUseCase('UC-01');
+    </script>
+</body>
+</html>

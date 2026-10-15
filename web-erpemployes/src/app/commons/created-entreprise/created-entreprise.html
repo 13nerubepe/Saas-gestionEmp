@@ -1,0 +1,464 @@
+
+<div class="p-4 md:p-6">
+
+    <!-- En-tête de la page -->
+    <div class="mb-6">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <div class="mb-2 flex items-center gap-2 text-sm text-surface-500">
+                    <i class="pi pi-building"></i>
+                    <span>Administration</span>
+                    <i class="pi pi-angle-right text-xs"></i>
+                    <span class="text-primary font-medium">Entreprises</span>
+                </div>
+
+                <h1 class="m-0 text-2xl font-bold text-surface-900 dark:text-surface-0">
+                    Créer une entreprise
+                </h1>
+
+                <p class="mt-2 mb-0 text-sm text-surface-500">
+                    Renseignez les informations nécessaires à l'enregistrement
+                    de votre entreprise.
+                </p>
+            </div>
+
+            <p-button
+                label="Retour"
+                icon="pi pi-arrow-left"
+                severity="secondary"
+                [outlined]="true">
+            </p-button>
+
+        </div>
+    </div>
+
+    <!-- Formulaire -->
+    <form
+        #entrepriseForm="ngForm"
+        (ngSubmit)="createEntreprise(entrepriseForm)"
+        class="flex flex-col gap-6">
+
+        <!-- SECTION 1 : INFORMATIONS GÉNÉRALES -->
+        <div class="rounded-xl border border-surface-200 bg-surface-0 p-5 shadow-sm dark:border-surface-700 dark:bg-surface-900 md:p-6">
+
+            <div class="mb-6 flex items-start gap-3">
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <i class="pi pi-building text-xl"></i>
+                </div>
+
+                <div>
+                    <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">
+                        Informations générales
+                    </h2>
+                    <p class="mt-1 mb-0 text-sm text-surface-500">
+                        Identité et caractéristiques de l'entreprise.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                <!-- Nom de l'entreprise -->
+                <div class="flex flex-col gap-2">
+                    <label for="nom" class="text-sm font-medium">
+                        Nom de l'entreprise <span class="text-red-500">*</span>
+                    </label>
+
+                    <input
+                        pInputText
+                        id="nom"
+                        name="nom"
+                        [(ngModel)]="entreprise.nom"
+                        #nom="ngModel"
+                        required
+                        maxlength="150"
+                        placeholder="Ex. : Entreprise Camerounaise"
+                        class="w-full" />
+
+                    @if (nom.invalid && (nom.dirty || nom.touched)) {
+                        <small class="text-red-500">
+                            Le nom de l'entreprise est obligatoire.
+                        </small>
+                    }
+                </div>
+
+                <!-- Sigle -->
+                <div class="flex flex-col gap-2">
+                    <label for="sigle" class="text-sm font-medium">
+                        Sigle
+                    </label>
+
+                    <input
+                        pInputText
+                        id="sigle"
+                        name="sigle"
+                        [(ngModel)]="entreprise.sigle"
+                        maxlength="20"
+                        placeholder="Ex. : EC SARL"
+                        class="w-full" />
+                </div>
+
+                <!-- Forme juridique -->
+                <div class="flex flex-col gap-2">
+                    <label for="formeJuridique" class="text-sm font-medium">
+                        Forme juridique <span class="text-red-500">*</span>
+                    </label>
+
+                    <p-select
+                        inputId="formeJuridique"
+                        name="formeJuridique"
+                        [(ngModel)]="entreprise.formeJuridique"
+                        #formeJuridique="ngModel"
+                        [options]="formesJuridiques"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Choisir une forme juridique"
+                        [showClear]="true"
+                        required
+                        appendTo="body"
+                        styleClass="w-full">
+                    </p-select>
+
+                    @if (formeJuridique.invalid && (formeJuridique.dirty || formeJuridique.touched)) {
+                        <small class="text-red-500">
+                            Veuillez sélectionner une forme juridique.
+                        </small>
+                    }
+                </div>
+
+                <!-- Secteur d'activité -->
+                <div class="flex flex-col gap-2">
+                    <label for="secteur" class="text-sm font-medium">
+                        Secteur d'activité <span class="text-red-500">*</span>
+                    </label>
+
+                    <p-select
+                        inputId="secteur"
+                        name="secteur"
+                        [(ngModel)]="entreprise.secteur"
+                        #secteur="ngModel"
+                        [options]="secteurs"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Choisir un secteur"
+                        [showClear]="true"
+                        required
+                        appendTo="body"
+                        styleClass="w-full">
+                    </p-select>
+
+                    @if (secteur.invalid && (secteur.dirty || secteur.touched)) {
+                        <small class="text-red-500">
+                            Veuillez sélectionner un secteur d'activité.
+                        </small>
+                    }
+                </div>
+
+                <!-- Numéro d'identification -->
+                <div class="flex flex-col gap-2">
+                    <label for="numeroIdentification" class="text-sm font-medium">
+                        Numéro d'identification
+                    </label>
+
+                    <input
+                        pInputText
+                        id="numeroIdentification"
+                        name="numeroIdentification"
+                        [(ngModel)]="entreprise.numeroIdentification"
+                        placeholder="Ex. : RCCM, NIU..."
+                        class="w-full" />
+
+                    <small class="text-surface-500">
+                        Renseignez le numéro officiel d'identification.
+                    </small>
+                </div>
+
+                <!-- Date de création -->
+                <div class="flex flex-col gap-2">
+                    <label for="dateCreation" class="text-sm font-medium">
+                        Date de création
+                    </label>
+
+                    <app-datepicker
+                        inputId="dateCreation"
+                        name="dateCreation"
+                        [(ngModel)]="entreprise.dateCreation"
+                        dateFormat="dd/mm/yy"
+                        placeholder="Sélectionner une date"
+                        styleClass="w-full"
+                        appendTo="body">
+                    </app-datepicker>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SECTION 2 : COORDONNÉES -->
+        <div class="rounded-xl border border-surface-200 bg-surface-0 p-5 shadow-sm dark:border-surface-700 dark:bg-surface-900 md:p-6">
+
+            <div class="mb-6 flex items-start gap-3">
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <i class="pi pi-map-marker text-xl"></i>
+                </div>
+
+                <div>
+                    <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">
+                        Coordonnées de l'entreprise
+                    </h2>
+                    <p class="mt-1 mb-0 text-sm text-surface-500">
+                        Moyens de contact et localisation.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                <!-- E-mail -->
+                <div class="flex flex-col gap-2">
+                    <label for="email" class="text-sm font-medium">
+                        Adresse e-mail <span class="text-red-500">*</span>
+                    </label>
+
+                    <input
+                        pInputText
+                        id="email"
+                        name="email"
+                        type="email"
+                        [(ngModel)]="entreprise.email"
+                        #email="ngModel"
+                        required
+                        email
+                        placeholder="contact@entreprise.com"
+                        class="w-full" />
+
+                    @if (email.invalid && (email.dirty || email.touched)) {
+                        <small class="text-red-500">
+                            @if (email.errors?.['required']) {
+                                L'adresse e-mail est obligatoire.
+                            } @else {
+                                Veuillez saisir une adresse e-mail valide.
+                            }
+                        </small>
+                    }
+                </div>
+
+                <!-- Téléphone -->
+                <div class="flex flex-col gap-2">
+                    <label for="telephone" class="text-sm font-medium">
+                        Téléphone <span class="text-red-500">*</span>
+                    </label>
+
+                    <input
+                        pInputText
+                        id="telephone"
+                        name="telephone"
+                        type="tel"
+                        [(ngModel)]="entreprise.telephone"
+                        #telephone="ngModel"
+                        required
+                        placeholder="Ex. : +237 6XX XXX XXX"
+                        class="w-full" />
+
+                    @if (telephone.invalid && (telephone.dirty || telephone.touched)) {
+                        <small class="text-red-500">
+                            Le numéro de téléphone est obligatoire.
+                        </small>
+                    }
+                </div>
+
+                <!-- Adresse -->
+                <div class="flex flex-col gap-2 md:col-span-2">
+                    <label for="adresse" class="text-sm font-medium">
+                        Adresse physique
+                    </label>
+
+                    <input
+                        pInputText
+                        id="adresse"
+                        name="adresse"
+                        [(ngModel)]="entreprise.adresse"
+                        placeholder="Rue, quartier, numéro..."
+                        class="w-full" />
+                </div>
+
+                <!-- Ville -->
+                <div class="flex flex-col gap-2">
+                    <label for="ville" class="text-sm font-medium">
+                        Ville
+                    </label>
+
+                    <input
+                        pInputText
+                        id="ville"
+                        name="ville"
+                        [(ngModel)]="entreprise.ville"
+                        placeholder="Ex. : Yaoundé"
+                        class="w-full" />
+                </div>
+
+                <!-- Pays -->
+                <div class="flex flex-col gap-2">
+                    <label for="pays" class="text-sm font-medium">
+                        Pays <span class="text-red-500">*</span>
+                    </label>
+
+<!--                    [options]="pays"-->
+                    <p-select
+                        inputId="pays"
+                        name="pays"
+                        [(ngModel)]="entreprise.pays"
+                        #pays="ngModel"
+
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Choisir un pays"
+                        [showClear]="true"
+                        required
+                        appendTo="body"
+                        styleClass="w-full">
+                    </p-select>
+
+                    @if (pays.invalid && (pays.dirty || pays.touched)) {
+                        <small class="text-red-500">
+                            Veuillez sélectionner un pays.
+                        </small>
+                    }
+                </div>
+
+                <!-- Site web -->
+                <div class="flex flex-col gap-2 md:col-span-2">
+                    <label for="siteWeb" class="text-sm font-medium">
+                        Site web
+                    </label>
+
+                    <input
+                        pInputText
+                        id="siteWeb"
+                        name="siteWeb"
+                        type="url"
+                        [(ngModel)]="entreprise.siteWeb"
+                        #siteWeb="ngModel"
+                        placeholder="https://www.entreprise.com"
+                        class="w-full" />
+
+                    @if (siteWeb.invalid && (siteWeb.dirty || siteWeb.touched)) {
+                        <small class="text-red-500">
+                            Veuillez saisir une URL valide.
+                        </small>
+                    }
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SECTION 3 : RESPONSABLE -->
+        <div class="rounded-xl border border-surface-200 bg-surface-0 p-5 shadow-sm dark:border-surface-700 dark:bg-surface-900 md:p-6">
+
+            <div class="mb-6 flex items-start gap-3">
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <i class="pi pi-user text-xl"></i>
+                </div>
+
+                <div>
+                    <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">
+                        Responsable de l'entreprise
+                    </h2>
+                    <p class="mt-1 mb-0 text-sm text-surface-500">
+                        Informations de la personne de référence.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                <!-- Nom du responsable -->
+                <div class="flex flex-col gap-2">
+                    <label for="nomResponsable" class="text-sm font-medium">
+                        Nom complet du responsable
+                    </label>
+
+                    <input
+                        pInputText
+                        id="nomResponsable"
+                        name="nomResponsable"
+                        [(ngModel)]="entreprise.nomResponsable"
+                        placeholder="Nom et prénom(s)"
+                        class="w-full" />
+                </div>
+
+                <!-- E-mail du responsable -->
+                <div class="flex flex-col gap-2">
+                    <label for="emailResponsable" class="text-sm font-medium">
+                        E-mail du responsable
+                    </label>
+
+                    <input
+                        pInputText
+                        id="emailResponsable"
+                        name="emailResponsable"
+                        type="email"
+                        [(ngModel)]="entreprise.emailResponsable"
+                        #emailResponsable="ngModel"
+                        email
+                        placeholder="responsable@entreprise.com"
+                        class="w-full" />
+
+                    @if (emailResponsable.invalid && (emailResponsable.dirty || emailResponsable.touched)) {
+                        <small class="text-red-500">
+                            Veuillez saisir une adresse e-mail valide.
+                        </small>
+                    }
+                </div>
+
+                <!-- Téléphone du responsable -->
+                <div class="flex flex-col gap-2">
+                    <label for="telephoneResponsable" class="text-sm font-medium">
+                        Téléphone du responsable
+                    </label>
+
+                    <input
+                        pInputText
+                        id="telephoneResponsable"
+                        name="telephoneResponsable"
+                        type="tel"
+                        [(ngModel)]="entreprise.telephoneResponsable"
+                        placeholder="Ex. : +237 6XX XXX XXX"
+                        class="w-full" />
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="flex flex-col-reverse gap-3 rounded-xl border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900 sm:flex-row sm:items-center sm:justify-between">
+
+            <p class="m-0 text-sm text-surface-500">
+                <i class="pi pi-info-circle mr-1"></i>
+                Les champs marqués d'un astérisque sont obligatoires.
+            </p>
+
+            <div class="flex flex-col gap-3 sm:flex-row">
+                <p-button
+                    type="button"
+                    label="Réinitialiser"
+                    icon="pi pi-refresh"
+                    severity="secondary"
+                    [outlined]="true"
+                    (onClick)="resetForm(entrepriseForm)">
+                </p-button>
+
+                <p-button
+                    type="submit"
+                    label="Créer l'entreprise"
+                    icon="pi pi-check"
+                    [loading]="isSubmitting"
+                    [disabled]="entrepriseForm.invalid || isSubmitting">
+                </p-button>
+            </div>
+
+        </div>
+
+    </form>
+</div>
+

@@ -1,0 +1,255 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Title</title>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--</body>-->
+<!--</html>-->
+
+
+<div class="flex min-h-screen items-center justify-center bg-surface-100 p-4 dark:bg-surface-950 md:p-8">
+
+    <div class="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-surface-200 bg-white shadow-xl dark:border-surface-700 dark:bg-surface-900 lg:grid-cols-2">
+
+        <!-- Panneau de présentation -->
+        <div class="relative hidden flex-col justify-between overflow-hidden bg-[#102750] p-10 text-white lg:flex">
+
+            <!-- Décoration -->
+            <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl"></div>
+            <div class="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-blue-400/20 blur-3xl"></div>
+
+            <!-- Logo -->
+            <div class="relative z-10 flex items-center gap-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
+                    <i class="pi pi-users text-3xl text-indigo-300"></i>
+                </div>
+
+                <div>
+                    <div class="text-2xl font-bold tracking-tight">
+                        Sakai<span class="text-indigo-300">HR</span>
+                    </div>
+                    <p class="m-0 text-xs text-blue-200">
+<!--                        Votre PME, Notre Intelligence-->
+                    </p>
+                </div>
+            </div>
+
+            <!-- Message principal -->
+            <div class="relative z-10 my-12">
+<!--                <span class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs text-blue-100">-->
+<!--                    <i class="pi pi-sparkles text-indigo-300"></i>-->
+<!--&lt;!&ndash;                    Votre espace de gestion RH&ndash;&gt;-->
+<!--                </span>-->
+
+                <h1 class="max-w-md text-4xl font-bold leading-tight">
+<!--                    Gérez vos équipes,-->
+<!--                    <span class="text-indigo-300">simplifiez vos processus.</span>-->
+                </h1>
+
+<!--                <p class="mt-5 max-w-md text-sm leading-7 text-blue-100/80">-->
+<!--                    Centralisez la gestion de vos employés, organisez vos-->
+<!--                    départements et optimisez votre productivité grâce-->
+<!--                    à une plateforme intelligente.-->
+<!--                </p>-->
+
+                <!-- Avantages -->
+                <div class="mt-8 flex flex-col gap-4">
+<!--                    <div class="flex items-center gap-3">-->
+<!--                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">-->
+<!--                            <i class="pi pi-shield text-indigo-300"></i>-->
+<!--                        </div>-->
+<!--                        <span class="text-sm text-blue-50">-->
+<!--&lt;!&ndash;                            Accès sécurisé à votre espace&ndash;&gt;-->
+<!--                        </span>-->
+<!--                    </div>-->
+
+<!--                    <div class="flex items-center gap-3">-->
+<!--                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">-->
+<!--                            <i class="pi pi-users text-indigo-300"></i>-->
+<!--                        </div>-->
+<!--                        <span class="text-sm text-blue-50">-->
+<!--&lt;!&ndash;                            Gestion centralisée du personnel&ndash;&gt;-->
+<!--                        </span>-->
+<!--                    </div>-->
+
+<!--                    <div class="flex items-center gap-3">-->
+<!--                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">-->
+<!--                            <i class="pi pi-bolt text-indigo-300"></i>-->
+<!--                        </div>-->
+<!--                        <span class="text-sm text-blue-50">-->
+<!--&lt;!&ndash;                            Des outils conçus pour votre PME&ndash;&gt;-->
+<!--                        </span>-->
+<!--                    </div>-->
+                </div>
+            </div>
+
+            <div class="relative z-10 border-t border-white/15 pt-5">
+                <p class="m-0 text-xs text-blue-200/70">
+                    © {{ currentYear }}
+<!--                    SakaiHR. Tous droits réservés.-->
+                </p>
+            </div>
+        </div>
+
+        <!-- Formulaire de connexion -->
+        <div class="flex items-center justify-center p-6 sm:p-10 lg:p-12">
+
+            <div class="w-full max-w-md">
+
+                <!-- Logo mobile -->
+                <div class="mb-10 flex items-center gap-3 lg:hidden">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#102750] text-white">
+                        <i class="pi pi-users text-2xl"></i>
+                    </div>
+
+                    <div>
+                        <div class="text-2xl font-bold text-surface-900 dark:text-surface-0">
+                            Sakai<span class="text-indigo-500">HR</span>
+                        </div>
+                        <p class="m-0 text-xs text-surface-500">
+                            Votre PME, Notre Intelligence
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h2 class="m-0 text-3xl font-bold tracking-tight text-surface-900 dark:text-surface-0">
+                        Bon retour !
+                    </h2>
+
+                    <p class="mb-0 mt-3 text-sm leading-6 text-surface-500 dark:text-surface-400">
+                        Connectez-vous pour accéder à votre espace de travail.
+                    </p>
+                </div>
+
+                <!-- Erreur de connexion -->
+                @if (errorMessage()) {
+                    <div class="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300" role="alert">
+                        <i class="pi pi-exclamation-circle mt-0.5"></i>
+                        <span>{{ errorMessage() }}</span>
+                    </div>
+                }
+
+                <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+
+                    <!-- E-mail -->
+                    <div class="flex flex-col gap-2">
+                        <label for="email" class="text-sm font-semibold text-surface-700 dark:text-surface-200">
+                            Adresse e-mail
+                        </label>
+
+                        <input
+                            pInputText
+                            id="email"
+                            type="email"
+                            formControlName="email"
+                            autocomplete="username"
+                            placeholder="nom@entreprise.com"
+                            class="w-full"
+                            [invalid]="isInvalid('email')"
+                        />
+
+                        @if (isInvalid('email')) {
+                            <small class="text-red-500">
+                                @if (loginForm.controls.email.hasError('required')) {
+                                    L'adresse e-mail est obligatoire.
+                                } @else {
+                                    Saisissez une adresse e-mail valide.
+                                }
+                            </small>
+                        }
+                    </div>
+
+                    <!-- Mot de passe -->
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center justify-between gap-3">
+                            <label for="password" class="text-sm font-semibold text-surface-700 dark:text-surface-200">
+                                Mot de passe
+                            </label>
+
+                            <a
+                                routerLink="/forgot-password"
+                                class="text-xs font-medium text-indigo-600 transition-colors hover:text-indigo-800 dark:text-indigo-400">
+                                Mot de passe oublié ?
+                            </a>
+                        </div>
+
+                        <p-password
+                            formControlName="password"
+                            inputId="password"
+                            autocomplete="current-password"
+                            placeholder="Entrez votre mot de passe"
+                            [feedback]="false"
+                            [toggleMask]="true"
+                            [fluid]="true"
+                            [invalid]="isInvalid('password')"
+                            styleClass="w-full"
+                            inputStyleClass="w-full"
+                        />
+
+                    </div>
+
+                    <!-- Mémorisation -->
+                    <div class="flex items-center gap-2">
+                        <p-checkbox
+                            inputId="remember"
+                            formControlName="remember"
+                            [binary]="true"
+                        />
+
+                        <label for="remember" class="cursor-pointer text-sm text-surface-600 dark:text-surface-300">
+                            Se souvenir de moi
+                        </label>
+
+                        @if (isInvalid('password')) {
+                            <small class="text-red-500">
+                                Le mot de passe est obligatoire.
+                            </small>
+                        }
+                    </div>
+
+                    <!-- Connexion -->
+<!--                    class="!mt-2 !w-full !justify-center !rounded-xl !bg-or-600 !py-3 !font-semibold hover:!bg-indigo-700"-->
+                    <button
+                        pButton
+                        type="submit"
+                        class="!mt-2 !w-full !justify-center !rounded-xl !py-3 !font-semibold "
+                        [disabled]="loading()">
+
+                        @if (loading()) {
+                            <i class="pi pi-spin pi-spinner"></i>
+                            <span>Connexion en cours...</span>
+                        } @else {
+                            <span>Se connecter</span>
+                            <i class="pi pi-arrow-right"></i>
+                        }
+                    </button>
+
+                </form>
+
+                <!-- Pied de formulaire -->
+                <div class="mt-8 border-t border-surface-200 pt-6 text-center dark:border-surface-700">
+                    <p class="m-0 text-xs leading-6 text-surface-500 dark:text-surface-400">
+                        En vous connectant, vous accédez à votre espace
+                        professionnel sécurisé.
+                    </p>
+
+                    <p class="mb-0 mt-4 text-sm text-surface-500">
+                        Pas encore de compte ?
+                        <a routerLink="/auth/register" class="font-medium text-primary">Créer un compte</a>
+                    </p>
+
+                    <div class="mt-4 flex items-center justify-center gap-2 text-xs text-surface-400">
+                        <i class="pi pi-shield"></i>
+                        <span>Connexion sécurisée</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,159 @@
+<!--<div class="ai-card">-->
+<!--    <div class="ai-head">-->
+<!--        <div class="ai-avatar">🤖</div>-->
+<!--        <div class="ai-title">Assistant IA</div>-->
+<!--    </div>-->
+
+<!--    <p class="ai-text">-->
+<!--        Bonjour ! Je suis votre assistant IA.-->
+<!--        <small>Comment puis-je vous aider aujourd'hui ?</small>-->
+<!--    </p>-->
+
+<!--    <div class="ai-actions">-->
+<!--        <button class="ai-btn">Gérer un congé</button>-->
+<!--        <button class="ai-btn">Voir les effectifs</button>-->
+<!--        <button class="ai-btn">Créer un département</button>-->
+<!--        <button class="ai-btn">Aide sur les politiques RH</button>-->
+<!--    </div>-->
+<!--</div>-->
+
+<div class="h-full rounded-2xl border border-surface-200 bg-white p-5 shadow-sm dark:border-surface-700 dark:bg-surface-900 md:p-6">
+
+    <!-- En-tête -->
+    <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-300">
+                <i class="pi pi-sparkles text-xl"></i>
+            </div>
+
+            <div>
+                <h3 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">
+                    Assistant IA
+                </h3>
+                <div class="mt-1 flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                    <span class="text-xs text-surface-500 dark:text-surface-400">
+                        À votre service
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <p-tag
+            value="IA"
+            icon="pi pi-bolt"
+            severity="warn"
+            [rounded]="true">
+        </p-tag>
+    </div>
+
+    <!-- Message de bienvenue -->
+    <div class="mt-6 rounded-xl border border-surface-200 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800">
+        <div class="flex items-start gap-3">
+            <i class="pi pi-comment mt-1 text-orange-500"></i>
+
+            <div>
+                <p class="m-0 text-sm font-medium text-surface-900 dark:text-surface-0">
+                    Bonjour et bienvenue !
+                </p>
+
+                <p class="mb-0 mt-2 text-sm leading-6 text-surface-600 dark:text-surface-300">
+                    Je suis votre assistant RH intelligent. Je peux vous aider à
+                    gérer les employés, les congés et les départements, ou à
+                    retrouver rapidement les informations dont vous avez besoin.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="mt-6">
+        <div class="mb-3 flex items-center justify-between">
+            <h4 class="m-0 text-sm font-semibold text-surface-900 dark:text-surface-0">
+                Comment puis-je vous aider ?
+            </h4>
+
+            <span class="text-xs text-surface-500">
+                Actions rapides
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+            <button
+                pButton
+                type="button"
+                class="!flex !w-full !items-center !justify-start !gap-3 !rounded-xl !border !border-surface-200 !bg-white !px-4 !py-3 !text-left !text-surface-700 hover:!border-orange-300 hover:!bg-orange-50 dark:!border-surface-700 dark:!bg-surface-900 dark:!text-surface-200 dark:hover:!bg-surface-800"
+                (click)="onAction('conges')">
+
+                <i class="pi pi-calendar text-lg text-orange-500"></i>
+
+                <span class="flex flex-col gap-1">
+                    <span class="text-sm font-medium">Gérer les congés</span>
+                    <span class="text-xs font-normal text-surface-500">
+                        Demandes et absences
+                    </span>
+                </span>
+            </button>
+
+            <button
+                pButton
+                type="button"
+                class="!flex !w-full !items-center !justify-start !gap-3 !rounded-xl !border !border-surface-200 !bg-white !px-4 !py-3 !text-left !text-surface-700 hover:!border-orange-300 hover:!bg-orange-50 dark:!border-surface-700 dark:!bg-surface-900 dark:!text-surface-200 dark:hover:!bg-surface-800"
+                (click)="onAction('effectifs')">
+
+                <i class="pi pi-users text-lg text-blue-500"></i>
+
+                <span class="flex flex-col gap-1">
+                    <span class="text-sm font-medium">Voir les effectifs</span>
+                    <span class="text-xs font-normal text-surface-500">
+                        Statistiques du personnel
+                    </span>
+                </span>
+            </button>
+
+            <button
+                pButton
+                type="button"
+                class="!flex !w-full !items-center !justify-start !gap-3 !rounded-xl !border !border-surface-200 !bg-white !px-4 !py-3 !text-left !text-surface-700 hover:!border-orange-300 hover:!bg-orange-50 dark:!border-surface-700 dark:!bg-surface-900 dark:!text-surface-200 dark:hover:!bg-surface-800"
+                (click)="onAction('departements')">
+
+                <i class="pi pi-sitemap text-lg text-purple-500"></i>
+
+                <span class="flex flex-col gap-1">
+                    <span class="text-sm font-medium">Départements</span>
+                    <span class="text-xs font-normal text-surface-500">
+                        Structures et organisation
+                    </span>
+                </span>
+            </button>
+
+            <button
+                pButton
+                type="button"
+                class="!flex !w-full !items-center !justify-start !gap-3 !rounded-xl !border !border-surface-200 !bg-white !px-4 !py-3 !text-left !text-surface-700 hover:!border-orange-300 hover:!bg-orange-50 dark:!border-surface-700 dark:!bg-surface-900 dark:!text-surface-200 dark:hover:!bg-surface-800"
+                (click)="onAction('politiques-rh')">
+
+                <i class="pi pi-book text-lg text-green-600"></i>
+
+                <span class="flex flex-col gap-1">
+                    <span class="text-sm font-medium">Politiques RH</span>
+                    <span class="text-xs font-normal text-surface-500">
+                        Règles et procédures
+                    </span>
+                </span>
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Pied de carte -->
+    <div class="mt-5 flex items-center gap-2 border-t border-surface-200 pt-4 dark:border-surface-700">
+        <i class="pi pi-info-circle text-xs text-surface-400"></i>
+        <p class="m-0 text-xs text-surface-500 dark:text-surface-400">
+            Sélectionnez une action pour commencer.
+        </p>
+    </div>
+
+</div>
+
