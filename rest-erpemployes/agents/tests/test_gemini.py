@@ -78,3 +78,24 @@ def test_client_errors_do_not_fall_back(provider):
     with pytest.raises(LLMUnavailable):
         ask(provider)
     assert provider.calls == ["main-model"]
+
+
+def test_embeddings_are_sent_in_batches_with_a_pause(provider, settings, monkeypatch):
+    settings.GEMINI_EMBED_BATCH_PAUSE_SECONDS = 61
+    sizes, pauses = [], []
+
+    class Embedding:
+        values = [0.0]
+
+    def embed_content(*, model, contents, config):
+        sizes.append(len(contents))
+        return type("Result", (), {"embeddings": [Embedding()] * len(contents)})()
+
+    monkeypatch.setattr(provider.client.models, "embed_content", embed_content)
+    monkeypatch.setattr("agents.llm.gemini.time.sleep", pauses.append)
+
+    vectors = provider.embed(["article"] * 200, for_query=False)
+
+    assert len(vectors) == 200
+    assert sizes == [90, 90, 20]
+    assert pauses == [61, 61]

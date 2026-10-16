@@ -1,75 +1,32 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './app/layout/component/app.layout';
 import { Dashboard } from './app/pages/dashboard/dashboard';
-import { Documentation } from './app/pages/documentation/documentation';
-import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
 import { AppConstantRoute } from '@/app/constants';
 import { authGuard } from '@/app/core/auth/auth.guard';
 
 export const appRoutes: Routes = [
-    // Redirection par défaut vers la page Login
-    // {
-    //     path: '',
-    //     redirectTo: 'auth/login',
-    //     pathMatch: 'full' },
-
     {
-
-        // Pages protégées avec le layout principal
+        // Signed-in area, inside the main layout.
         path: '',
         component: AppLayout,
         canActivate: [authGuard],
         children: [
-
-            { path: '', component: Dashboard },
-
-            {
-                path: AppConstantRoute.Activated_Desactived_PATH_PATH,
-                loadComponent: () => import('./app/pages/activated-desactived/activated-desactived').then((c) => c.ActivatedDesactived),
-                data: { breadcrumb: 'Actived-desactived' },
-            },
-            {
-                path: AppConstantRoute.Created_PATH,
-                loadComponent: () => import('./app/pages/create-user-entreprise/create-user').then((c) => c.CreateUser),
-                data: { breadcrumb: 'Create' },
-            },
-            {
-                path: AppConstantRoute.Liste_Tableau_PATH,
-                loadComponent: () => import('./app/pages/activated-desactived/activated-desactived').then((c) => c.ActivatedDesactived),
-                data: { breadcrumb: 'Actived-desactived' },
-            },
-            // {
-            //     path: AppConstantRoute.Actualite_PATH,
-            //     loadComponent: () => import('./app/pages/create-user-entreprise/create-user').then((c) => c.CreateUser),
-            //     data: { breadcrumb: 'Create' },
-            // },
-
-            // {
-            //     path: AppConstantRoute.ComparaisonActif_PATH,
-            //     loadComponent: () => import('@/app/pages/deconnection/deconnection').then((c) => c.ComparaisonActifComponent),
-            //     data: { breadcrumb: 'ComparairéActifs' },
-            // },
-
+            { path: '', component: Dashboard, data: { breadcrumb: 'Tableau de bord' } },
             {
                 path: AppConstantRoute.Legal_Assistant_PATH,
                 loadComponent: () => import('./app/pages/legal-assistant/legal-assistant').then((c) => c.LegalAssistant),
-                data: { breadcrumb: 'Assistant juridique' },
+                data: { breadcrumb: 'Assistant juridique' }
             },
             {
                 path: AppConstantRoute.Profile_PATH,
                 loadComponent: () => import('./app/pages/profile/profile').then((c) => c.Profile),
-                data: { breadcrumb: 'Profil' },
-            },
-
-            { path: 'uikit', loadChildren: () => import('./app/pages/uikit/uikit.routes') },
-            { path: 'documentation', component: Documentation },
-            { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
+                data: { breadcrumb: 'Profil' }
+            }
         ]
     },
-    { path: 'landing', component: Landing },
-    { path: 'notfound', component: Notfound },
-    // Routes d'authentification
+    // Login and sign-up.
     { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },
+    { path: 'notfound', component: Notfound },
     { path: '**', redirectTo: '/notfound' }
 ];

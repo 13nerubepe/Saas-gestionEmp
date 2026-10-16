@@ -84,13 +84,16 @@ API error `code`) and `agents/`. The API URL is in `src/environments/`.
   after a reload (`authGuard` → `restoreSession()`).
 - The app runs without zone.js: state changed in an HTTP callback must be a
   signal, or the view does not update.
-- Wired pages: login, sign-up, dashboard (stats from /auth/me/ and the
-  conversation count, legal question card), legal assistant (history,
-  follow-ups), profile (name, language). The legal form is hidden for
-  employees (`AuthService.isFounder`).
-- Screens still on demo data (no API yet): create user / company, activation,
-  departments, events, AI assistant quick actions, password reset. The
-  sidebar still lists the template's demo pages below "Home".
+- Delivered scope is US-01 and US-02 only: login, sign-up, dashboard (stats
+  and legal question card), legal assistant (history, follow-ups), profile
+  (name, answer language). The legal form is hidden for employees
+  (`AuthService.isFounder`). Product name: `APP_NAME` in `src/app/constants.ts`.
+- The Sakai template demos were removed. Work-in-progress components for
+  later stories (created-user, created-entreprise, assistant-ai,
+  prochain-event, activated-desactived, liste-tableau-departement,
+  reinitialisation) are kept in the code but not routed.
+- US-03/US-04 (clients, interactions) exist as an API on branch
+  `feature/US-03-US-04-clients`, not merged.
 
 ## Backend architecture
 
@@ -206,11 +209,12 @@ npm run format
 - LLM provider for real users: the Gemini free tier is for development only.
 - Legal texts: the team loads the documents currently in force and updates
   them by hand. The update process is deferred.
-- `LEGAL_SEARCH_MAX_DISTANCE` (default 0.45) must be tuned on real texts. First
-  measures with Gemini embeddings (768 dims), on two fictitious articles: a
-  matching question sits at 0.25-0.31, an unrelated legal question at
-  0.38-0.45. The model is the second filter: it cites nothing when the
-  passages do not answer.
+- `LEGAL_SEARCH_MAX_DISTANCE` is 0.36, measured on the Cameroon Labour Code
+  (`rest-erpemployes/data/legal_texts/`, 177 articles, 1992 text without later
+  amendments): the right article at 0.23-0.29 (top 1 for 4 of 5 questions,
+  top 2 otherwise), off-topic questions from 0.376. Re-measure when adding texts.
+- Gemini free tier embeds 100 texts per minute: the loader sends 90 at a time
+  with `GEMINI_EMBED_BATCH_PAUSE_SECONDS` (61) between batches.
 - Gemini model pinned to `gemini-3.5-flash`, with `GEMINI_FALLBACK_MODEL`
   (`gemini-2.5-flash`) used when the main one is overloaded; the stored Answer
   names the model that answered. On 2026-10-15, `gemini-flash-latest`

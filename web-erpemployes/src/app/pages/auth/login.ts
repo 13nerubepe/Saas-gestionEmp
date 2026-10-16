@@ -2,18 +2,17 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
-import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
 import { AuthService } from '@/app/core/auth/auth.service';
 import { apiErrorMessage } from '@/app/core/api-errors';
+import { APP_NAME } from '@/app/constants';
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, ReactiveFormsModule],
+    imports: [ButtonModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, ReactiveFormsModule],
     templateUrl: './login.html'
 })
 export class Login {
@@ -28,6 +27,7 @@ export class Login {
     private readonly route = inject(ActivatedRoute);
     private readonly auth = inject(AuthService);
 
+    readonly appName = APP_NAME;
     currentYear = new Date().getFullYear();
     // Signals: the app runs without zone.js, so plain fields changed in an HTTP
     // callback would not refresh the view.
@@ -36,8 +36,7 @@ export class Login {
 
     loginForm = this.fb.nonNullable.group({
         email: ['', [Validators.required, Validators.email]],
-        password: ['', Validators.required],
-        remember: [false]
+        password: ['', Validators.required]
     });
 
     isInvalid(controlName: 'email' | 'password'): boolean {

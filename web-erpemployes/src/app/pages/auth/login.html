@@ -29,7 +29,7 @@
 
                 <div>
                     <div class="text-2xl font-bold tracking-tight">
-                        Sakai<span class="text-indigo-300">HR</span>
+                        {{ appName }}
                     </div>
                     <p class="m-0 text-xs text-blue-200">
 <!--                        Votre PME, Notre Intelligence-->
@@ -107,10 +107,10 @@
 
                     <div>
                         <div class="text-2xl font-bold text-surface-900 dark:text-surface-0">
-                            Sakai<span class="text-indigo-500">HR</span>
+                            {{ appName }}
                         </div>
                         <p class="m-0 text-xs text-surface-500">
-                            Votre PME, Notre Intelligence
+                            Votre back-office, assisté par l'IA
                         </p>
                     </div>
                 </div>
@@ -165,17 +165,9 @@
 
                     <!-- Mot de passe -->
                     <div class="flex flex-col gap-2">
-                        <div class="flex items-center justify-between gap-3">
-                            <label for="password" class="text-sm font-semibold text-surface-700 dark:text-surface-200">
+                        <label for="password" class="text-sm font-semibold text-surface-700 dark:text-surface-200">
                                 Mot de passe
                             </label>
-
-                            <a
-                                routerLink="/forgot-password"
-                                class="text-xs font-medium text-indigo-600 transition-colors hover:text-indigo-800 dark:text-indigo-400">
-                                Mot de passe oublié ?
-                            </a>
-                        </div>
 
                         <p-password
                             formControlName="password"
@@ -192,24 +184,11 @@
 
                     </div>
 
-                    <!-- Mémorisation -->
-                    <div class="flex items-center gap-2">
-                        <p-checkbox
-                            inputId="remember"
-                            formControlName="remember"
-                            [binary]="true"
-                        />
-
-                        <label for="remember" class="cursor-pointer text-sm text-surface-600 dark:text-surface-300">
-                            Se souvenir de moi
-                        </label>
-
-                        @if (isInvalid('password')) {
+                    @if (isInvalid('password')) {
                             <small class="text-red-500">
                                 Le mot de passe est obligatoire.
                             </small>
                         }
-                    </div>
 
                     <!-- Connexion -->
 <!--                    class="!mt-2 !w-full !justify-center !rounded-xl !bg-or-600 !py-3 !font-semibold hover:!bg-indigo-700"-->

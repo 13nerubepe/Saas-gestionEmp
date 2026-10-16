@@ -189,11 +189,15 @@ GEMINI_MODEL = env("GEMINI_MODEL", default="gemini-3.5-flash")
 # both frequent on the free tier.
 GEMINI_FALLBACK_MODEL = env("GEMINI_FALLBACK_MODEL", default="gemini-2.5-flash")
 GEMINI_EMBEDDING_MODEL = env("GEMINI_EMBEDDING_MODEL", default="gemini-embedding-001")
+# Free tier: 100 embedded texts per minute. Pause between batches when loading texts.
+GEMINI_EMBED_BATCH_PAUSE_SECONDS = env.int("GEMINI_EMBED_BATCH_PAUSE_SECONDS", default=61)
 LLM_TIMEOUT_SECONDS = env.int("LLM_TIMEOUT_SECONDS", default=30)
 # Size of the vector column: changing it requires a migration and re-embedding.
 EMBEDDING_DIMENSIONS = 768
-# Cosine distance above which a legal passage is considered unrelated.
-LEGAL_SEARCH_MAX_DISTANCE = env.float("LEGAL_SEARCH_MAX_DISTANCE", default=0.45)
+# Cosine distance above which a legal passage is considered unrelated. Measured
+# on the Cameroon Labour Code (Gemini embeddings, 768 dims): the right article
+# sits at 0.23-0.29, off-topic questions start at 0.376.
+LEGAL_SEARCH_MAX_DISTANCE = env.float("LEGAL_SEARCH_MAX_DISTANCE", default=0.36)
 
 
 # Internationalization

@@ -1,3 +1,5 @@
+import time
+
 import httpx
 import pydantic
 from django.conf import settings
@@ -6,8 +8,10 @@ from google.genai import errors, types
 
 from agents.llm.base import LLMUnavailable, SchemaT
 
-# Gemini accepts at most 100 texts per embedding request.
-EMBED_BATCH_SIZE = 100
+# Gemini accepts at most 100 texts per embedding request, and the free tier
+# counts every text against a 100-per-minute quota: send 90 at a time and
+# wait between batches (GEMINI_EMBED_BATCH_PAUSE_SECONDS, 0 on a paid plan).
+EMBED_BATCH_SIZE = 90
 
 # One retry on rate limiting and transient overload ("high demand"). Kept low:
 # the user waits for the answer, and each attempt can last LLM_TIMEOUT_SECONDS.
@@ -33,6 +37,8 @@ class GeminiProvider:
         )
         vectors = []
         for start in range(0, len(texts), EMBED_BATCH_SIZE):
+            if start:
+                time.sleep(settings.GEMINI_EMBED_BATCH_PAUSE_SECONDS)
             batch = texts[start : start + EMBED_BATCH_SIZE]
             try:
                 result = self.client.models.embed_content(
