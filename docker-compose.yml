@@ -22,7 +22,10 @@ services:
       retries: 10
 
   api:
-    build: ./rest-erpemployes
+    build:
+      context: ./rest-erpemployes
+      args:
+        REQUIREMENTS: requirements-dev.txt
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     environment:
       SECRET_KEY: local-development-only-not-secret-but-long-enough

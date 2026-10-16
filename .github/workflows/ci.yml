@@ -44,3 +44,19 @@ jobs:
         run: python manage.py makemigrations --check --dry-run
       - name: Tests
         run: pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web-erpemployes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web-erpemployes/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Production build
+        run: npx ng build --configuration production

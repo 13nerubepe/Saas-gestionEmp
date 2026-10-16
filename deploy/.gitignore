@@ -1,0 +1,5 @@
+# Server-side files: secrets and the uploaded Angular build.
+.env
+frontend/
+frontend.new/
+frontend.old/

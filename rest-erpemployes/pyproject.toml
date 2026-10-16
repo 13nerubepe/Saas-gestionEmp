@@ -11,3 +11,7 @@ select = ["E", "F", "I", "B", "UP", "DJ"]
 DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = ["test_*.py"]
 addopts = "--strict-markers"
+filterwarnings = [
+    # WhiteNoise: STATIC_ROOT only exists after collectstatic (done in the Docker image).
+    "ignore:No directory at:UserWarning",
+]

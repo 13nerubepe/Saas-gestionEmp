@@ -49,6 +49,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Serves the admin and API static files in production, without nginx.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -183,7 +185,8 @@ GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
 # A pinned version, not a "-latest" alias: answers stay reproducible and each
 # stored Answer names the model that really produced it.
 GEMINI_MODEL = env("GEMINI_MODEL", default="gemini-3.5-flash")
-# Used only when the main model is overloaded (5xx), frequent on the free tier.
+# Used only when the main model is overloaded (5xx) or out of quota (429),
+# both frequent on the free tier.
 GEMINI_FALLBACK_MODEL = env("GEMINI_FALLBACK_MODEL", default="gemini-2.5-flash")
 GEMINI_EMBEDDING_MODEL = env("GEMINI_EMBEDDING_MODEL", default="gemini-embedding-001")
 LLM_TIMEOUT_SECONDS = env.int("LLM_TIMEOUT_SECONDS", default=30)
@@ -216,6 +219,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
+
+# Production security
+# HTTPS is terminated by Caddy, which forwards the original scheme.
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+# Caddy redirects HTTP to HTTPS and sends HSTS; Django can do both too if needed.
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=False)
+SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=0)
 
 
 # Email
