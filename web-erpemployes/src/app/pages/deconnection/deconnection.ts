@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Actif, Periode } from '@/app/commons/models/model';
+import { Actif, Periode } from '@/app/model';
 import { NgClass } from '@angular/common';
 import { UIChart } from 'primeng/chart';
 import { TableModule } from 'primeng/table';

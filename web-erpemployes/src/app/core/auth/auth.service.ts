@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, finalize, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
 import { environment } from '@/environments/environment';
 import { AccessToken, RegisterPayload, User } from './auth.models';
+import { AccessRequestPayload, AuthResponse, LoginPayload } from '@/app/model';
 
 const AUTH_URL = `${environment.apiUrl}/auth`;
 
@@ -20,18 +21,27 @@ export class AuthService {
     private readonly http = inject(HttpClient);
     private readonly router = inject(Router);
 
+    // Le token d'accès reste en mémoire.
     private readonly accessToken = signal<string | null>(null);
     private refreshInFlight: Observable<string> | null = null;
 
     readonly user = signal<User | null>(null);
+
+    /**
+     * Vérifie si un token d'accès est présent.
+     */
     readonly isAuthenticated = computed(() => this.accessToken() !== null);
     /** Company sent in X-Company-ID. First membership until a company switcher exists. */
+        // Première entreprise associée à l'utilisateur connecté.
     readonly activeCompanyId = computed(() => this.user()?.memberships[0]?.company_id ?? null);
 
     get token(): string | null {
         return this.accessToken();
     }
 
+    /**
+     * Connexion et récupération des tokens JWT.
+     */
     login(email: string, password: string): Observable<User> {
         return this.http.post<AccessToken>(`${AUTH_URL}/login/`, { email, password }, { withCredentials: true }).pipe(
             tap(({ access }) => this.accessToken.set(access)),
@@ -39,15 +49,24 @@ export class AuthService {
         );
     }
 
+    /**
+     * Inscription du fondateur et création de son entreprise.
+     */
     register(payload: RegisterPayload): Observable<User> {
         return this.http.post<User>(`${AUTH_URL}/register/`, payload);
     }
 
+    /**
+     * Récupération du profil connecté.
+     */
     loadCurrentUser(): Observable<User> {
         return this.http.get<User>(`${AUTH_URL}/me/`).pipe(tap((user) => this.user.set(user)));
     }
 
     /** New access token from the refresh cookie. Concurrent callers share one request. */
+    /**
+     * Récupération d'un nouveau token depuis le cookie de rafraîchissement.
+     */
     refresh(): Observable<string> {
         this.refreshInFlight ??= this.http.post<AccessToken>(`${AUTH_URL}/refresh/`, {}, { withCredentials: true }).pipe(
             map(({ access }) => access),
@@ -70,6 +89,9 @@ export class AuthService {
         );
     }
 
+    /**
+     * Déconnexion locale.
+     */
     logout(): void {
         this.http
             .post(`${AUTH_URL}/logout/`, {}, { withCredentials: true })
@@ -80,8 +102,30 @@ export class AuthService {
             });
     }
 
+    /**
+     * Suppression des données de session en mémoire.
+     */
     clear(): void {
         this.accessToken.set(null);
         this.user.set(null);
+    }
+
+    /**
+     * Retourne le token d'accès actuel.
+     */
+    getAccessToken(): string | null {
+        return this.accessToken();
+    }
+
+    /**
+     * Envoi d'une demande d'accès à l'administration.
+     */
+    submitRequest(
+        payload: AccessRequestPayload
+    ): Observable<unknown> {
+        return this.http.post<unknown>(
+            `${AUTH_URL}/access-requests/`,
+            payload
+        );
     }
 }

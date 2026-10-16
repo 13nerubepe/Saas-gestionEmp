@@ -5,7 +5,7 @@ import { CreatedEntreprise } from '@/app/commons/created-entreprise/created-entr
 @Component({
     selector: 'app-create-user-entreprise',
     imports: [CreatedUser, CreatedEntreprise],
-    templateUrl: './create-user.html',
-    styleUrl: './create-user.scss'
+    templateUrl: './create-user-entreprise.html',
+    styleUrl: './create-user-entreprise.scss'
 })
-export class CreateUser {}
+export class CreateUserEntreprise {}

@@ -1,0 +1,142 @@
+<div class="card min-h-[calc(100vh-12rem)]">
+    <!-- En-tête -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-3">
+        <div>
+            <h2 class="text-3xl font-semibold m-0">Gestion des utilisateurs </h2>
+        </div>
+    </div>
+    <p-divider></p-divider>
+
+    <p-table
+        #dt
+        [value]="users()"
+        [rows]="8"
+        [rowsPerPageOptions]="[8, 15, 30]"
+        [globalFilterFields]="['name', 'email', 'role', 'status']"
+        dataKey="id"
+        currentPageReportTemplate="{first} - {last} sur {totalRecords} utilisateurs"
+    >
+        <ng-template #caption>
+            <div class="flex items-center justify-between gap-4">
+                <p-iconfield class="w-full md:w-[28rem]">
+                    <p-inputicon class="pi pi-search" />
+                    <input
+                        pInputText
+                        type="text"
+                        class="w-full"
+                        placeholder="Rechercher un utilisateur, un e-mail ou un rôle..."
+                        (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                    />
+                </p-iconfield>
+                <p-selectbutton
+                    [options]="roleFilterOptions"
+                    [(ngModel)]="selectedFilter"
+                    optionLabel="label"
+                    optionValue="value"
+                    [allowEmpty]="false"
+                    (onChange)="filterByRole($event.value)"></p-selectbutton>
+
+            </div>
+        </ng-template>
+        <ng-template #header>
+            <tr>
+                <th pSortableColumn="name" style="min-width: 20rem">Utilisateur <p-sortIcon field="name" /></th>
+                <th pSortableColumn="role" style="min-width: 12rem">Rôle <p-sortIcon field="role" /></th>
+                <th pSortableColumn="status" style="min-width: 10rem">Statut <p-sortIcon field="status" /></th>
+                <th class="text-right" style="width: 8rem">Actions</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-user>
+            <tr>
+                <td class="!py-4">
+                    <div class="flex items-center gap-4">
+                        <p-avatar
+                            [image]="user.avatar"
+                            [label]="user.avatar ? undefined : user.name?.charAt(0)"
+                            shape="circle"
+                            size="xlarge"
+                        />
+                        <div class="flex flex-col gap-1">
+                            <span class="font-semibold text-lg">{{ user.name }}</span>
+                            <span class="text-muted-color">{{ user.email }}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <p-tag [value]="user.role" [severity]="roleSeverity(user.role)" [rounded]="true" />
+                </td>
+                <td>
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="inline-block w-2.5 h-2.5 rounded-full"
+                            [ngClass]="user.status === 'Actif' ? 'bg-green-500' : 'bg-red-500'"
+                        ></span>
+                        <span>{{ user.status }}</span>
+                    </div>
+                </td>
+<!--                <td class="text-right">-->
+<!--                    <p-button-->
+<!--                        icon="pi pi-ellipsis-v"-->
+<!--                        [text]="true"-->
+<!--                        [rounded]="true"-->
+<!--                        severity="secondary"-->
+<!--                        pTooltip="Actions"-->
+<!--                        tooltipPosition="left"-->
+<!--                    />-->
+<!--                </td>-->
+
+                <td>
+                    <div class="flex gap-2">
+
+                        <p-togglebutton
+                            *ngIf="!validationDesDemande"
+                            onLabel="Activé"
+                            offLabel="Désactivé"
+                            onIcon="pi pi-check"
+                            offIcon="pi pi-times"
+                            pTooltip="Activer / Désactiver"
+                        ></p-togglebutton>
+
+                        <p-button icon="pi pi-pencil" *ngIf="!validationDesDemande"
+                                  [loading]="isLoad"
+                                  [pTooltip]="'edit'" [text]="true"
+                                  severity="info" />
+
+                        <p-button
+                            *ngIf="!validationDesDemande"
+                            [loading]="isLoad" severity="help"
+                            [pTooltip]="'Imprimer'" icon="pi pi-file-pdf" [text]="true" />
+
+                        <p-button *ngIf="!validationDesDemande"
+                                   icon="pi pi-trash"
+                                  [pTooltip]="'supprimer'"
+                                  [rounded]="true" [text]="true" severity="danger" />
+
+                        <p-button
+                            *ngIf="validationDesDemande"
+                            [loading]="isLoad"
+                            icon="pi pi-check-square"
+                            [pTooltip]="'valider le  virement?'"
+                            [rounded]="true" [text]="true" severity="success" />
+
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="4">
+                    <div class="flex flex-col items-center justify-center gap-3 py-16 text-muted-color">
+                        <i class="pi pi-users !text-5xl"></i>
+                        <span class="font-medium text-lg">Aucun utilisateur trouvé</span>
+                        <span>Essayez de modifier votre recherche.</span>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+

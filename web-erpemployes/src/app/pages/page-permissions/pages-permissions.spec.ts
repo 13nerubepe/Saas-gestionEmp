@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CreateUser } from './create-user';
+import { PagesPermissions } from './pages-permissions';
 
-describe('CreateUser', () => {
-    let component: CreateUser;
-    let fixture: ComponentFixture<CreateUser>;
+describe('PagesPermissions', () => {
+    let component: PagesPermissions;
+    let fixture: ComponentFixture<PagesPermissions>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [CreateUser]
+            imports: [PagesPermissions]
         }).compileComponents();
 
-        fixture = TestBed.createComponent(CreateUser);
+        fixture = TestBed.createComponent(PagesPermissions);
         component = fixture.componentInstance;
         await fixture.whenStable();
     });

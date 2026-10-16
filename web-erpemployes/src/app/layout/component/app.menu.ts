@@ -26,10 +26,11 @@ export class AppMenu {
             {
                 label: 'Home',
                 items: [
-                    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
-                    { label: 'Actif', icon: 'pi pi-fw pi-home', routerLink: ['/actifs'] },
-                    { label: 'Analyse de volatilité', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
+                    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'] },
+                    { label: 'Gestion des Utilisateur', icon: 'pi pi-fw pi-home', routerLink: ['/utilisateur'] },
+                    { label: 'Gestion des Roles et Permission', icon: 'pi pi-fw pi-home', routerLink: ['/permission'] },
                     { label: 'Comparaison', icon: 'pi pi-fw pi-home', routerLink: ['/comparaison'] },
+                    { label: 'Creation', icon: 'pi pi-fw pi-home', routerLink: ['/created'] },
                     { label: 'Actualités', icon: 'pi pi-fw pi-home', routerLink: ['/actualités'] },
                 ]
             },

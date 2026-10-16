@@ -1,0 +1,270 @@
+
+<div class="flex min-h-screen items-center justify-center bg-surface-100 p-4 dark:bg-surface-950 md:p-8">
+    <div class="w-full max-w-2xl rounded-3xl border border-surface-200 bg-white p-6 shadow-xl dark:border-surface-700 dark:bg-surface-900 sm:p-10 lg:p-12">
+
+        <!-- En-tête -->
+        <div class="mb-8">
+            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-50 dark:bg-primary-950">
+                <i class="pi pi-send text-2xl text-primary-600 dark:text-primary-400"></i>
+            </div>
+
+            <h1 class="text-3xl font-bold tracking-tight text-surface-900 dark:text-surface-0">
+                Demande d'accès à SakaiHR
+            </h1>
+
+            <p class="mb-0 mt-3 text-sm leading-6 text-surface-500 dark:text-surface-400">
+                Vous n'avez pas encore de compte ?
+                Remplissez ce formulaire pour soumettre une demande à notre administration.
+            </p>
+        </div>
+
+        <!-- Message d'erreur -->
+        @if (errorMessage()) {
+            <div
+                class="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+                role="alert">
+                <i class="pi pi-exclamation-circle mt-0.5"></i>
+                <span>{{ errorMessage() }}</span>
+            </div>
+        }
+
+        <!-- Message de succès -->
+        @if (successMessage()) {
+            <div
+                class="mb-5 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700 dark:border-green-900 dark:bg-green-950 dark:text-green-300"
+                role="status">
+                <i class="pi pi-check-circle mt-0.5"></i>
+                <span>{{ successMessage() }}</span>
+            </div>
+        }
+
+        <form
+            [formGroup]="form"
+            (ngSubmit)="onSubmit()"
+            class="flex flex-col gap-6">
+
+            <!-- Informations du demandeur -->
+            <section>
+                <h2 class="mb-4 border-b border-surface-200 pb-3 text-lg font-semibold text-surface-900 dark:border-surface-700 dark:text-surface-0">
+                    <i class="pi pi-user mr-2 text-primary"></i>
+                    Informations du demandeur
+                </h2>
+
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div class="flex flex-col gap-2">
+                        <label for="first_name" class="text-sm font-semibold">
+                            Prénom *
+                        </label>
+                        <input
+                            pInputText
+                            id="first_name"
+                            formControlName="first_name"
+                            autocomplete="given-name"
+                            placeholder="Votre prénom"
+                            fluid />
+
+                        @if (isInvalid('first_name')) {
+                            <small class="text-red-500">
+                                Le prénom est obligatoire.
+                            </small>
+                        }
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="last_name" class="text-sm font-semibold">
+                            Nom *
+                        </label>
+                        <input
+                            pInputText
+                            id="last_name"
+                            formControlName="last_name"
+                            autocomplete="family-name"
+                            placeholder="Votre nom"
+                            fluid />
+
+                        @if (isInvalid('last_name')) {
+                            <small class="text-red-500">
+                                Le nom est obligatoire.
+                            </small>
+                        }
+                    </div>
+
+                    <div class="flex flex-col gap-2 sm:col-span-2">
+                        <label for="email" class="text-sm font-semibold">
+                            Adresse e-mail professionnelle *
+                        </label>
+                        <input
+                            pInputText
+                            id="email"
+                            type="email"
+                            formControlName="email"
+                            autocomplete="email"
+                            placeholder="nom@entreprise.com"
+                            fluid />
+
+                        @if (isInvalid('email')) {
+                            <small class="text-red-500">
+                                Saisissez une adresse e-mail valide.
+                            </small>
+                        }
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="phone" class="text-sm font-semibold">
+                            Téléphone *
+                        </label>
+                        <input
+                            pInputText
+                            id="phone"
+                            type="tel"
+                            formControlName="phone"
+                            autocomplete="tel"
+                            placeholder="+237 6XX XX XX XX"
+                            fluid />
+
+                        @if (isInvalid('phone')) {
+                            <small class="text-red-500">
+                                Le numéro de téléphone est obligatoire.
+                            </small>
+                        }
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="position" class="text-sm font-semibold">
+                            Fonction dans l'entreprise *
+                        </label>
+                        <p-select
+                            inputId="position"
+                            formControlName="position"
+                            [options]="positions"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Sélectionner une fonction"
+                            [fluid]="true" />
+
+                        @if (isInvalid('position')) {
+                            <small class="text-red-500">
+                                Sélectionnez votre fonction.
+                            </small>
+                        }
+                    </div>
+                </div>
+            </section>
+
+            <!-- Informations de l'entreprise -->
+            <section>
+                <h2 class="mb-4 border-b border-surface-200 pb-3 text-lg font-semibold text-surface-900 dark:border-surface-700 dark:text-surface-0">
+                    <i class="pi pi-building mr-2 text-primary"></i>
+                    Informations de l'entreprise
+                </h2>
+
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div class="flex flex-col gap-2 sm:col-span-2">
+                        <label for="company_name" class="text-sm font-semibold">
+                            Nom de l'entreprise *
+                        </label>
+                        <input
+                            pInputText
+                            id="company_name"
+                            formControlName="company_name"
+                            autocomplete="organization"
+                            placeholder="Nom de votre entreprise"
+                            fluid />
+
+                        @if (isInvalid('company_name')) {
+                            <small class="text-red-500">
+                                Le nom de l'entreprise est obligatoire.
+                            </small>
+                        }
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="country" class="text-sm font-semibold">
+                            Pays *
+                        </label>
+                        <p-select
+                            inputId="country"
+                            formControlName="country"
+                            [options]="countries"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Sélectionner un pays"
+                            [filter]="true"
+                            [fluid]="true" />
+
+                        @if (isInvalid('country')) {
+                            <small class="text-red-500">
+                                Sélectionnez un pays.
+                            </small>
+                        }
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label for="city" class="text-sm font-semibold">
+                            Ville *
+                        </label>
+                        <input
+                            pInputText
+                            id="city"
+                            formControlName="city"
+                            placeholder="Ex. : Yaoundé"
+                            fluid />
+
+                        @if (isInvalid('city')) {
+                            <small class="text-red-500">
+                                La ville est obligatoire.
+                            </small>
+                        }
+                    </div>
+
+                    <div class="flex flex-col gap-2 sm:col-span-2">
+                        <label for="reason" class="text-sm font-semibold">
+                            Motif de la demande *
+                        </label>
+                        <textarea
+                            pTextarea
+                            id="reason"
+                            formControlName="reason"
+                            rows="4"
+                            class="w-full"
+                            placeholder="Présentez brièvement votre entreprise et expliquez pourquoi vous souhaitez utiliser SakaiHR.">
+                        </textarea>
+
+                        @if (isInvalid('reason')) {
+                            <small class="text-red-500">
+                                Veuillez expliquer le motif de votre demande (20 caractères minimum).
+                            </small>
+                        }
+                    </div>
+                </div>
+            </section>
+
+            <!-- Boutons -->
+            <div class="flex flex-col-reverse gap-3 border-t border-surface-200 pt-5 dark:border-surface-700 sm:flex-row sm:justify-end">
+                <p-button
+                    type="button"
+                    label="Retour à la connexion"
+                    icon="pi pi-arrow-left"
+                    severity="secondary"
+                    [outlined]="true"
+                    routerLink="/auth/login" />
+
+                <p-button
+                    type="submit"
+                    label="Envoyer ma demande"
+                    icon="pi pi-send"
+                    [loading]="loading()"
+                    [disabled]="loading()" />
+            </div>
+        </form>
+
+        <!-- Pied de page -->
+        <div class="mt-6 flex items-start gap-3 rounded-xl bg-surface-50 p-4 dark:bg-surface-800">
+            <i class="pi pi-info-circle mt-0.5 text-primary"></i>
+            <p class="m-0 text-xs leading-5 text-surface-500 dark:text-surface-400">
+                Votre demande sera transmise à l'administration pour examen.
+                Vous serez informé de la suite donnée à votre demande.
+            </p>
+        </div>
+    </div>
+</div>

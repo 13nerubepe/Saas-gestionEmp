@@ -25,13 +25,19 @@ export const appRoutes: Routes = [
             { path: '', component: Dashboard },
 
             {
-                path: AppConstantRoute.Activated_Desactived_PATH_PATH,
+                path: AppConstantRoute.Dashbord_PATH,
+                loadComponent: () => import('./app/pages/dashboard/dashboard').then((c) => c.Dashboard),
+                data: { breadcrumb: 'Dashboard' },
+            },
+
+            {
+                path: AppConstantRoute.Activated_Desactived_PATH,
                 loadComponent: () => import('./app/pages/activated-desactived/activated-desactived').then((c) => c.ActivatedDesactived),
                 data: { breadcrumb: 'Actived-desactived' },
             },
             {
                 path: AppConstantRoute.Created_PATH,
-                loadComponent: () => import('./app/pages/create-user-entreprise/create-user').then((c) => c.CreateUser),
+                loadComponent: () => import('./app/pages/create-user-entreprise/create-user-entreprise').then((c) => c.CreateUserEntreprise),
                 data: { breadcrumb: 'Create' },
             },
             {
@@ -39,11 +45,16 @@ export const appRoutes: Routes = [
                 loadComponent: () => import('./app/pages/activated-desactived/activated-desactived').then((c) => c.ActivatedDesactived),
                 data: { breadcrumb: 'Actived-desactived' },
             },
-            // {
-            //     path: AppConstantRoute.Actualite_PATH,
-            //     loadComponent: () => import('./app/pages/create-user-entreprise/create-user').then((c) => c.CreateUser),
-            //     data: { breadcrumb: 'Create' },
-            // },
+            {
+                path: AppConstantRoute.Permission_PATH,
+                loadComponent: () => import('@/app/pages/page-permissions/pages-permissions').then((c) => c.PagesPermissions),
+                data: { breadcrumb: 'Gestion desPermision et Roles' },
+            },
+            {
+                path: AppConstantRoute.Gestion_Utilisateur_PATH,
+                loadComponent: () => import('@/app/pages/gestio-utilisateurs/gestio-utilisateurs').then((c) => c.GestioUtilisateurs),
+                data: { breadcrumb: 'Gestion des utilisateurs' },
+            },
 
             // {
             //     path: AppConstantRoute.ComparaisonActif_PATH,
