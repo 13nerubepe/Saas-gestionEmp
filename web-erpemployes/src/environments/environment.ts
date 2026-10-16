@@ -1,4 +1,4 @@
 export const environment = {
-    // Django API (rest-erpemployes). Production URL to set when the backend is deployed.
+    // Local development: Django on port 8000. Production builds use environment.prod.ts.
     apiUrl: 'http://localhost:8000/api/v1'
 };

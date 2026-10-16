@@ -57,11 +57,14 @@ class GeminiProvider:
                     model=model, contents=prompt, config=config
                 )
                 result = schema.model_validate_json(response.text or "")
-            except errors.ServerError as exc:
-                # Overloaded or failing on Google's side: try the next model.
+            except errors.APIError as exc:
+                # Overloaded (5xx) or out of quota (429, counted per model):
+                # try the next model. Other errors would fail the same way.
+                if exc.code != 429 and not isinstance(exc, errors.ServerError):
+                    raise LLMUnavailable(str(exc)) from exc
                 last_error = exc
                 continue
-            except (errors.APIError, httpx.HTTPError, pydantic.ValidationError) as exc:
+            except (httpx.HTTPError, pydantic.ValidationError) as exc:
                 raise LLMUnavailable(str(exc)) from exc
             # Record the model that actually answered.
             self.model_name = model

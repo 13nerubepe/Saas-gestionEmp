@@ -7,3 +7,5 @@ django-cors-headers~=4.9.0
 psycopg[binary]~=3.3.6
 google-genai~=2.30.1
 pgvector~=0.5.1
+gunicorn~=26.2.0
+whitenoise~=6.12.0

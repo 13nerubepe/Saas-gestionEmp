@@ -1,0 +1,5 @@
+# Files executed or read on Linux keep LF line endings, even on Windows checkouts.
+*.sh text eol=lf
+Caddyfile text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf

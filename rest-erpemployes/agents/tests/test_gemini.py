@@ -56,6 +56,14 @@ def test_falls_back_when_main_model_is_overloaded(provider):
     assert provider.model_name == "fallback-model"
 
 
+def test_falls_back_when_main_model_is_out_of_quota(provider):
+    quota = errors.ClientError(429, {"error": {"code": 429, "message": "quota exceeded"}})
+    provider.stub({"main-model": quota, "fallback-model": Response()})
+
+    assert ask(provider).answer == "Six months."
+    assert provider.model_name == "fallback-model"
+
+
 def test_unavailable_when_every_model_is_overloaded(provider):
     provider.stub({"main-model": OVERLOADED, "fallback-model": OVERLOADED})
 
