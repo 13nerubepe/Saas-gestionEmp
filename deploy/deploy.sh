@@ -44,7 +44,9 @@ tar -czf - -C "$ROOT/web-erpemployes/dist/sakai-ng/browser" . |
     "${SSH[@]}" "rm -rf $APP_DIR/deploy/frontend.new && mkdir -p $APP_DIR/deploy/frontend.new && tar -xzf - -C $APP_DIR/deploy/frontend.new && rm -rf $APP_DIR/deploy/frontend.old && (mv $APP_DIR/deploy/frontend $APP_DIR/deploy/frontend.old 2>/dev/null || true) && mv $APP_DIR/deploy/frontend.new $APP_DIR/deploy/frontend"
 
 echo "==> Rebuilding and restarting the containers"
-"${SSH[@]}" "cd $APP_DIR/deploy && docker compose -f docker-compose.prod.yml up -d --build --remove-orphans && docker image prune -f >/dev/null"
+# Caddy keeps the replaced frontend folder open until it restarts: restart it,
+# or it goes on serving the previous Angular build.
+"${SSH[@]}" "cd $APP_DIR/deploy && docker compose -f docker-compose.prod.yml up -d --build --remove-orphans && docker compose -f docker-compose.prod.yml restart caddy && docker image prune -f >/dev/null"
 
 SITE="$("${SSH[@]}" "grep -E '^APP_DOMAIN=' $APP_DIR/deploy/.env | cut -d= -f2-" | tr -d '\r')"
 echo "==> Checking https://$SITE"
