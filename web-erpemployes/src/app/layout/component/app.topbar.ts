@@ -73,7 +73,7 @@ import { AuthService } from '@/app/core/auth/auth.service';
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
-                    <button type="button" class="layout-topbar-action" [title]="auth.user()?.email ?? ''">
+                    <button type="button" class="layout-topbar-action" routerLink="/profil" [title]="auth.user()?.email ?? ''">
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
                     </button>

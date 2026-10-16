@@ -38,3 +38,9 @@ export interface ApiError {
     code?: string;
     [field: string]: unknown;
 }
+
+export interface ProfileUpdate {
+    first_name?: string;
+    last_name?: string;
+    language?: 'fr' | 'en';
+}

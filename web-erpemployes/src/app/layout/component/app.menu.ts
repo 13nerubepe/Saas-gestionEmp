@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
+import { AppConstantRoute } from '@/app/constants';
 
 @Component({
     selector: 'app-menu',
@@ -26,11 +27,11 @@ export class AppMenu {
             {
                 label: 'Home',
                 items: [
-                    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
-                    { label: 'Actif', icon: 'pi pi-fw pi-home', routerLink: ['/actifs'] },
-                    { label: 'Analyse de volatilité', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
-                    { label: 'Comparaison', icon: 'pi pi-fw pi-home', routerLink: ['/comparaison'] },
-                    { label: 'Actualités', icon: 'pi pi-fw pi-home', routerLink: ['/actualités'] },
+                    { label: 'Tableau de bord', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
+                    { label: 'Assistant juridique', icon: 'pi pi-fw pi-briefcase', routerLink: ['/' + AppConstantRoute.Legal_Assistant_PATH] },
+                    { label: 'Mon profil', icon: 'pi pi-fw pi-user', routerLink: ['/' + AppConstantRoute.Profile_PATH] },
+                    // Demo data only, no API yet.
+                    { label: 'Créer utilisateur / entreprise', icon: 'pi pi-fw pi-user-plus', routerLink: ['/' + AppConstantRoute.Created_PATH] },
                 ]
             },
 
