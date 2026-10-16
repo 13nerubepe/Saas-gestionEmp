@@ -1,464 +1,701 @@
 
-<div class="p-4 md:p-6">
-
-    <!-- En-tête de la page -->
-    <div class="mb-6">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-
-            <div>
-                <div class="mb-2 flex items-center gap-2 text-sm text-surface-500">
-                    <i class="pi pi-building"></i>
-                    <span>Administration</span>
-                    <i class="pi pi-angle-right text-xs"></i>
-                    <span class="text-primary font-medium">Entreprises</span>
-                </div>
-
-                <h1 class="m-0 text-2xl font-bold text-surface-900 dark:text-surface-0">
-                    Créer une entreprise
-                </h1>
-
-                <p class="mt-2 mb-0 text-sm text-surface-500">
-                    Renseignez les informations nécessaires à l'enregistrement
-                    de votre entreprise.
-                </p>
-            </div>
-
-            <p-button
-                label="Retour"
-                icon="pi pi-arrow-left"
-                severity="secondary"
-                [outlined]="true">
-            </p-button>
-
-        </div>
-    </div>
-
-    <!-- Formulaire -->
-    <form
-        #entrepriseForm="ngForm"
-        (ngSubmit)="createEntreprise(entrepriseForm)"
-        class="flex flex-col gap-6">
-
-        <!-- SECTION 1 : INFORMATIONS GÉNÉRALES -->
-        <div class="rounded-xl border border-surface-200 bg-surface-0 p-5 shadow-sm dark:border-surface-700 dark:bg-surface-900 md:p-6">
-
-            <div class="mb-6 flex items-start gap-3">
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <i class="pi pi-building text-xl"></i>
-                </div>
-
-                <div>
-                    <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">
-                        Informations générales
-                    </h2>
-                    <p class="mt-1 mb-0 text-sm text-surface-500">
-                        Identité et caractéristiques de l'entreprise.
-                    </p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-
-                <!-- Nom de l'entreprise -->
-                <div class="flex flex-col gap-2">
-                    <label for="nom" class="text-sm font-medium">
-                        Nom de l'entreprise <span class="text-red-500">*</span>
-                    </label>
-
-                    <input
-                        pInputText
-                        id="nom"
-                        name="nom"
-                        [(ngModel)]="entreprise.nom"
-                        #nom="ngModel"
-                        required
-                        maxlength="150"
-                        placeholder="Ex. : Entreprise Camerounaise"
-                        class="w-full" />
-
-                    @if (nom.invalid && (nom.dirty || nom.touched)) {
-                        <small class="text-red-500">
-                            Le nom de l'entreprise est obligatoire.
-                        </small>
-                    }
-                </div>
-
-                <!-- Sigle -->
-                <div class="flex flex-col gap-2">
-                    <label for="sigle" class="text-sm font-medium">
-                        Sigle
-                    </label>
-
-                    <input
-                        pInputText
-                        id="sigle"
-                        name="sigle"
-                        [(ngModel)]="entreprise.sigle"
-                        maxlength="20"
-                        placeholder="Ex. : EC SARL"
-                        class="w-full" />
-                </div>
-
-                <!-- Forme juridique -->
-                <div class="flex flex-col gap-2">
-                    <label for="formeJuridique" class="text-sm font-medium">
-                        Forme juridique <span class="text-red-500">*</span>
-                    </label>
-
-                    <p-select
-                        inputId="formeJuridique"
-                        name="formeJuridique"
-                        [(ngModel)]="entreprise.formeJuridique"
-                        #formeJuridique="ngModel"
-                        [options]="formesJuridiques"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Choisir une forme juridique"
-                        [showClear]="true"
-                        required
-                        appendTo="body"
-                        styleClass="w-full">
-                    </p-select>
-
-                    @if (formeJuridique.invalid && (formeJuridique.dirty || formeJuridique.touched)) {
-                        <small class="text-red-500">
-                            Veuillez sélectionner une forme juridique.
-                        </small>
-                    }
-                </div>
-
-                <!-- Secteur d'activité -->
-                <div class="flex flex-col gap-2">
-                    <label for="secteur" class="text-sm font-medium">
-                        Secteur d'activité <span class="text-red-500">*</span>
-                    </label>
-
-                    <p-select
-                        inputId="secteur"
-                        name="secteur"
-                        [(ngModel)]="entreprise.secteur"
-                        #secteur="ngModel"
-                        [options]="secteurs"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Choisir un secteur"
-                        [showClear]="true"
-                        required
-                        appendTo="body"
-                        styleClass="w-full">
-                    </p-select>
-
-                    @if (secteur.invalid && (secteur.dirty || secteur.touched)) {
-                        <small class="text-red-500">
-                            Veuillez sélectionner un secteur d'activité.
-                        </small>
-                    }
-                </div>
-
-                <!-- Numéro d'identification -->
-                <div class="flex flex-col gap-2">
-                    <label for="numeroIdentification" class="text-sm font-medium">
-                        Numéro d'identification
-                    </label>
-
-                    <input
-                        pInputText
-                        id="numeroIdentification"
-                        name="numeroIdentification"
-                        [(ngModel)]="entreprise.numeroIdentification"
-                        placeholder="Ex. : RCCM, NIU..."
-                        class="w-full" />
-
-                    <small class="text-surface-500">
-                        Renseignez le numéro officiel d'identification.
-                    </small>
-                </div>
-
-                <!-- Date de création -->
-                <div class="flex flex-col gap-2">
-                    <label for="dateCreation" class="text-sm font-medium">
-                        Date de création
-                    </label>
-
-                    <app-datepicker
-                        inputId="dateCreation"
-                        name="dateCreation"
-                        [(ngModel)]="entreprise.dateCreation"
-                        dateFormat="dd/mm/yy"
-                        placeholder="Sélectionner une date"
-                        styleClass="w-full"
-                        appendTo="body">
-                    </app-datepicker>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- SECTION 2 : COORDONNÉES -->
-        <div class="rounded-xl border border-surface-200 bg-surface-0 p-5 shadow-sm dark:border-surface-700 dark:bg-surface-900 md:p-6">
-
-            <div class="mb-6 flex items-start gap-3">
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <i class="pi pi-map-marker text-xl"></i>
-                </div>
-
-                <div>
-                    <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">
-                        Coordonnées de l'entreprise
-                    </h2>
-                    <p class="mt-1 mb-0 text-sm text-surface-500">
-                        Moyens de contact et localisation.
-                    </p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-
-                <!-- E-mail -->
-                <div class="flex flex-col gap-2">
-                    <label for="email" class="text-sm font-medium">
-                        Adresse e-mail <span class="text-red-500">*</span>
-                    </label>
-
-                    <input
-                        pInputText
-                        id="email"
-                        name="email"
-                        type="email"
-                        [(ngModel)]="entreprise.email"
-                        #email="ngModel"
-                        required
-                        email
-                        placeholder="contact@entreprise.com"
-                        class="w-full" />
-
-                    @if (email.invalid && (email.dirty || email.touched)) {
-                        <small class="text-red-500">
-                            @if (email.errors?.['required']) {
-                                L'adresse e-mail est obligatoire.
-                            } @else {
-                                Veuillez saisir une adresse e-mail valide.
-                            }
-                        </small>
-                    }
-                </div>
-
-                <!-- Téléphone -->
-                <div class="flex flex-col gap-2">
-                    <label for="telephone" class="text-sm font-medium">
-                        Téléphone <span class="text-red-500">*</span>
-                    </label>
-
-                    <input
-                        pInputText
-                        id="telephone"
-                        name="telephone"
-                        type="tel"
-                        [(ngModel)]="entreprise.telephone"
-                        #telephone="ngModel"
-                        required
-                        placeholder="Ex. : +237 6XX XXX XXX"
-                        class="w-full" />
-
-                    @if (telephone.invalid && (telephone.dirty || telephone.touched)) {
-                        <small class="text-red-500">
-                            Le numéro de téléphone est obligatoire.
-                        </small>
-                    }
-                </div>
-
-                <!-- Adresse -->
-                <div class="flex flex-col gap-2 md:col-span-2">
-                    <label for="adresse" class="text-sm font-medium">
-                        Adresse physique
-                    </label>
-
-                    <input
-                        pInputText
-                        id="adresse"
-                        name="adresse"
-                        [(ngModel)]="entreprise.adresse"
-                        placeholder="Rue, quartier, numéro..."
-                        class="w-full" />
-                </div>
-
-                <!-- Ville -->
-                <div class="flex flex-col gap-2">
-                    <label for="ville" class="text-sm font-medium">
-                        Ville
-                    </label>
-
-                    <input
-                        pInputText
-                        id="ville"
-                        name="ville"
-                        [(ngModel)]="entreprise.ville"
-                        placeholder="Ex. : Yaoundé"
-                        class="w-full" />
-                </div>
-
-                <!-- Pays -->
-                <div class="flex flex-col gap-2">
-                    <label for="pays" class="text-sm font-medium">
-                        Pays <span class="text-red-500">*</span>
-                    </label>
-
-<!--                    [options]="pays"-->
-                    <p-select
-                        inputId="pays"
-                        name="pays"
-                        [(ngModel)]="entreprise.pays"
-                        #pays="ngModel"
-
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Choisir un pays"
-                        [showClear]="true"
-                        required
-                        appendTo="body"
-                        styleClass="w-full">
-                    </p-select>
-
-                    @if (pays.invalid && (pays.dirty || pays.touched)) {
-                        <small class="text-red-500">
-                            Veuillez sélectionner un pays.
-                        </small>
-                    }
-                </div>
-
-                <!-- Site web -->
-                <div class="flex flex-col gap-2 md:col-span-2">
-                    <label for="siteWeb" class="text-sm font-medium">
-                        Site web
-                    </label>
-
-                    <input
-                        pInputText
-                        id="siteWeb"
-                        name="siteWeb"
-                        type="url"
-                        [(ngModel)]="entreprise.siteWeb"
-                        #siteWeb="ngModel"
-                        placeholder="https://www.entreprise.com"
-                        class="w-full" />
-
-                    @if (siteWeb.invalid && (siteWeb.dirty || siteWeb.touched)) {
-                        <small class="text-red-500">
-                            Veuillez saisir une URL valide.
-                        </small>
-                    }
-                </div>
-
-            </div>
-        </div>
-
-        <!-- SECTION 3 : RESPONSABLE -->
-        <div class="rounded-xl border border-surface-200 bg-surface-0 p-5 shadow-sm dark:border-surface-700 dark:bg-surface-900 md:p-6">
-
-            <div class="mb-6 flex items-start gap-3">
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <i class="pi pi-user text-xl"></i>
-                </div>
-
-                <div>
-                    <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">
-                        Responsable de l'entreprise
-                    </h2>
-                    <p class="mt-1 mb-0 text-sm text-surface-500">
-                        Informations de la personne de référence.
-                    </p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-
-                <!-- Nom du responsable -->
-                <div class="flex flex-col gap-2">
-                    <label for="nomResponsable" class="text-sm font-medium">
-                        Nom complet du responsable
-                    </label>
-
-                    <input
-                        pInputText
-                        id="nomResponsable"
-                        name="nomResponsable"
-                        [(ngModel)]="entreprise.nomResponsable"
-                        placeholder="Nom et prénom(s)"
-                        class="w-full" />
-                </div>
-
-                <!-- E-mail du responsable -->
-                <div class="flex flex-col gap-2">
-                    <label for="emailResponsable" class="text-sm font-medium">
-                        E-mail du responsable
-                    </label>
-
-                    <input
-                        pInputText
-                        id="emailResponsable"
-                        name="emailResponsable"
-                        type="email"
-                        [(ngModel)]="entreprise.emailResponsable"
-                        #emailResponsable="ngModel"
-                        email
-                        placeholder="responsable@entreprise.com"
-                        class="w-full" />
-
-                    @if (emailResponsable.invalid && (emailResponsable.dirty || emailResponsable.touched)) {
-                        <small class="text-red-500">
-                            Veuillez saisir une adresse e-mail valide.
-                        </small>
-                    }
-                </div>
-
-                <!-- Téléphone du responsable -->
-                <div class="flex flex-col gap-2">
-                    <label for="telephoneResponsable" class="text-sm font-medium">
-                        Téléphone du responsable
-                    </label>
-
-                    <input
-                        pInputText
-                        id="telephoneResponsable"
-                        name="telephoneResponsable"
-                        type="tel"
-                        [(ngModel)]="entreprise.telephoneResponsable"
-                        placeholder="Ex. : +237 6XX XXX XXX"
-                        class="w-full" />
-                </div>
-
-            </div>
-        </div>
-
-        <!-- ACTIONS -->
-        <div class="flex flex-col-reverse gap-3 rounded-xl border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900 sm:flex-row sm:items-center sm:justify-between">
-
-            <p class="m-0 text-sm text-surface-500">
-                <i class="pi pi-info-circle mr-1"></i>
-                Les champs marqués d'un astérisque sont obligatoires.
-            </p>
-
-            <div class="flex flex-col gap-3 sm:flex-row">
-                <p-button
-                    type="button"
-                    label="Réinitialiser"
-                    icon="pi pi-refresh"
-                    severity="secondary"
-                    [outlined]="true"
-                    (onClick)="resetForm(entrepriseForm)">
-                </p-button>
-
-                <p-button
-                    type="submit"
-                    label="Créer l'entreprise"
-                    icon="pi pi-check"
-                    [loading]="isSubmitting"
-                    [disabled]="entrepriseForm.invalid || isSubmitting">
-                </p-button>
-            </div>
-
-        </div>
-
-    </form>
-</div>
+<!--&lt;!&ndash;<div class="p-4 md:p-6">&ndash;&gt;-->
+
+<!--&lt;!&ndash;    &lt;!&ndash; En-tête de la page &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="mb-6">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="mb-2 flex items-center gap-2 text-sm text-surface-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <i class="pi pi-building"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <span>Administration</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <i class="pi pi-angle-right text-xs"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <span class="text-primary font-medium">Entreprises</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <h1 class="m-0 text-2xl font-bold text-surface-900 dark:text-surface-0">&ndash;&gt;-->
+<!--&lt;!&ndash;                    Créer une entreprise&ndash;&gt;-->
+<!--&lt;!&ndash;                </h1>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <p class="mt-2 mb-0 text-sm text-surface-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                    Renseignez les informations nécessaires à l'enregistrement&ndash;&gt;-->
+<!--&lt;!&ndash;                    de votre entreprise.&ndash;&gt;-->
+<!--&lt;!&ndash;                </p>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <p-button&ndash;&gt;-->
+<!--&lt;!&ndash;                label="Retour"&ndash;&gt;-->
+<!--&lt;!&ndash;                icon="pi pi-arrow-left"&ndash;&gt;-->
+<!--&lt;!&ndash;                severity="secondary"&ndash;&gt;-->
+<!--&lt;!&ndash;                [outlined]="true">&ndash;&gt;-->
+<!--&lt;!&ndash;            </p-button>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    &lt;!&ndash; Formulaire &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <form&ndash;&gt;-->
+<!--&lt;!&ndash;        #entrepriseForm="ngForm"&ndash;&gt;-->
+<!--&lt;!&ndash;        (ngSubmit)="createEntreprise(entrepriseForm)"&ndash;&gt;-->
+<!--&lt;!&ndash;        class="flex flex-col gap-6">&ndash;&gt;-->
+
+<!--&lt;!&ndash;        &lt;!&ndash; SECTION 1 : INFORMATIONS GÉNÉRALES &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="rounded-xl border border-surface-200 bg-surface-0 p-5 shadow-sm dark:border-surface-700 dark:bg-surface-900 md:p-6">&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <div class="mb-6 flex items-start gap-3">&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <i class="pi pi-building text-xl"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <div>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Informations générales&ndash;&gt;-->
+<!--&lt;!&ndash;                    </h2>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p class="mt-1 mb-0 text-sm text-surface-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Identité et caractéristiques de l'entreprise.&ndash;&gt;-->
+<!--&lt;!&ndash;                    </p>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Nom de l'entreprise &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="nom" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Nom de l'entreprise <span class="text-red-500">*</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="nom"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="nom"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.nom"&ndash;&gt;-->
+<!--&lt;!&ndash;                        #nom="ngModel"&ndash;&gt;-->
+<!--&lt;!&ndash;                        required&ndash;&gt;-->
+<!--&lt;!&ndash;                        maxlength="150"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Ex. : Entreprise Camerounaise"&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    @if (nom.invalid && (nom.dirty || nom.touched)) {&ndash;&gt;-->
+<!--&lt;!&ndash;                        <small class="text-red-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                            Le nom de l'entreprise est obligatoire.&ndash;&gt;-->
+<!--&lt;!&ndash;                        </small>&ndash;&gt;-->
+<!--&lt;!&ndash;                    }&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Sigle &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="sigle" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Sigle&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="sigle"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="sigle"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.sigle"&ndash;&gt;-->
+<!--&lt;!&ndash;                        maxlength="20"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Ex. : EC SARL"&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Forme juridique &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="formeJuridique" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Forme juridique <span class="text-red-500">*</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <p-select&ndash;&gt;-->
+<!--&lt;!&ndash;                        inputId="formeJuridique"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="formeJuridique"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.formeJuridique"&ndash;&gt;-->
+<!--&lt;!&ndash;                        #formeJuridique="ngModel"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [options]="formesJuridiques"&ndash;&gt;-->
+<!--&lt;!&ndash;                        optionLabel="label"&ndash;&gt;-->
+<!--&lt;!&ndash;                        optionValue="value"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Choisir une forme juridique"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [showClear]="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                        required&ndash;&gt;-->
+<!--&lt;!&ndash;                        appendTo="body"&ndash;&gt;-->
+<!--&lt;!&ndash;                        styleClass="w-full">&ndash;&gt;-->
+<!--&lt;!&ndash;                    </p-select>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    @if (formeJuridique.invalid && (formeJuridique.dirty || formeJuridique.touched)) {&ndash;&gt;-->
+<!--&lt;!&ndash;                        <small class="text-red-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                            Veuillez sélectionner une forme juridique.&ndash;&gt;-->
+<!--&lt;!&ndash;                        </small>&ndash;&gt;-->
+<!--&lt;!&ndash;                    }&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Secteur d'activité &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="secteur" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Secteur d'activité <span class="text-red-500">*</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <p-select&ndash;&gt;-->
+<!--&lt;!&ndash;                        inputId="secteur"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="secteur"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.secteur"&ndash;&gt;-->
+<!--&lt;!&ndash;                        #secteur="ngModel"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [options]="secteurs"&ndash;&gt;-->
+<!--&lt;!&ndash;                        optionLabel="label"&ndash;&gt;-->
+<!--&lt;!&ndash;                        optionValue="value"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Choisir un secteur"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [showClear]="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                        required&ndash;&gt;-->
+<!--&lt;!&ndash;                        appendTo="body"&ndash;&gt;-->
+<!--&lt;!&ndash;                        styleClass="w-full">&ndash;&gt;-->
+<!--&lt;!&ndash;                    </p-select>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    @if (secteur.invalid && (secteur.dirty || secteur.touched)) {&ndash;&gt;-->
+<!--&lt;!&ndash;                        <small class="text-red-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                            Veuillez sélectionner un secteur d'activité.&ndash;&gt;-->
+<!--&lt;!&ndash;                        </small>&ndash;&gt;-->
+<!--&lt;!&ndash;                    }&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Numéro d'identification &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="numeroIdentification" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Numéro d'identification&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="numeroIdentification"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="numeroIdentification"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.numeroIdentification"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Ex. : RCCM, NIU..."&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <small class="text-surface-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Renseignez le numéro officiel d'identification.&ndash;&gt;-->
+<!--&lt;!&ndash;                    </small>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Date de création &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="dateCreation" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Date de création&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <app-datepicker&ndash;&gt;-->
+<!--&lt;!&ndash;                        inputId="dateCreation"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="dateCreation"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.dateCreation"&ndash;&gt;-->
+<!--&lt;!&ndash;                        dateFormat="dd/mm/yy"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Sélectionner une date"&ndash;&gt;-->
+<!--&lt;!&ndash;                        styleClass="w-full"&ndash;&gt;-->
+<!--&lt;!&ndash;                        appendTo="body">&ndash;&gt;-->
+<!--&lt;!&ndash;                    </app-datepicker>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        &lt;!&ndash; SECTION 2 : COORDONNÉES &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="rounded-xl border border-surface-200 bg-surface-0 p-5 shadow-sm dark:border-surface-700 dark:bg-surface-900 md:p-6">&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <div class="mb-6 flex items-start gap-3">&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <i class="pi pi-map-marker text-xl"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <div>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Coordonnées de l'entreprise&ndash;&gt;-->
+<!--&lt;!&ndash;                    </h2>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p class="mt-1 mb-0 text-sm text-surface-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Moyens de contact et localisation.&ndash;&gt;-->
+<!--&lt;!&ndash;                    </p>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; E-mail &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="email" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Adresse e-mail <span class="text-red-500">*</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="email"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="email"&ndash;&gt;-->
+<!--&lt;!&ndash;                        type="email"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.email"&ndash;&gt;-->
+<!--&lt;!&ndash;                        #email="ngModel"&ndash;&gt;-->
+<!--&lt;!&ndash;                        required&ndash;&gt;-->
+<!--&lt;!&ndash;                        email&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="contact@entreprise.com"&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    @if (email.invalid && (email.dirty || email.touched)) {&ndash;&gt;-->
+<!--&lt;!&ndash;                        <small class="text-red-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                            @if (email.errors?.['required']) {&ndash;&gt;-->
+<!--&lt;!&ndash;                                L'adresse e-mail est obligatoire.&ndash;&gt;-->
+<!--&lt;!&ndash;                            } @else {&ndash;&gt;-->
+<!--&lt;!&ndash;                                Veuillez saisir une adresse e-mail valide.&ndash;&gt;-->
+<!--&lt;!&ndash;                            }&ndash;&gt;-->
+<!--&lt;!&ndash;                        </small>&ndash;&gt;-->
+<!--&lt;!&ndash;                    }&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Téléphone &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="telephone" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Téléphone <span class="text-red-500">*</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="telephone"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="telephone"&ndash;&gt;-->
+<!--&lt;!&ndash;                        type="tel"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.telephone"&ndash;&gt;-->
+<!--&lt;!&ndash;                        #telephone="ngModel"&ndash;&gt;-->
+<!--&lt;!&ndash;                        required&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Ex. : +237 6XX XXX XXX"&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    @if (telephone.invalid && (telephone.dirty || telephone.touched)) {&ndash;&gt;-->
+<!--&lt;!&ndash;                        <small class="text-red-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                            Le numéro de téléphone est obligatoire.&ndash;&gt;-->
+<!--&lt;!&ndash;                        </small>&ndash;&gt;-->
+<!--&lt;!&ndash;                    }&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Adresse &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2 md:col-span-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="adresse" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Adresse physique&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="adresse"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="adresse"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.adresse"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Rue, quartier, numéro..."&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Ville &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="ville" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Ville&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="ville"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="ville"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.ville"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Ex. : Yaoundé"&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Pays &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="pays" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Pays <span class="text-red-500">*</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;                    [options]="pays"&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p-select&ndash;&gt;-->
+<!--&lt;!&ndash;                        inputId="pays"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="pays"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.pays"&ndash;&gt;-->
+<!--&lt;!&ndash;                        #pays="ngModel"&ndash;&gt;-->
+
+<!--&lt;!&ndash;                        optionLabel="label"&ndash;&gt;-->
+<!--&lt;!&ndash;                        optionValue="value"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Choisir un pays"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [showClear]="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                        required&ndash;&gt;-->
+<!--&lt;!&ndash;                        appendTo="body"&ndash;&gt;-->
+<!--&lt;!&ndash;                        styleClass="w-full">&ndash;&gt;-->
+<!--&lt;!&ndash;                    </p-select>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    @if (pays.invalid && (pays.dirty || pays.touched)) {&ndash;&gt;-->
+<!--&lt;!&ndash;                        <small class="text-red-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                            Veuillez sélectionner un pays.&ndash;&gt;-->
+<!--&lt;!&ndash;                        </small>&ndash;&gt;-->
+<!--&lt;!&ndash;                    }&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Site web &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2 md:col-span-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="siteWeb" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Site web&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="siteWeb"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="siteWeb"&ndash;&gt;-->
+<!--&lt;!&ndash;                        type="url"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.siteWeb"&ndash;&gt;-->
+<!--&lt;!&ndash;                        #siteWeb="ngModel"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="https://www.entreprise.com"&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    @if (siteWeb.invalid && (siteWeb.dirty || siteWeb.touched)) {&ndash;&gt;-->
+<!--&lt;!&ndash;                        <small class="text-red-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                            Veuillez saisir une URL valide.&ndash;&gt;-->
+<!--&lt;!&ndash;                        </small>&ndash;&gt;-->
+<!--&lt;!&ndash;                    }&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        &lt;!&ndash; SECTION 3 : RESPONSABLE &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="rounded-xl border border-surface-200 bg-surface-0 p-5 shadow-sm dark:border-surface-700 dark:bg-surface-900 md:p-6">&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <div class="mb-6 flex items-start gap-3">&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <i class="pi pi-user text-xl"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <div>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Responsable de l'entreprise&ndash;&gt;-->
+<!--&lt;!&ndash;                    </h2>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p class="mt-1 mb-0 text-sm text-surface-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Informations de la personne de référence.&ndash;&gt;-->
+<!--&lt;!&ndash;                    </p>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Nom du responsable &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="nomResponsable" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Nom complet du responsable&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="nomResponsable"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="nomResponsable"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.nomResponsable"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Nom et prénom(s)"&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; E-mail du responsable &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="emailResponsable" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        E-mail du responsable&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="emailResponsable"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="emailResponsable"&ndash;&gt;-->
+<!--&lt;!&ndash;                        type="email"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.emailResponsable"&ndash;&gt;-->
+<!--&lt;!&ndash;                        #emailResponsable="ngModel"&ndash;&gt;-->
+<!--&lt;!&ndash;                        email&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="responsable@entreprise.com"&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    @if (emailResponsable.invalid && (emailResponsable.dirty || emailResponsable.touched)) {&ndash;&gt;-->
+<!--&lt;!&ndash;                        <small class="text-red-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                            Veuillez saisir une adresse e-mail valide.&ndash;&gt;-->
+<!--&lt;!&ndash;                        </small>&ndash;&gt;-->
+<!--&lt;!&ndash;                    }&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                &lt;!&ndash; Téléphone du responsable &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="flex flex-col gap-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <label for="telephoneResponsable" class="text-sm font-medium">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Téléphone du responsable&ndash;&gt;-->
+<!--&lt;!&ndash;                    </label>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <input&ndash;&gt;-->
+<!--&lt;!&ndash;                        pInputText&ndash;&gt;-->
+<!--&lt;!&ndash;                        id="telephoneResponsable"&ndash;&gt;-->
+<!--&lt;!&ndash;                        name="telephoneResponsable"&ndash;&gt;-->
+<!--&lt;!&ndash;                        type="tel"&ndash;&gt;-->
+<!--&lt;!&ndash;                        [(ngModel)]="entreprise.telephoneResponsable"&ndash;&gt;-->
+<!--&lt;!&ndash;                        placeholder="Ex. : +237 6XX XXX XXX"&ndash;&gt;-->
+<!--&lt;!&ndash;                        class="w-full" />&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        &lt;!&ndash; ACTIONS &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="flex flex-col-reverse gap-3 rounded-xl border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900 sm:flex-row sm:items-center sm:justify-between">&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <p class="m-0 text-sm text-surface-500">&ndash;&gt;-->
+<!--&lt;!&ndash;                <i class="pi pi-info-circle mr-1"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;                Les champs marqués d'un astérisque sont obligatoires.&ndash;&gt;-->
+<!--&lt;!&ndash;            </p>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <div class="flex flex-col gap-3 sm:flex-row">&ndash;&gt;-->
+<!--&lt;!&ndash;                <p-button&ndash;&gt;-->
+<!--&lt;!&ndash;                    type="button"&ndash;&gt;-->
+<!--&lt;!&ndash;                    label="Réinitialiser"&ndash;&gt;-->
+<!--&lt;!&ndash;                    icon="pi pi-refresh"&ndash;&gt;-->
+<!--&lt;!&ndash;                    severity="secondary"&ndash;&gt;-->
+<!--&lt;!&ndash;                    [outlined]="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                    (onClick)="resetForm(entrepriseForm)">&ndash;&gt;-->
+<!--&lt;!&ndash;                </p-button>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <p-button&ndash;&gt;-->
+<!--&lt;!&ndash;                    type="submit"&ndash;&gt;-->
+<!--&lt;!&ndash;                    label="Créer l'entreprise"&ndash;&gt;-->
+<!--&lt;!&ndash;                    icon="pi pi-check"&ndash;&gt;-->
+<!--&lt;!&ndash;                    [loading]="isSubmitting"&ndash;&gt;-->
+<!--&lt;!&ndash;                    [disabled]="entrepriseForm.invalid || isSubmitting">&ndash;&gt;-->
+<!--&lt;!&ndash;                </p-button>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    </form>&ndash;&gt;-->
+<!--&lt;!&ndash;</div>&ndash;&gt;-->
+
+
+
+<!--<div class="card min-h-[calc(100vh-12rem)] rounded-xl p-4 md:p-6">-->
+
+<!--    &lt;!&ndash; Fil d'Ariane &ndash;&gt;-->
+<!--    <p-breadcrumb-->
+<!--        [model]="breadcrumb"-->
+<!--        [home]="home"-->
+<!--        class=" mb-5">-->
+<!--    </p-breadcrumb>-->
+
+<!--    &lt;!&ndash; En-tête &ndash;&gt;-->
+<!--    <div class="mb-1 border-b border-surface-200 pb-5">-->
+<!--        <h1 class="text-2xl font-semibold text-surface-900">-->
+<!--            Créer une entreprise-->
+<!--        </h1>-->
+<!--    </div>-->
+
+<!--    <form [formGroup]="form" (ngSubmit)="submit()">-->
+
+<!--        &lt;!&ndash; Informations générales &ndash;&gt;-->
+<!--        <div class="mb-5">-->
+<!--            <h2 class="text-lg font-semibold text-surface-900">-->
+<!--                Informations générales-->
+<!--            </h2>-->
+<!--            <p class="mt-1 text-sm text-surface-500">-->
+<!--                Les champs marqués d'un astérisque (*) sont obligatoires.-->
+<!--            </p>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Champs du formulaire &ndash;&gt;-->
+<!--        <div class="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">-->
+
+<!--            &lt;!&ndash; Nom de l'entreprise &ndash;&gt;-->
+<!--            <div class="flex flex-col gap-2">-->
+<!--                <label for="name" class="font-medium text-sm">-->
+<!--                    Nom de l'entreprise <span class="text-red-500">*</span>-->
+<!--                </label>-->
+
+<!--                <input-->
+<!--                    pInputText-->
+<!--                    id="name"-->
+<!--                    formControlName="name"-->
+<!--                    placeholder="Ex. : Sakai Group"-->
+<!--                    fluid />-->
+
+<!--                @if (invalid('name')) {-->
+<!--                    <p-message severity="error" size="small" variant="simple">-->
+<!--                        Le nom de l'entreprise est obligatoire.-->
+<!--                    </p-message>-->
+<!--                }-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Secteur d'activité &ndash;&gt;-->
+<!--            <div class="flex flex-col gap-2">-->
+<!--                <label for="sector" class="font-medium text-sm">-->
+<!--                    Secteur d'activité <span class="text-red-500">*</span>-->
+<!--                </label>-->
+
+<!--                <p-select-->
+<!--                    inputId="sector"-->
+<!--                    formControlName="sector"-->
+<!--                    [options]="sectors"-->
+<!--                    placeholder="Sélectionner un secteur"-->
+<!--                    fluid />-->
+
+<!--                @if (invalid('sector')) {-->
+<!--                    <p-message severity="error" size="small" variant="simple">-->
+<!--                        Le secteur d'activité est obligatoire.-->
+<!--                    </p-message>-->
+<!--                }-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Adresse &ndash;&gt;-->
+<!--            <div class="flex flex-col gap-2">-->
+<!--                <label for="address" class="font-medium text-sm">-->
+<!--                    Adresse <span class="text-red-500">*</span>-->
+<!--                </label>-->
+
+<!--                <input-->
+<!--                    pInputText-->
+<!--                    id="address"-->
+<!--                    formControlName="address"-->
+<!--                    placeholder="Ex. : 123 Avenue de l'Innovation"-->
+<!--                    fluid />-->
+
+<!--                @if (invalid('address')) {-->
+<!--                    <p-message severity="error" size="small" variant="simple">-->
+<!--                        L'adresse est obligatoire.-->
+<!--                    </p-message>-->
+<!--                }-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Ville &ndash;&gt;-->
+<!--            <div class="flex flex-col gap-2">-->
+<!--                <label for="city" class="font-medium text-sm">-->
+<!--                    Ville <span class="text-red-500">*</span>-->
+<!--                </label>-->
+
+<!--                <input-->
+<!--                    pInputText-->
+<!--                    id="city"-->
+<!--                    formControlName="city"-->
+<!--                    placeholder="Ex. : Yaoundé"-->
+<!--                    fluid />-->
+
+<!--                @if (invalid('city')) {-->
+<!--                    <p-message severity="error" size="small" variant="simple">-->
+<!--                        La ville est obligatoire.-->
+<!--                    </p-message>-->
+<!--                }-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Pays &ndash;&gt;-->
+<!--            <div class="flex flex-col gap-2">-->
+<!--                <label for="country" class="font-medium text-sm">-->
+<!--                    Pays <span class="text-red-500">*</span>-->
+<!--                </label>-->
+
+<!--                <p-select-->
+<!--                    inputId="country"-->
+<!--                    formControlName="country"-->
+<!--                    [options]="countries"-->
+<!--                    placeholder="Sélectionner un pays"-->
+<!--                    [filter]="true"-->
+<!--                    filterPlaceholder="Rechercher un pays"-->
+<!--                    fluid />-->
+
+<!--                @if (invalid('country')) {-->
+<!--                    <p-message severity="error" size="small" variant="simple">-->
+<!--                        Le pays est obligatoire.-->
+<!--                    </p-message>-->
+<!--                }-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Téléphone &ndash;&gt;-->
+<!--            <div class="flex flex-col gap-2">-->
+<!--                <label for="phone" class="font-medium text-sm">-->
+<!--                    Téléphone <span class="text-red-500">*</span>-->
+<!--                </label>-->
+
+<!--                <input-->
+<!--                    pInputText-->
+<!--                    id="phone"-->
+<!--                    type="tel"-->
+<!--                    formControlName="phone"-->
+<!--                    placeholder="Ex. : +237 6 12 34 56 78"-->
+<!--                    fluid />-->
+
+<!--                @if (invalid('phone')) {-->
+<!--                    <p-message severity="error" size="small" variant="simple">-->
+<!--                        Veuillez saisir un numéro de téléphone valide.-->
+<!--                    </p-message>-->
+<!--                }-->
+<!--            </div>-->
+
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Logo de l'entreprise &ndash;&gt;-->
+<!--        <div class="mt-7 border-t border-surface-200 pt-6">-->
+<!--            <div class="mb-4">-->
+<!--                <h2 class="text-lg font-semibold text-surface-900">-->
+<!--                    Logo de l'entreprise-->
+<!--                    <span class="text-sm font-normal text-surface-500">-->
+<!--                        (optionnel)-->
+<!--                    </span>-->
+<!--                </h2>-->
+
+<!--                <p class="mt-1 text-sm text-surface-500">-->
+<!--                    Ajoutez le logo qui représentera votre entreprise.-->
+<!--                </p>-->
+<!--            </div>-->
+
+<!--            <div class="w-full">-->
+<!--                <p-fileupload-->
+<!--                    mode="advanced"-->
+<!--                    name="logo"-->
+<!--                    accept="image/png,image/jpeg"-->
+<!--                    [maxFileSize]="2000000"-->
+<!--                    [customUpload]="true"-->
+<!--                    [multiple]="false"-->
+<!--                    [showUploadButton]="false"-->
+<!--                    [showCancelButton]="false"-->
+<!--                    chooseLabel="Choisir un logo"-->
+<!--                    chooseIcon="pi pi-upload"-->
+<!--                    invalidFileSizeMessageSummary="Fichier trop volumineux :"-->
+<!--                    invalidFileSizeMessageDetail="la taille maximale est de 2 Mo."-->
+<!--                    invalidFileTypeMessageSummary="Format non supporté :"-->
+<!--                    invalidFileTypeMessageDetail="PNG ou JPG uniquement."-->
+<!--                    (onSelect)="onLogoSelect($event)"-->
+<!--                    (onRemove)="logo.set(null)">-->
+
+<!--                    <ng-template #empty>-->
+<!--                        <div class="flex flex-col items-center justify-center gap-3 px-4 py-8 text-center">-->
+<!--                            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-primary-50">-->
+<!--                                <i class="pi pi-image text-2xl text-primary-600"></i>-->
+<!--                            </div>-->
+
+<!--                            <div>-->
+<!--                                <p class="font-medium text-surface-700">-->
+<!--                                    Glissez votre logo ici-->
+<!--                                </p>-->
+<!--                                <p class="mt-1 text-sm text-surface-500">-->
+<!--                                    Formats acceptés : PNG, JPG ou JPEG-->
+<!--                                </p>-->
+<!--                                <p class="mt-1 text-xs text-surface-400">-->
+<!--                                    Taille maximale : 2 Mo-->
+<!--                                </p>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </ng-template>-->
+
+<!--                </p-fileupload>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Actions &ndash;&gt;-->
+<!--        <div class="mt-8 flex flex-col-reverse gap-3 border-t border-surface-200 pt-5 sm:flex-row sm:justify-end">-->
+
+<!--            <p-button-->
+<!--                type="button"-->
+<!--                label="Annuler"-->
+<!--                icon="pi pi-times"-->
+<!--                severity="secondary"-->
+<!--                [outlined]="true"-->
+<!--                (onClick)="cancel()" />-->
+
+<!--            <p-button-->
+<!--                type="submit"-->
+<!--                label="Créer l'entreprise"-->
+<!--                icon="pi pi-check"-->
+<!--                [loading]="saving()" />-->
+
+<!--        </div>-->
+<!--    </form>-->
+<!--</div>-->
 

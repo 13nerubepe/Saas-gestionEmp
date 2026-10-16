@@ -1,0 +1,152 @@
+
+<!--<div class="card h-full">-->
+<!--    &lt;!&ndash; En-tête &ndash;&gt;-->
+<!--    <div class="mb-6 flex items-center justify-between gap-3">-->
+<!--        <div>-->
+<!--            <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">-->
+<!--                Activités récentes-->
+<!--            </h2>-->
+<!--            <p class="mt-1 mb-0 text-sm text-muted-color">-->
+<!--                Suivez les dernières actions sur la plateforme.-->
+<!--            </p>-->
+<!--        </div>-->
+
+<!--        <span-->
+<!--            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"-->
+<!--        >-->
+<!--            <i class="pi pi-history text-xl"></i>-->
+<!--        </span>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Timeline &ndash;&gt;-->
+<!--    <div class="flex flex-col">-->
+<!--        @for (activity of activities; track $index; let last = $last) {-->
+<!--            <div class="flex gap-4">-->
+<!--                &lt;!&ndash; Icône et ligne verticale &ndash;&gt;-->
+<!--                <div class="flex flex-col items-center">-->
+<!--                    <div-->
+<!--                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"-->
+<!--                        [ngClass]="activity.bg"-->
+<!--                    >-->
+<!--                        <i-->
+<!--                            class="pi"-->
+<!--                            [ngClass]="[activity.icon, activity.color]"-->
+<!--                        ></i>-->
+<!--                    </div>-->
+
+<!--                    @if (!last) {-->
+<!--                        <div class="my-2 min-h-6 w-px flex-1 bg-surface-200 dark:bg-surface-700"></div>-->
+<!--                    }-->
+<!--                </div>-->
+
+<!--                &lt;!&ndash; Contenu &ndash;&gt;-->
+<!--                <div class="min-w-0 flex-1 pb-6">-->
+<!--                    <div class="flex flex-wrap items-start justify-between gap-2">-->
+<!--                        <h3 class="m-0 text-sm font-semibold text-surface-900 dark:text-surface-0">-->
+<!--                            {{ activity.title }}-->
+<!--                        </h3>-->
+
+<!--                        <span class="shrink-0 text-xs text-muted-color">-->
+<!--                            {{ activity.date }}-->
+<!--                        </span>-->
+<!--                    </div>-->
+
+<!--                    <p class="mb-0 mt-2 text-sm leading-6 text-muted-color">-->
+<!--                        {{ activity.description }}-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        } @empty {-->
+<!--            <div class="py-8 text-center">-->
+<!--                <i class="pi pi-inbox mb-3 text-3xl text-muted-color"></i>-->
+<!--                <p class="m-0 text-sm text-muted-color">-->
+<!--                    Aucune activité récente.-->
+<!--                </p>-->
+<!--            </div>-->
+<!--        }-->
+<!--    </div>-->
+<!--</div>-->
+
+<div class="card h-full">
+    <!-- En-tête -->
+    <div class="mb-4 flex items-center justify-between gap-3">
+        <div>
+            <h2 class="m-0 text-lg font-semibold text-surface-900 dark:text-surface-0">
+                Activités récentes
+            </h2>
+        </div>
+
+        <button
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-lg border border-surface-200 text-muted-color transition-colors hover:bg-surface-100 dark:border-surface-700 dark:hover:bg-surface-800"
+            aria-label="Historique des activités"
+        >
+            <i class="pi pi-history text-base"></i>
+        </button>
+    </div>
+
+    <!-- Liste des activités -->
+    <div class="flex flex-col">
+        @for (activity of activities; track $index; let last = $last) {
+            <div
+                class="flex items-start gap-3 py-4 first:pt-0 last:pb-0"
+                [ngClass]="{ 'border-b border-surface-200 dark:border-surface-700': !last }"
+            >
+                <!-- Icône discrète -->
+                <div
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                    [ngClass]="activity.bg"
+                >
+                    <i
+                        class="pi text-sm"
+                        [ngClass]="[activity.icon, activity.color]"
+                    ></i>
+                </div>
+
+                <!-- Informations -->
+                <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                        <h3 class="m-0 text-sm font-medium text-surface-900 dark:text-surface-0">
+                            {{ activity.title }}
+                        </h3>
+
+                        <span class="shrink-0 text-xs text-muted-color">
+                            {{ activity.date }}
+                        </span>
+                    </div>
+
+                    <p class="mb-0 mt-1 text-sm leading-5 text-muted-color">
+                        {{ activity.description }}
+                    </p>
+                </div>
+            </div>
+        } @empty {
+            <div class="flex flex-col items-center justify-center py-10 text-center">
+                <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-100 dark:bg-surface-800">
+                    <i class="pi pi-inbox text-xl text-muted-color"></i>
+                </div>
+
+                <p class="m-0 text-sm font-medium text-surface-700 dark:text-surface-200">
+                    Aucune activité récente
+                </p>
+
+                <p class="mb-0 mt-1 text-xs text-muted-color">
+                    Les nouvelles actions apparaîtront ici.
+                </p>
+            </div>
+        }
+    </div>
+
+    <!-- Pied de carte -->
+    <div class="mt-5 border-t border-surface-200 pt-4 dark:border-surface-700">
+        <button
+            type="button"
+            class="flex w-full items-center justify-center gap-2 text-sm font-medium text-primary transition-opacity hover:opacity-80"
+        >
+            Voir toutes les activités
+            <i class="pi pi-arrow-right text-xs"></i>
+        </button>
+    </div>
+</div>
+
+

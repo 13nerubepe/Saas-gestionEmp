@@ -1,0 +1,63 @@
+<!--<div class="grid grid-cols-12 gap-8 mb-8">-->
+<!--    @for (kpi of kpis(); track kpi.label) {-->
+<!--        <div class="col-span-12 lg:col-span-6 xl:col-span-3">-->
+<!--            <div class="card mb-0">-->
+<!--                <div class="flex justify-between mb-4">-->
+<!--                    <div>-->
+<!--                        <span class="block text-muted-color font-medium mb-4">{{ kpi.label }}</span>-->
+<!--                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ kpi.value }}</div>-->
+<!--                    </div>-->
+<!--                    <div-->
+<!--                        class="flex items-center justify-center rounded-border"-->
+<!--                        [ngClass]="kpi.bg"-->
+<!--                        style="width: 2.5rem; height: 2.5rem"-->
+<!--                    >-->
+<!--                        <i class="pi text-xl!" [ngClass]="[kpi.icon, kpi.color]"></i>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <span class="text-primary font-medium">{{ kpi.sub }}</span>-->
+<!--                <span class="text-muted-color"> {{ kpi.subLabel }}</span>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    }-->
+<!--</div>-->
+
+<div class="grid grid-cols-12 gap-8 mb-8">
+    @for (kpi of kpis(); track kpi.label) {
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <div class="card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div class="min-w-0">
+                        <span class="block text-muted-color font-medium mb-4">
+                            {{ kpi.label }}
+                        </span>
+
+                        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">
+                            {{ kpi.value }}
+                        </div>
+                    </div>
+
+                    <div
+                        class="flex items-center justify-center rounded-border shrink-0"
+                        [ngClass]="kpi.bg"
+                        style="width: 2.5rem; height: 2.5rem"
+                    >
+                        <i
+                            class="pi text-xl!"
+                            [ngClass]="[kpi.icon, kpi.color]"
+                        ></i>
+                    </div>
+                </div>
+
+                <span class="text-primary font-medium">
+                    {{ kpi.sub }}
+                </span>
+
+                <span class="text-muted-color">
+                    {{ kpi.subLabel }}
+                </span>
+            </div>
+        </div>
+    }
+</div>
+

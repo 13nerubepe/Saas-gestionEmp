@@ -1,16 +1,19 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '@/app/layout/service/layout.service';
 import { AuthService } from '@/app/core/auth/auth.service';
+import { Avatar } from 'primeng/avatar';
+import { Menu } from 'primeng/menu';
+import { OverlayBadgeModule } from 'primeng/overlaybadge';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator],
+    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Avatar, Menu, OverlayBadgeModule],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
@@ -65,30 +68,54 @@ import { AuthService } from '@/app/core/auth/auth.service';
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-calendar"></i>
-                        <span>Calendar</span>
+                    <button type="button" class="layout-topbar-action" title="Notifications">
+                        <p-overlaybadge value="3" severity="danger">
+                            <i class="pi pi-bell"></i>
+                        </p-overlaybadge>
+                        <span>Notifications</span>
                     </button>
+
                     <button type="button" class="layout-topbar-action">
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
+
+                    <button type="button" class="layout-topbar-action" aria-haspopup="true" (click)="userMenu.toggle($event)">
+                        <p-avatar [label]="initials()" shape="circle" />
+                        <span>{{ displayName() }}</span>
+                        <i class="pi pi-angle-down"></i>
                     <button type="button" class="layout-topbar-action" routerLink="/profil" [title]="auth.user()?.email ?? ''">
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
                     </button>
-                    <button type="button" class="layout-topbar-action" title="Se déconnecter" (click)="auth.logout()">
-                        <i class="pi pi-sign-out"></i>
-                        <span>Déconnexion</span>
-                    </button>
+                    <p-menu #userMenu [model]="userItems" [popup]="true" appendTo="body" />
                 </div>
             </div>
         </div>
     </div>`
 })
 export class AppTopbar {
-    items!: MenuItem[];
 
+    private router = inject(Router);
+    private readonly authService = inject(AuthService);
+
+    displayName = computed(() => this.authService.user()?.email?.split('@')[0] ?? 'Utilisateur');
+    initials = computed(() => this.displayName().slice(0, 2).toUpperCase());
+
+    // Fonction de déconnexion
+    seDeconnecter(): void {
+        this.authService.logout();
+    }
+    userItems: MenuItem[] = [
+        { label: 'Mon profil', icon: 'pi pi-user', command: () => this.router.navigate(['/profil']) },
+        { label: 'Paramètres', icon: 'pi pi-cog', command: () => this.router.navigate(['/parametres']) },
+        { label: 'Aide', icon: 'pi pi-question-circle', command: () => this.router.navigate(['/aide']) },
+        { separator: true },
+        // { label: 'Se déconnecter', icon: 'pi pi-sign-out', styleClass: 'text-red-500', command: () => this.authService.logout() }
+        { label: 'Se déconnecter', icon: 'pi pi-sign-out', styleClass: 'text-red-500', command: () => this.seDeconnecter() }
+    ];
+
+    items!: MenuItem[];
     layoutService = inject(LayoutService);
     auth = inject(AuthService);
 

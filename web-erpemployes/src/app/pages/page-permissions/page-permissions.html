@@ -1,0 +1,389 @@
+
+<div class="card min-h-[calc(100vh-12rem)]">
+    <!-- En-tête -->
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="m-0 text-2xl font-semibold text-surface-900 dark:text-surface-0">
+                Gestion des rôles et permissions
+            </h2>
+            <p class="mt-2 text-sm text-surface-500">
+                Gérez les rôles et les accès des utilisateurs de votre entreprise.
+            </p>
+        </div>
+
+        <p-button
+            label="Nouveau rôle"
+            icon="pi pi-plus"
+            (onClick)="newRole()"
+        />
+    </div>
+
+    <p-divider />
+
+    <!-- Tableau -->
+    <p-table
+        #dt
+        [value]="users()"
+        [rows]="8"
+        [paginator]="true"
+        [rowsPerPageOptions]="[8, 15, 30]"
+        [globalFilterFields]="['name', 'email', 'role', 'status']"
+        [rowHover]="true"
+        dataKey="id"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first} - {last} sur {totalRecords} utilisateurs"
+        responsiveLayout="scroll"
+    >
+        <ng-template #caption>
+            <div class="flex flex-col gap-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                <p-iconfield class="w-full sm:max-w-md">
+                    <p-inputicon class="pi pi-search" />
+                    <input
+                        pInputText
+                        type="text"
+                        class="w-full"
+                        placeholder="Rechercher un utilisateur, un e-mail..."
+                        (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                    />
+                </p-iconfield>
+
+                <span class="text-sm text-surface-500">
+                    {{ users().length }} utilisateur(s)
+                </span>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th pSortableColumn="name" style="min-width: 17rem">
+                    Utilisateur
+                    <p-sortIcon field="name" />
+                </th>
+                <th pSortableColumn="role" style="min-width: 11rem">
+                    Rôle
+                    <p-sortIcon field="role" />
+                </th>
+                <th pSortableColumn="status" style="min-width: 9rem">
+                    Statut
+                    <p-sortIcon field="status" />
+                </th>
+                <th class="text-center" style="width: 6rem">
+                    Actions
+                </th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-user>
+            <tr>
+                <td class="!py-4">
+                    <div class="flex items-center gap-3">
+                        <p-avatar
+                            [image]="user.avatar"
+                            [label]="user.name?.charAt(0)"
+                            shape="circle"
+                            size="large"
+                        />
+                        <div class="flex min-w-0 flex-col gap-1">
+                            <span class="truncate font-semibold text-surface-900 dark:text-surface-0">
+                                {{ user.name }}
+                            </span>
+                            <span class="truncate text-sm text-surface-500">
+                                {{ user.email }}
+                            </span>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <p-tag
+                        [value]="user.role"
+                        [severity]="roleSeverity(user.role)"
+                        [rounded]="true"
+                    />
+                </td>
+
+                <td>
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="inline-block h-2.5 w-2.5 rounded-full"
+                            [ngClass]="user.status === 'Actif' ? 'bg-green-500' : 'bg-red-500'"
+                        ></span>
+                        <span class="text-sm">{{ user.status }}</span>
+                    </div>
+                </td>
+
+                <td class="text-center">
+                    <p-button
+                        icon="pi pi-ellipsis-v"
+                        severity="secondary"
+                        [text]="true"
+                        [rounded]="true"
+                        pTooltip="Gérer cet utilisateur"
+                        tooltipPosition="left"
+                        (onClick)="openActions(user)"
+                    />
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="4">
+                    <div class="flex flex-col items-center justify-center gap-3 py-14 text-center text-surface-500">
+                        <i class="pi pi-users text-4xl"></i>
+                        <span class="font-semibold">Aucun utilisateur trouvé</span>
+                        <span class="text-sm">Modifiez votre recherche et réessayez.</span>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<!-- Menu des actions -->
+<p-dialog
+    header="Gérer l'utilisateur"
+    [(visible)]="actionsVisible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '25rem' }"
+    [breakpoints]="{ '640px': '95vw' }"
+>
+    @if (selectedUser) {
+        <div class="mb-5 flex items-center gap-3">
+            <p-avatar
+                [image]="selectedUser.avatar"
+                [label]="selectedUser.name.charAt(0)"
+                shape="circle"
+                size="large"
+            />
+            <div class="flex min-w-0 flex-col gap-1">
+                <span class="font-semibold">{{ selectedUser.name }}</span>
+                <span class="break-all text-sm text-surface-500">
+                    {{ selectedUser.email }}
+                </span>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <button
+                type="button"
+                class="flex w-full items-center gap-3 rounded-lg border border-surface-200 p-3 text-left transition-colors hover:bg-surface-100 dark:border-surface-700 dark:hover:bg-surface-800"
+                (click)="openEditDialog()"
+            >
+                <i class="pi pi-pencil text-primary"></i>
+                <span class="flex-1">
+                    <span class="block font-medium">Modifier</span>
+                    <span class="text-sm text-surface-500">Changer le rôle de l'utilisateur</span>
+                </span>
+                <i class="pi pi-chevron-right text-xs text-surface-400"></i>
+            </button>
+
+            <button
+                type="button"
+                class="flex w-full items-center gap-3 rounded-lg border border-surface-200 p-3 text-left transition-colors hover:bg-surface-100 dark:border-surface-700 dark:hover:bg-surface-800"
+                (click)="openStatusDialog()"
+            >
+                <i
+                    [ngClass]="selectedUser.status === 'Actif'
+                        ? 'pi pi-ban text-orange-500'
+                        : 'pi pi-check-circle text-green-500'"
+                ></i>
+                <span class="flex-1">
+                    <span class="block font-medium">
+                        {{ selectedUser.status === 'Actif' ? 'Désactiver le compte' : 'Activer le compte' }}
+                    </span>
+                    <span class="text-sm text-surface-500">
+                        Modifier le statut de l'utilisateur
+                    </span>
+                </span>
+                <i class="pi pi-chevron-right text-xs text-surface-400"></i>
+            </button>
+
+            <button
+                type="button"
+                class="flex w-full items-center gap-3 rounded-lg border border-red-200 p-3 text-left transition-colors hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950"
+                (click)="openDeleteDialog()"
+            >
+                <i class="pi pi-trash text-red-500"></i>
+                <span class="flex-1">
+                    <span class="block font-medium text-red-600 dark:text-red-400">
+                        Supprimer
+                    </span>
+                    <span class="text-sm text-surface-500">
+                        Retirer cet utilisateur de la liste
+                    </span>
+                </span>
+                <i class="pi pi-chevron-right text-xs text-surface-400"></i>
+            </button>
+        </div>
+    }
+
+    <ng-template #footer>
+        <p-button
+            label="Fermer"
+            severity="secondary"
+            [text]="true"
+            (onClick)="actionsVisible = false"
+        />
+    </ng-template>
+</p-dialog>
+
+<!-- Dialogue de modification -->
+<p-dialog
+    header="Modifier l'utilisateur"
+    [(visible)]="editVisible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '27rem' }"
+    [breakpoints]="{ '640px': '95vw' }"
+>
+    @if (selectedUser) {
+        <div class="flex flex-col gap-2">
+            <label for="editRole" class="font-medium">Rôle</label>
+            <p-select
+                inputId="editRole"
+                [options]="roles"
+                [(ngModel)]="selectedRole"
+                placeholder="Choisir un rôle"
+                class="w-full"
+                appendTo="body"
+            />
+            <p class="text-sm text-surface-500">
+                Le rôle choisi sera associé à {{ selectedUser.name }}.
+            </p>
+        </div>
+    }
+
+    <ng-template #footer>
+        <p-button
+            label="Annuler"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="editVisible = false"
+        />
+        <p-button
+            label="Enregistrer"
+            icon="pi pi-check"
+            [disabled]="!selectedRole"
+            (onClick)="saveRole()"
+        />
+    </ng-template>
+</p-dialog>
+
+<!-- Dialogue d'activation/désactivation -->
+<p-dialog
+    [header]="selectedUser?.status === 'Actif' ? 'Désactiver le compte' : 'Activer le compte'"
+    [(visible)]="statusVisible"
+    [modal]="true"
+    [draggable]="false"
+    [style]="{ width: '25rem' }"
+    [breakpoints]="{ '640px': '95vw' }"
+>
+    @if (selectedUser) {
+        <div class="flex items-start gap-3">
+            <i
+                class="pi pi-info-circle mt-1 text-xl"
+                [ngClass]="selectedUser.status === 'Actif' ? 'text-orange-500' : 'text-green-500'"
+            ></i>
+            <p class="m-0 leading-6">
+                Voulez-vous vraiment
+                <strong>{{ selectedUser.status === 'Actif' ? 'désactiver' : 'activer' }}</strong>
+                le compte de <strong>{{ selectedUser.name }}</strong> ?
+            </p>
+        </div>
+    }
+
+    <ng-template #footer>
+        <p-button
+            label="Annuler"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="statusVisible = false"
+        />
+        <p-button
+            [label]="selectedUser?.status === 'Actif' ? 'Désactiver' : 'Activer'"
+            [severity]="selectedUser?.status === 'Actif' ? 'warn' : 'success'"
+            (onClick)="toggleStatus()"
+        />
+    </ng-template>
+</p-dialog>
+
+<!-- Dialogue de suppression -->
+<p-dialog
+    header="Confirmer la suppression"
+    [(visible)]="deleteVisible"
+    [modal]="true"
+    [draggable]="false"
+    [style]="{ width: '25rem' }"
+    [breakpoints]="{ '640px': '95vw' }"
+>
+    @if (selectedUser) {
+        <div class="flex items-start gap-3">
+            <i class="pi pi-exclamation-triangle mt-1 text-2xl text-red-500"></i>
+            <div>
+                <p class="m-0 leading-6">
+                    Voulez-vous vraiment supprimer
+                    <strong>{{ selectedUser.name }}</strong> ?
+                </p>
+                <p class="mt-2 text-sm text-surface-500">
+                    Cette action retirera l'utilisateur de la liste de démonstration.
+                </p>
+            </div>
+        </div>
+    }
+
+    <ng-template #footer>
+        <p-button
+            label="Annuler"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="deleteVisible = false"
+        />
+        <p-button
+            label="Supprimer"
+            icon="pi pi-trash"
+            severity="danger"
+            (onClick)="deleteUser()"
+        />
+    </ng-template>
+</p-dialog>
+
+<!-- Dialogue de création de rôle -->
+<p-dialog
+    header="Nouveau rôle"
+    [(visible)]="createRoleVisible"
+    [modal]="true"
+    [draggable]="false"
+    [style]="{ width: '27rem' }"
+    [breakpoints]="{ '640px': '95vw' }"
+>
+    <div class="flex flex-col gap-2">
+        <label for="newRoleName" class="font-medium">Nom du rôle</label>
+        <input
+            pInputText
+            id="newRoleName"
+            [(ngModel)]="newRoleName"
+            class="w-full"
+            placeholder="Ex. : Superviseur"
+        />
+        <p class="text-sm text-surface-500">
+            La création de rôles personnalisés nécessite de les gérer séparément des rôles prédéfinis des utilisateurs.
+        </p>
+    </div>
+
+    <ng-template #footer>
+        <p-button
+            label="Annuler"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="createRoleVisible = false"
+        />
+        <p-button
+            label="Fermer"
+            (onClick)="createRoleVisible = false"
+        />
+    </ng-template>
+</p-dialog>

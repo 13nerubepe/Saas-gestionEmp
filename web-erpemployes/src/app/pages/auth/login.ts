@@ -13,7 +13,7 @@ import { apiErrorMessage } from '@/app/core/api-errors';
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator, ReactiveFormsModule],
+    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, ReactiveFormsModule],
     templateUrl: './login.html'
 })
 export class Login {
