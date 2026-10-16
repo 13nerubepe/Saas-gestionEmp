@@ -1,18 +1,53 @@
-<div class="grid grid-cols-12 items-stretch gap-8">
+<!--<div class="grid grid-cols-12 items-stretch gap-8">-->
+<!--    &lt;!&ndash; Indicateurs clés &ndash;&gt;-->
+<!--    <app-stats-widget [users]="users()"-->
+<!--        class="col-span-12 contents" />-->
+<!--    &lt;!&ndash; Assistant IA &ndash;&gt;-->
+<!--    <div class="col-span-12 flex min-w-0 xl:col-span-6">-->
+<!--        <app-assistant-ai class="block w-full"></app-assistant-ai>-->
+<!--    </div>-->
+<!--    &lt;!&ndash; Prochains événements &ndash;&gt;-->
+<!--    <div class="col-span-12 flex min-w-0 xl:col-span-6">-->
+<!--        <app-prochain-event class="block w-full"></app-prochain-event>-->
+<!--    </div>-->
+<!--    &lt;!&ndash; Question juridique (US-02) &ndash;&gt;-->
+<!--    <div class="col-span-12">-->
+<!--        <app-legal-question class="block w-full"></app-legal-question>-->
+<!--    </div>-->
+<!--</div>-->
+
+<div class="grid grid-cols-12 items-stretch gap-6">
+
     <!-- Indicateurs clés -->
-    <app-stats-widget class="col-span-12 contents" />
-    <!-- Assistant IA -->
-    <div class="col-span-12 flex min-w-0 xl:col-span-6">
-        <app-assistant-ai class="block w-full"></app-assistant-ai>
+    <div class="col-span-12 min-w-0">
+        <app-stats-widget
+            [users]="users()"
+            class="block w-full">
+        </app-stats-widget>
     </div>
-    <!-- Prochains événements -->
-    <div class="col-span-12 flex min-w-0 xl:col-span-6">
-        <app-prochain-event class="block w-full"></app-prochain-event>
+
+    <!-- activites recentes -->
+    <div class="col-span-12 min-w-0">
+        <app-activites-recentes
+            class="block w-full">
+        </app-activites-recentes>
     </div>
-    <!-- Question juridique (US-02) -->
-    <div class="col-span-12">
-        <app-legal-question class="block w-full"></app-legal-question>
-    </div>
+
+<!--    &lt;!&ndash; Assistant IA &ndash;&gt;-->
+<!--    <div class="col-span-12 flex min-w-0 xl:col-span-6">-->
+<!--        <app-assistant-ai class="block w-full"></app-assistant-ai>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Prochains événements &ndash;&gt;-->
+<!--    <div class="col-span-12 flex min-w-0 xl:col-span-6">-->
+<!--        <app-prochain-event class="block w-full"></app-prochain-event>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Question juridique &ndash;&gt;-->
+<!--    <div class="col-span-12 min-w-0">-->
+<!--        <app-legal-question class="block w-full"></app-legal-question>-->
+<!--    </div>-->
+
 </div>
 
 

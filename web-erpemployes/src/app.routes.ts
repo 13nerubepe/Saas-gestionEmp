@@ -19,16 +19,15 @@ export const appRoutes: Routes = [
         // Pages protégées avec le layout principal
         path: '',
         component: AppLayout,
-        canActivate: [authGuard],
+        // canActivate: [authGuard],
         children: [
 
             { path: '', component: Dashboard },
-
-            {
-                path: AppConstantRoute.Dashbord_PATH,
-                loadComponent: () => import('./app/pages/dashboard/dashboard').then((c) => c.Dashboard),
-                data: { breadcrumb: 'Dashboard' },
-            },
+            // {
+            //     path: AppConstantRoute.Dashbord_PATH,
+            //     loadComponent: () => import('./app/pages/dashboard/dashboard').then((c) => c.Dashboard),
+            //     data: { breadcrumb: 'Dashboard' },
+            // },
 
             {
                 path: AppConstantRoute.Activated_Desactived_PATH,

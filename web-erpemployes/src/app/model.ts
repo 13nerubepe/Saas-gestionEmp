@@ -40,3 +40,12 @@ export interface Country {
     value: string;
 }
 
+export interface RecentActivity {
+    title: string;
+    description: string;
+    date: string;
+    icon: string;
+    color: string;
+    bg: string;
+}
+

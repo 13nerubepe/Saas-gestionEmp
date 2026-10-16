@@ -128,4 +128,34 @@ export class AuthService {
             payload
         );
     }
+
+    /**
+     * Récupération de la liste des utilisateurs.
+     * À utiliser uniquement lorsque le backend expose cette route.
+     */
+    getUsers(): Observable<User[]> {
+        return this.http.get<User[]>(`${AUTH_URL}/users/`);
+    }
+
+    /**
+     * Récupération d'un utilisateur par son identifiant.
+     * À adapter selon les routes réellement exposées par le backend.
+     */
+    getUserById(id: string): Observable<User> {
+        return this.http.get<User>(
+            `${AUTH_URL}/users/${encodeURIComponent(id)}/`
+        );
+    }
+
+    /**
+     * Modification du profil de l'utilisateur connecté.
+     * Seuls first_name, last_name et language sont modifiables.
+     */
+    updateCurrentUser(
+        payload: Partial<Pick<User, 'first_name' | 'last_name' | 'language'>>
+    ): Observable<User> {
+        return this.http.patch<User>(`${AUTH_URL}/me/`, payload).pipe(
+            tap((user) => this.user.set(user))
+        );
+    }
 }

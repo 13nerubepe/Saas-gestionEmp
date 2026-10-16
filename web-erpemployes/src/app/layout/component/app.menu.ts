@@ -26,7 +26,7 @@ export class AppMenu {
             {
                 label: 'Home',
                 items: [
-                    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'] },
+                    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
                     { label: 'Gestion des Utilisateur', icon: 'pi pi-fw pi-home', routerLink: ['/utilisateur'] },
                     { label: 'Gestion des Roles et Permission', icon: 'pi pi-fw pi-home', routerLink: ['/permission'] },
                     { label: 'Comparaison', icon: 'pi pi-fw pi-home', routerLink: ['/comparaison'] },
