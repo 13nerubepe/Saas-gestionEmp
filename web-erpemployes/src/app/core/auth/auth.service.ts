@@ -3,7 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, finalize, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
 import { environment } from '@/environments/environment';
-import { AccessToken, RegisterPayload, User } from './auth.models';
+import { AccessToken, ProfileUpdate, RegisterPayload, User } from './auth.models';
 
 const AUTH_URL = `${environment.apiUrl}/auth`;
 
@@ -25,8 +25,12 @@ export class AuthService {
 
     readonly user = signal<User | null>(null);
     readonly isAuthenticated = computed(() => this.accessToken() !== null);
-    /** Company sent in X-Company-ID. First membership until a company switcher exists. */
-    readonly activeCompanyId = computed(() => this.user()?.memberships[0]?.company_id ?? null);
+    /** Company the user works in. First membership until a company switcher exists. */
+    readonly activeMembership = computed(() => this.user()?.memberships[0] ?? null);
+    /** Company sent in X-Company-ID. */
+    readonly activeCompanyId = computed(() => this.activeMembership()?.company_id ?? null);
+    /** Founders only: asking the legal agent, for instance. */
+    readonly isFounder = computed(() => this.activeMembership()?.role === 'founder');
 
     get token(): string | null {
         return this.accessToken();
@@ -45,6 +49,11 @@ export class AuthService {
 
     loadCurrentUser(): Observable<User> {
         return this.http.get<User>(`${AUTH_URL}/me/`).pipe(tap((user) => this.user.set(user)));
+    }
+
+    /** Name and language. The language also sets the language of agent answers. */
+    updateProfile(changes: ProfileUpdate): Observable<User> {
+        return this.http.patch<User>(`${AUTH_URL}/me/`, changes).pipe(tap((user) => this.user.set(user)));
     }
 
     /** New access token from the refresh cookie. Concurrent callers share one request. */

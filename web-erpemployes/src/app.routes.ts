@@ -51,6 +51,17 @@ export const appRoutes: Routes = [
             //     data: { breadcrumb: 'ComparairéActifs' },
             // },
 
+            {
+                path: AppConstantRoute.Legal_Assistant_PATH,
+                loadComponent: () => import('./app/pages/legal-assistant/legal-assistant').then((c) => c.LegalAssistant),
+                data: { breadcrumb: 'Assistant juridique' },
+            },
+            {
+                path: AppConstantRoute.Profile_PATH,
+                loadComponent: () => import('./app/pages/profile/profile').then((c) => c.Profile),
+                data: { breadcrumb: 'Profil' },
+            },
+
             { path: 'uikit', loadChildren: () => import('./app/pages/uikit/uikit.routes') },
             { path: 'documentation', component: Documentation },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }

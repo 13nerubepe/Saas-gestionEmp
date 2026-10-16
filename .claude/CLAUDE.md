@@ -83,8 +83,13 @@ API error `code`) and `agents/`. The API URL is in `src/environments/`.
   after a reload (`authGuard` → `restoreSession()`).
 - The app runs without zone.js: state changed in an HTTP callback must be a
   signal, or the view does not update.
+- Wired pages: login, sign-up, dashboard (stats from /auth/me/ and the
+  conversation count, legal question card), legal assistant (history,
+  follow-ups), profile (name, language). The legal form is hidden for
+  employees (`AuthService.isFounder`).
 - Screens still on demo data (no API yet): create user / company, activation,
-  departments, events, stats widgets. The sidebar still lists template pages.
+  departments, events, AI assistant quick actions, password reset. The
+  sidebar still lists the template's demo pages below "Home".
 
 ## Backend architecture
 
