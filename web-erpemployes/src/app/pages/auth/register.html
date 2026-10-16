@@ -769,7 +769,8 @@
                         label="Envoyer ma demande"
                         icon="pi pi-send"
                         [loading]="loading()"
-                        [disabled]="loading()" />
+                        [disabled]="loading() || form.invalid"
+                    />
                 </div>
             }
 

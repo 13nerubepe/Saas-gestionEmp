@@ -99,12 +99,17 @@ export class AppTopbar {
     displayName = computed(() => this.authService.user()?.email?.split('@')[0] ?? 'Utilisateur');
     initials = computed(() => this.displayName().slice(0, 2).toUpperCase());
 
+    // Fonction de déconnexion
+    seDeconnecter(): void {
+        this.authService.logout();
+    }
     userItems: MenuItem[] = [
         { label: 'Mon profil', icon: 'pi pi-user', command: () => this.router.navigate(['/profil']) },
         { label: 'Paramètres', icon: 'pi pi-cog', command: () => this.router.navigate(['/parametres']) },
         { label: 'Aide', icon: 'pi pi-question-circle', command: () => this.router.navigate(['/aide']) },
         { separator: true },
-        { label: 'Se déconnecter', icon: 'pi pi-sign-out', styleClass: 'text-red-500', command: () => this.authService.logout() }
+        // { label: 'Se déconnecter', icon: 'pi pi-sign-out', styleClass: 'text-red-500', command: () => this.authService.logout() }
+        { label: 'Se déconnecter', icon: 'pi pi-sign-out', styleClass: 'text-red-500', command: () => this.seDeconnecter() }
     ];
 
     items!: MenuItem[];

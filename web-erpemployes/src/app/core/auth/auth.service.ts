@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, finalize, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
 import { environment } from '@/environments/environment';
 import { AccessToken, RegisterPayload, User } from './auth.models';
-import { AccessRequestPayload, AuthResponse, LoginPayload } from '@/app/model';
+import { AccessRequestPayload, AccessRequestResponse, AuthResponse, LoginPayload } from '@/app/model';
 
 const AUTH_URL = `${environment.apiUrl}/auth`;
 
@@ -120,10 +120,19 @@ export class AuthService {
     /**
      * Envoi d'une demande d'accès à l'administration.
      */
+    // submitRequest(
+    //     payload: AccessRequestPayload
+    // ): Observable<unknown> {
+    //     return this.http.post<unknown>(
+    //         `${AUTH_URL}/access-requests/`,
+    //         payload
+    //     );
+    // }
+
     submitRequest(
         payload: AccessRequestPayload
-    ): Observable<unknown> {
-        return this.http.post<unknown>(
+    ): Observable<AccessRequestResponse> {
+        return this.http.post<AccessRequestResponse>(
             `${AUTH_URL}/access-requests/`,
             payload
         );
@@ -151,11 +160,17 @@ export class AuthService {
      * Modification du profil de l'utilisateur connecté.
      * Seuls first_name, last_name et language sont modifiables.
      */
-    updateCurrentUser(
-        payload: Partial<Pick<User, 'first_name' | 'last_name' | 'language'>>
-    ): Observable<User> {
+    updateCurrentUser(payload: Partial<Pick<User, 'first_name' | 'last_name' | 'language'>>): Observable<User> {
         return this.http.patch<User>(`${AUTH_URL}/me/`, payload).pipe(
             tap((user) => this.user.set(user))
         );
     }
+
+
+    // envoyerDemande(payload: AccessRequestPayload): Observable<{ message: string }> {
+    //     return this.http.post<{ message: string }>(
+    //         `${AUTH_URL}/access-requests/`,
+    //         payload
+    //     );
+    // }
 }

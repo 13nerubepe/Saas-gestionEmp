@@ -49,3 +49,7 @@ export interface RecentActivity {
     bg: string;
 }
 
+export interface AccessRequestResponse {
+    message?: string;
+}
+

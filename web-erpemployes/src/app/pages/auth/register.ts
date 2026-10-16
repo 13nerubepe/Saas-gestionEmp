@@ -1,13 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { switchMap } from 'rxjs';
+import {finalize, switchMap} from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { SelectModule } from 'primeng/select';
 import { AuthService } from '@/app/core/auth/auth.service';
-import {AccessRequestPayload, Country} from "@/app/model";
+import {AccessRequestPayload, AccessRequestResponse, Country} from "@/app/model";
 import {Textarea} from "primeng/textarea";
 
 @Component({
@@ -106,38 +106,99 @@ export class Register {
 
         this.loading.set(true);
         this.errorMessage.set('');
+        this.successMessage.set('');
 
         const payload: AccessRequestPayload = this.form.getRawValue();
 
-        this.authService.submitRequest(payload).subscribe({
-            next: () => {
-                this.loading.set(false);
+        this.authService.submitRequest(payload)
+            .pipe(
+                finalize(() => this.loading.set(false))
+            )
+            .subscribe({
+                next: (response: AccessRequestResponse) => {
+                    this.successMessage.set(
+                        response?.message ??
+                        'Votre demande a été envoyée avec succès à l’administration.'
+                    );
 
-                this.form.reset({
-                    first_name: '',
-                    last_name: '',
-                    email: '',
-                    phone: '',
-                    position: '',
-                    company_name: '',
-                    country: 'CM',
-                    city: '',
-                    reason: ''
-                });
+                    this.form.reset({
+                        first_name: '',
+                        last_name: '',
+                        email: '',
+                        phone: '',
+                        position: '',
+                        company_name: '',
+                        country: 'CM',
+                        city: '',
+                        reason: '',
+                        activity_sector: '',
+                        company_phone: '',
+                        company_address: ''
+                    });
 
-                alert('Votre demande a été envoyée à l’administration avec succès.');
-            },
+                    this.selectedLogo = null;
+                    this.logoPreview.set(null);
+                    this.currentStep.set(1);
+                },
+                error: (error) => {
+                    const detail = error?.error?.detail;
+                    const message = error?.error?.message;
 
-            error: (error) => {
-                this.loading.set(false);
-
-                const detail = error?.error?.detail;
-                const message = error?.error?.message;
-
-                this.errorMessage.set(typeof detail === 'string' ? detail : typeof message === 'string' ? message : 'Impossible d’envoyer votre demande. Veuillez réessayer.');
-            }
-        });
+                    this.errorMessage.set(
+                        typeof detail === 'string'
+                            ? detail
+                            : typeof message === 'string'
+                                ? message
+                                : 'Impossible d’envoyer votre demande. Veuillez réessayer.'
+                    );
+                }
+            });
     }
+
+    // onSubmit(): void {
+    //     if (this.loading()) {
+    //         return;
+    //     }
+    //
+    //     if (this.form.invalid) {
+    //         this.form.markAllAsTouched();
+    //         return;
+    //     }
+    //
+    //     this.loading.set(true);
+    //     this.errorMessage.set('');
+    //
+    //     const payload: AccessRequestPayload = this.form.getRawValue();
+    //
+    //     this.authService.submitRequest(payload).subscribe({
+    //         next: () => {
+    //             this.loading.set(false);
+    //
+    //             this.form.reset({
+    //                 first_name: '',
+    //                 last_name: '',
+    //                 email: '',
+    //                 phone: '',
+    //                 position: '',
+    //                 company_name: '',
+    //                 country: 'CM',
+    //                 city: '',
+    //                 reason: ''
+    //             });
+    //
+    //             alert('Votre demande a été envoyée à l’administration avec succès.');
+    //         },
+    //
+    //         error: (error) => {
+    //             this.loading.set(false);
+    //
+    //             const detail = error?.error?.detail;
+    //             const message = error?.error?.message;
+    //
+    //             this.errorMessage.set(typeof detail === 'string' ? detail : typeof message === 'string' ? message : 'Impossible d’envoyer votre demande. Veuillez réessayer.');
+    //         }
+    //     });
+    // }
 
     // Étape actuellement affichée
     readonly currentStep = signal<1 | 2>(1);
