@@ -57,6 +57,9 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: web-erpemployes/package-lock.json
+      # The lockfile is written by npm 11 (developer machines); npm 10, bundled
+      # with Node 22, reads it as out of sync.
+      - run: npm install -g npm@11
       - run: npm ci --no-audit --no-fund
       - name: Production build
         run: npx ng build --configuration production
