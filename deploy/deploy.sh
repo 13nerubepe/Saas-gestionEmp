@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # Deploy main to the server. Run FROM YOUR PC (Git Bash), at the repository root:
-#   deploy/deploy.sh 13.37.42.1
+#   deploy/deploy.sh 13.37.42.1            (deploys main)
+#   deploy/deploy.sh 13.37.42.1 my-branch  (deploys another pushed branch)
 #
 # 1. Builds the Angular app locally (the 1 GB server cannot build it).
-# 2. Updates the code on the server to origin/main.
+# 2. Updates the code on the server to origin/<branch> (main by default).
 # 3. Uploads the Angular build, then rebuilds and restarts the containers.
 # 4. Checks that the site answers.
 set -euo pipefail
 
-HOST="${1:?Usage: deploy/deploy.sh <server-ip>}"
+HOST="${1:?Usage: deploy/deploy.sh <server-ip> [branch]}"
+BRANCH="${2:-main}"
 KEY="${SSH_KEY:-$HOME/.ssh/saas-gestionemp-key.pem}"
 SSH_BIN=ssh
 # On Windows, Git Bash's ssh rejects keys stored on NTFS ("bad permissions"):
@@ -21,6 +23,10 @@ SSH=("$SSH_BIN" -i "$KEY" -o StrictHostKeyChecking=accept-new "ubuntu@$HOST")
 APP_DIR="saas-gestionemp"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
+if [ "$(git -C "$ROOT" branch --show-current)" != "$BRANCH" ]; then
+    echo "Check out $BRANCH locally first: the Angular app is built from your working copy." >&2
+    exit 1
+fi
 if [ -n "$(git -C "$ROOT" status --porcelain -- web-erpemployes)" ]; then
     echo "web-erpemployes has uncommitted changes: commit them, or the server would get code that is not on main." >&2
     exit 1
@@ -30,7 +36,7 @@ echo "==> Building the Angular app (production)"
 (cd "$ROOT/web-erpemployes" && npm ci --no-audit --no-fund && npx ng build --configuration production)
 
 echo "==> Updating the code on the server"
-"${SSH[@]}" "cd $APP_DIR && git fetch --quiet origin && git checkout --quiet main && git reset --quiet --hard origin/main"
+"${SSH[@]}" "cd $APP_DIR && git fetch --quiet origin && git checkout --quiet -B $BRANCH origin/$BRANCH"
 "${SSH[@]}" "test -f $APP_DIR/deploy/.env" || { echo "deploy/.env is missing on the server (see deploy/README.md)." >&2; exit 1; }
 
 echo "==> Uploading the Angular build"
