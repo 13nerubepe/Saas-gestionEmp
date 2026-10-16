@@ -56,7 +56,7 @@ class GeminiProvider:
             response_schema=schema,
             temperature=0.2,
         )
-        models = [settings.GEMINI_MODEL, settings.GEMINI_FALLBACK_MODEL]
+        models = [settings.GEMINI_MODEL, *settings.GEMINI_FALLBACK_MODELS]
         for model in dict.fromkeys(filter(None, models)):
             try:
                 response = self.client.models.generate_content(

@@ -185,9 +185,11 @@ GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
 # A pinned version, not a "-latest" alias: answers stay reproducible and each
 # stored Answer names the model that really produced it.
 GEMINI_MODEL = env("GEMINI_MODEL", default="gemini-3.5-flash")
-# Used only when the main model is overloaded (5xx) or out of quota (429),
-# both frequent on the free tier.
-GEMINI_FALLBACK_MODEL = env("GEMINI_FALLBACK_MODEL", default="gemini-2.5-flash")
+# Tried in order only when the previous model is overloaded (5xx) or out of
+# quota (429), both frequent on the free tier where quotas are per model.
+GEMINI_FALLBACK_MODELS = env.list(
+    "GEMINI_FALLBACK_MODELS", default=["gemini-2.5-flash", "gemini-3.5-flash-lite"]
+)
 GEMINI_EMBEDDING_MODEL = env("GEMINI_EMBEDDING_MODEL", default="gemini-embedding-001")
 # Free tier: 100 embedded texts per minute. Pause between batches when loading texts.
 GEMINI_EMBED_BATCH_PAUSE_SECONDS = env.int("GEMINI_EMBED_BATCH_PAUSE_SECONDS", default=61)

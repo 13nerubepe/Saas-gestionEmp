@@ -89,8 +89,9 @@ safety, e.g. `scp -i ~/.ssh/saas-gestionemp-key.pem ubuntu@<IP>:backups/*.gz .`
 
 - `python manage.py check --deploy` reports SECURE_SSL_REDIRECT and HSTS:
   Caddy handles both. The email warning stays until emails are sent.
-- The Gemini free tier has small quotas per model. `GEMINI_FALLBACK_MODEL`
-  answers when the main model is overloaded or out of quota; if both are, the
-  API returns 503 `llm_unavailable`. Real users need a paid key.
+- The Gemini free tier has small quotas per model (daily ones run out after
+  about a hundred questions). `GEMINI_FALLBACK_MODELS` are tried in order when
+  a model is overloaded or out of quota; if all are, the API returns 503
+  `llm_unavailable`. Real users need a paid key.
 - Variables in `.env` lose against variables of the same name in the shell
   that runs Docker Compose; hence the unusual name `APP_DOMAIN`.

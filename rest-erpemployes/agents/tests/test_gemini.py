@@ -18,7 +18,7 @@ class Response:
 def provider(settings, monkeypatch):
     settings.GEMINI_API_KEY = "test-key"
     settings.GEMINI_MODEL = "main-model"
-    settings.GEMINI_FALLBACK_MODEL = "fallback-model"
+    settings.GEMINI_FALLBACK_MODELS = ["fallback-model"]
     provider = GeminiProvider()
     calls = []
 

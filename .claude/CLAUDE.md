@@ -215,9 +215,10 @@ npm run format
   top 2 otherwise), off-topic questions from 0.376. Re-measure when adding texts.
 - Gemini free tier embeds 100 texts per minute: the loader sends 90 at a time
   with `GEMINI_EMBED_BATCH_PAUSE_SECONDS` (61) between batches.
-- Gemini model pinned to `gemini-3.5-flash`, with `GEMINI_FALLBACK_MODEL`
-  (`gemini-2.5-flash`) used when the main one is overloaded; the stored Answer
-  names the model that answered. On 2026-10-15, `gemini-flash-latest`
+- Gemini model pinned to `gemini-3.5-flash`, then `GEMINI_FALLBACK_MODELS`
+  (`gemini-2.5-flash`, `gemini-3.5-flash-lite`) when a model is overloaded or
+  out of quota (free-tier quotas are per model and per day); the stored
+  Answer names the model that answered. On 2026-10-15, `gemini-flash-latest`
   and `gemini-3.7-flash` were overloaded (503) and `gemini-3.8-flash` took about
   15 minutes; `gemini-2.5-flash` is a fast fallback.
 - French translations are compiled by hand (`locale/fr/LC_MESSAGES/django.mo`)
