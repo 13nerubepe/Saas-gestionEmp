@@ -41,8 +41,8 @@ export const appRoutes: Routes = [
             },
             {
                 path: AppConstantRoute.Liste_Tableau_PATH,
-                loadComponent: () => import('./app/pages/activated-desactived/activated-desactived').then((c) => c.ActivatedDesactived),
-                data: { breadcrumb: 'Actived-desactived' },
+                loadComponent: () => import('@/app/pages/liste-tableau-departement/liste-tableau-departement').then((c) => c.ListeTableauDepartement),
+                data: { breadcrumb: 'Départements' },
             },
             {
                 path: AppConstantRoute.Permission_PATH,
