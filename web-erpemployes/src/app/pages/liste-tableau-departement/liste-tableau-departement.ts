@@ -11,7 +11,9 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DepartementService } from '@/app/core/departement/departement.service';
 import { Departement } from '@/app/core/departement/departement.model';
+import { Router } from '@angular/router';
 
+   
 @Component({
     selector: 'app-liste-tableau-departement',
     imports: [CommonModule, FormsModule, TableModule, ButtonModule, DialogModule, InputTextModule, InputNumberModule, ConfirmDialogModule, ToastModule],
@@ -23,11 +25,13 @@ export class ListeTableauDepartement {
     private readonly service = inject(DepartementService);
     private readonly confirmation = inject(ConfirmationService);
     private readonly messages = inject(MessageService);
+    private readonly router = inject(Router);
 
     readonly departements = signal<Departement[]>([]);
     readonly loading = signal(false);
     readonly dialogVisible = signal(false);
     readonly modeEdition = signal(false);
+
 
     // Formulaire
     readonly form = signal<Partial<Departement>>({
@@ -55,9 +59,7 @@ export class ListeTableauDepartement {
     }
 
     ouvrirNouveau(): void {
-        this.form.set({ nom: '', entreprise: 'Sakai Group', effectif: 0 });
-        this.modeEdition.set(false);
-        this.dialogVisible.set(true);
+        this.router.navigate(['/creer-departement']);
     }
 
     ouvrirEdition(dept: Departement): void {
@@ -101,6 +103,7 @@ export class ListeTableauDepartement {
                     this.loadAll();
                 });
             }
+           
         });
     }
     updateForm(field: keyof Departement, value: any): void {

@@ -45,6 +45,11 @@ export const appRoutes: Routes = [
                 data: { breadcrumb: 'Départements' },
             },
             {
+                path: 'creer-departement',
+                loadComponent: () => import('@/app/pages/creer-departement/creer-departement').then((c) => c.CreerDepartement),
+                data: { breadcrumb: 'Créer un département' },
+            },
+            {
                 path: 'dashboard-departements',
                 loadComponent: () => import('@/app/pages/dashboard-departements/dashboard-departements').then((c) => c.DashboardDepartements),
                 data: { breadcrumb: 'Tableau de bord Départements' },

@@ -1,0 +1,71 @@
+<div class="card max-w-4xl mx-auto mt-6">
+    <!-- En-tête -->
+    <div class="flex items-center gap-2 mb-8 cursor-pointer text-gray-500 hover:text-gray-800" (click)="annuler()">
+        <i class="pi pi-arrow-left"></i>
+        <span class="font-medium">Retour</span>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">Créer un département</h2>
+    
+    <div class="mb-8">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Informations du département</h3>
+        
+        <div class="flex flex-col gap-6">
+            <!-- Nom du département -->
+            <div class="flex flex-col gap-2">
+                <label for="nom" class="font-medium text-gray-700">Nom du département *</label>
+                <input 
+                    pInputText 
+                    id="nom" 
+                    [ngModel]="departement().nom"
+                    (ngModelChange)="updateForm('nom', $event)"
+                    placeholder="Ex: Ressources Humaines" 
+                    class="w-full" />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Entreprise -->
+                <div class="flex flex-col gap-2">
+                    <label for="entreprise" class="font-medium text-gray-700">Entreprise *</label>
+                    <p-select
+                        inputId="entreprise"
+                        [options]="entreprises" 
+                        optionLabel="label" 
+                        optionValue="value"
+                        [ngModel]="departement().entreprise"
+                        (ngModelChange)="updateForm('entreprise', $event)"
+                        placeholder="Sélectionner une entreprise"
+                        styleClass="w-full">
+                    </p-select>>
+                </div>
+
+                <!-- Description -->
+                <div class="flex flex-col gap-2">
+                    <label for="description" class="font-medium text-gray-700">Description (optionnelle)</label>
+                    <textarea 
+                        pTextarea 
+                        id="description" 
+                        rows="3" 
+                        [ngModel]="departement().description"
+                        (ngModelChange)="updateForm('description', $event)"
+                        placeholder="Gestion des ressources humaines..."
+                        class="w-full">
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boutons d'action -->
+    <div class="flex justify-end gap-4 mt-8 pt-4 border-t border-gray-100">
+        <p-button 
+            label="Annuler" 
+            severity="secondary" 
+            [outlined]="true"
+            (onClick)="annuler()" />
+        <p-button 
+            label="Créer" 
+            [loading]="loading()"
+            (onClick)="creer()" />
+    </div>
+</div>

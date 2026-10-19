@@ -3,4 +3,5 @@ export interface Departement {
     nom: string;
     entreprise: string;
     effectif: number;
+    description?: string; 
 }
