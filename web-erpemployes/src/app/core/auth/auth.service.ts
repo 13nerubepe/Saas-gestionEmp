@@ -5,6 +5,7 @@ import { catchError, finalize, map, Observable, of, shareReplay, switchMap, tap 
 import { environment } from '@/environments/environment';
 import { AccessToken, RegisterPayload, User } from './auth.models';
 import { AccessRequestPayload, AccessRequestResponse, AuthResponse, LoginPayload } from '@/app/model';
+// import { AccessToken, ProfileUpdate, RegisterPayload, User } from './auth.models';
 
 const AUTH_URL = `${environment.apiUrl}/auth`;
 
@@ -31,9 +32,15 @@ export class AuthService {
      * Vérifie si un token d'accès est présent.
      */
     readonly isAuthenticated = computed(() => this.accessToken() !== null);
+    /** Company the user works in. First membership until a company switcher exists. */
+    readonly activeMembership = computed(() => this.user()?.memberships[0] ?? null);
+    /** Company sent in X-Company-ID. */
+    readonly activeCompanyId = computed(() => this.activeMembership()?.company_id ?? null);
+    /** Founders only: asking the legal agent, for instance. */
+    readonly isFounder = computed(() => this.activeMembership()?.role === 'founder');
     /** Company sent in X-Company-ID. First membership until a company switcher exists. */
         // Première entreprise associée à l'utilisateur connecté.
-    readonly activeCompanyId = computed(() => this.user()?.memberships[0]?.company_id ?? null);
+    // readonly activeCompanyId = computed(() => this.user()?.memberships[0]?.company_id ?? null);
 
     get token(): string | null {
         return this.accessToken();
@@ -62,6 +69,11 @@ export class AuthService {
     loadCurrentUser(): Observable<User> {
         return this.http.get<User>(`${AUTH_URL}/me/`).pipe(tap((user) => this.user.set(user)));
     }
+
+    // /** Name and language. The language also sets the language of agent answers. */
+    // updateProfile(changes: ProfileUpdate): Observable<User> {
+    //     return this.http.patch<User>(`${AUTH_URL}/me/`, changes).pipe(tap((user) => this.user.set(user)));
+    // }
 
     /** New access token from the refresh cookie. Concurrent callers share one request. */
     /**
