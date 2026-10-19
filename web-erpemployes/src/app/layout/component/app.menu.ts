@@ -30,6 +30,7 @@ export class AppMenu {
                     { label: 'Gestion des Utilisateur', icon: 'pi pi-fw pi-home', routerLink: ['/utilisateur'] },
                     { label: 'Gestion des Roles et Permission', icon: 'pi pi-fw pi-home', routerLink: ['/permission'] },
                     { label: 'Départements', icon: 'pi pi-building', routerLink: ['/liste-tableau']},
+                    { label: 'Tableau Départements', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/dashboard-departements'] },
                     // { label: 'Comparaison', icon: 'pi pi-fw pi-home', routerLink: ['/comparaison'] },
                     // { label: 'Creation', icon: 'pi pi-fw pi-home', routerLink: ['/created'] },
                     // { label: 'Actualités', icon: 'pi pi-fw pi-home', routerLink: ['/actualités'] },

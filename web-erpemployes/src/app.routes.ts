@@ -45,6 +45,11 @@ export const appRoutes: Routes = [
                 data: { breadcrumb: 'Départements' },
             },
             {
+                path: 'dashboard-departements',
+                loadComponent: () => import('@/app/pages/dashboard-departements/dashboard-departements').then((c) => c.DashboardDepartements),
+                data: { breadcrumb: 'Tableau de bord Départements' },
+            },
+            {
                 path: AppConstantRoute.Permission_PATH,
                 loadComponent: () => import('@/app/pages/page-permissions/pages-permissions').then((c) => c.PagesPermissions),
                 data: { breadcrumb: 'Gestion desPermision et Roles' },
