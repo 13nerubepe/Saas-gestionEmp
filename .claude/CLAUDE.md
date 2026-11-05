@@ -84,16 +84,17 @@ API error `code`) and `agents/`. The API URL is in `src/environments/`.
   after a reload (`authGuard` → `restoreSession()`).
 - The app runs without zone.js: state changed in an HTTP callback must be a
   signal, or the view does not update.
-- Delivered scope is US-01 and US-02 only: login, sign-up, dashboard (stats
+- Delivered scope is US-01 to US-04: login, sign-up, dashboard (stats
   and legal question card), legal assistant (history, follow-ups), profile
-  (name, answer language). The legal form is hidden for employees
+  (name, answer language), clients (list, search, record, interaction
+  history; `core/crm/`, `pages/clients/`). The legal form is hidden for employees
   (`AuthService.isFounder`). Product name: `APP_NAME` in `src/app/constants.ts`.
 - The Sakai template demos were removed. Work-in-progress components for
   later stories (created-user, created-entreprise, assistant-ai,
   prochain-event, activated-desactived, liste-tableau-departement,
   reinitialisation) are kept in the code but not routed.
-- US-03/US-04 (clients, interactions) exist as an API on branch
-  `feature/US-03-US-04-clients`, not merged.
+- Sprint 3 plan (finance and clients, after the teacher's feedback):
+  `docs/sprints/sprint-03.md`.
 
 ## Backend architecture
 
@@ -104,7 +105,7 @@ One Django app per business domain:
 | `core` | abstract `BaseModel`, `CompanyOwnedModel`; health endpoint | shared |
 | `accounts` | `Company`, `User`, `Membership`, `DataRequest` | M1 |
 | `agents` | `Agent`, `Conversation`, `Query`, `Answer`, `Source`, `LegalReference`, `ProposedAction`, `AuditLogEntry`, `UsageRecord` | M2, M3 |
-| `crm` | `Client`, `Interaction`, `FollowUp`, `Opportunity` | M5 |
+| `crm` | `Client`, `Interaction` (in place); `FollowUp`, `Opportunity` (planned) | M5 |
 | `billing` | `Invoice`, `InvoiceLine`, `Payment`, `CashMovement` | M4 |
 | `documents` | `Document` | M3, M6 |
 | `hr` | `Employee`, `LeaveRequest`, `OnboardingPlan`, `OnboardingStep` | M6 |
