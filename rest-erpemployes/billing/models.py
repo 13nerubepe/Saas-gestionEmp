@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -18,6 +19,8 @@ class Invoice(CompanyOwnedModel):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
         ISSUED = "issued", _("Issued")
+        # Set by the payment service once the payments cover the total.
+        PAID = "paid", _("Paid")
 
     client = models.ForeignKey("crm.Client", on_delete=models.PROTECT, related_name="invoices")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
@@ -32,6 +35,8 @@ class Invoice(CompanyOwnedModel):
     subtotal = models.DecimalField(**AMOUNT, default=0)
     tax_total = models.DecimalField(**AMOUNT, default=0)
     total = models.DecimalField(**AMOUNT, default=0)
+    # Sum of the payments, kept by billing.services.record_payment.
+    amount_paid = models.DecimalField(**AMOUNT, default=0)
 
     # Frozen when the invoice is issued.
     seller_name = models.CharField(max_length=255, blank=True)
@@ -52,6 +57,10 @@ class Invoice(CompanyOwnedModel):
 
     def __str__(self):
         return self.number or f"Draft {self.id}"
+
+    @property
+    def balance_due(self):
+        return self.total - self.amount_paid
 
 
 class InvoiceLine(BaseModel):
@@ -84,3 +93,28 @@ class InvoiceSequence(CompanyOwnedModel):
         constraints = [
             models.UniqueConstraint(fields=["company", "year"], name="unique_sequence_per_year"),
         ]
+
+
+class Payment(CompanyOwnedModel):
+    """US-15: money received for an invoice, entered by the founder.
+
+    Never edited or deleted: like the invoice it pays, it is part of the books.
+    """
+
+    invoice = models.ForeignKey(Invoice, on_delete=models.PROTECT, related_name="payments")
+    amount = models.DecimalField(**AMOUNT)
+    paid_on = models.DateField()
+    # A code from the country rules (cash, MTN Mobile Money, bank transfer…).
+    method = models.CharField(max_length=30)
+    reference = models.CharField(
+        max_length=100, blank=True, help_text="Transaction id, cheque number…"
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["-paid_on", "-created_at"]
+
+    def __str__(self):
+        return f"{self.amount} {self.invoice.currency} — {self.invoice}"

@@ -1,5 +1,6 @@
 import hashlib
 import re
+from typing import Literal, get_args, get_origin
 
 from django.conf import settings
 
@@ -20,7 +21,18 @@ class FakeProvider:
         return [self._embed_one(text) for text in texts]
 
     def generate_json(self, *, system, prompt, schema: type[SchemaT]) -> SchemaT:
-        return schema(answer="Fake answer.", cited=[1])
+        """A valid instance of any answer schema: text fields say "Fake <name>.",
+        number lists cite passage 1, choices take their first value."""
+        values = {}
+        for name, field in schema.model_fields.items():
+            annotation = field.annotation
+            if get_origin(annotation) is list:
+                values[name] = [1]
+            elif get_origin(annotation) is Literal:
+                values[name] = get_args(annotation)[0]
+            elif annotation is str:
+                values[name] = "Fake answer." if name == "answer" else f"Fake {name}."
+        return schema(**values)
 
     def _embed_one(self, text):
         vector = [0.0] * settings.EMBEDDING_DIMENSIONS

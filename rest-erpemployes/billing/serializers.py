@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.utils import timezone
 from rest_framework import serializers
 
-from billing.models import Invoice, InvoiceLine
+from billing.models import Invoice, InvoiceLine, Payment
 from crm.models import Client
 
 
@@ -27,6 +27,21 @@ class InvoiceLineSerializer(serializers.ModelSerializer):
         read_only_fields = ["tax_rate", "subtotal", "tax_amount"]
 
 
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ["id", "amount", "paid_on", "method", "reference", "created_at"]
+        read_only_fields = fields
+
+
+class PaymentWriteSerializer(serializers.Serializer):
+    amount = serializers.DecimalField(max_digits=18, decimal_places=2)
+    paid_on = serializers.DateField()
+    # Checked against the country's payment methods by the service.
+    method = serializers.CharField(max_length=30)
+    reference = serializers.CharField(max_length=100, required=False, allow_blank=True, default="")
+
+
 class InvoiceSerializer(serializers.ModelSerializer):
     """Read side: an invoice with its lines and totals."""
 
@@ -34,6 +49,8 @@ class InvoiceSerializer(serializers.ModelSerializer):
     client_display_name = serializers.SerializerMethodField()
     is_overdue = serializers.SerializerMethodField()
     lines = InvoiceLineSerializer(many=True, read_only=True)
+    payments = PaymentSerializer(many=True, read_only=True)
+    balance_due = serializers.DecimalField(max_digits=18, decimal_places=2, read_only=True)
 
     class Meta:
         model = Invoice
@@ -51,7 +68,10 @@ class InvoiceSerializer(serializers.ModelSerializer):
             "subtotal",
             "tax_total",
             "total",
+            "amount_paid",
+            "balance_due",
             "lines",
+            "payments",
             "seller_name",
             "seller_tax_id",
             "client_name",
@@ -98,9 +118,67 @@ class TaxRateSerializer(serializers.Serializer):
     label = serializers.CharField()
 
 
+class PaymentMethodSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    label = serializers.CharField()
+
+
 class InvoicingRulesSerializer(serializers.Serializer):
     country = serializers.CharField()
     currency = serializers.CharField()
     currency_decimals = serializers.IntegerField()
     default_tax_rate = serializers.CharField()
     tax_rates = TaxRateSerializer(many=True)
+    payment_methods = PaymentMethodSerializer(many=True)
+
+
+def _amount(**kwargs):
+    return serializers.DecimalField(max_digits=18, decimal_places=2, **kwargs)
+
+
+class ReceivableSerializer(serializers.Serializer):
+    client_id = serializers.UUIDField()
+    client_name = serializers.CharField()
+    total_due = _amount()
+    overdue_due = _amount()
+    invoice_count = serializers.IntegerField()
+    max_days_late = serializers.IntegerField()
+
+
+class AgingSerializer(serializers.Serializer):
+    not_due = _amount()
+    days_1_30 = _amount()
+    days_31_60 = _amount()
+    days_61_90 = _amount()
+    days_over_90 = _amount()
+
+
+class FinancialSummarySerializer(serializers.Serializer):
+    currency = serializers.CharField()
+    today = serializers.DateField()
+    invoiced_this_year = _amount()
+    invoiced_this_month = _amount()
+    collected_this_year = _amount()
+    collected_this_month = _amount()
+    outstanding = _amount()
+    overdue = _amount()
+    open_count = serializers.IntegerField()
+    overdue_count = serializers.IntegerField()
+    draft_count = serializers.IntegerField()
+    aging = AgingSerializer()
+    receivables = ReceivableSerializer(many=True)
+    receivables_count = serializers.IntegerField()
+
+
+class ClientFinancialsSerializer(serializers.Serializer):
+    currency = serializers.CharField()
+    invoiced = _amount()
+    paid = _amount()
+    due = _amount()
+    overdue = _amount()
+    invoice_count = serializers.IntegerField()
+    paid_invoice_count = serializers.IntegerField()
+    last_issue_date = serializers.DateField(allow_null=True)
+    average_days_late = serializers.IntegerField(
+        allow_null=True, help_text="Over paid invoices; null when none is paid yet."
+    )

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "agents",
     "crm",
     "billing",
+    "advisor",
 ]
 
 MIDDLEWARE = [

@@ -24,6 +24,12 @@ class TaxRate:
 
 
 @dataclass(frozen=True)
+class PaymentMethod:
+    code: str
+    label: str
+
+
+@dataclass(frozen=True)
 class CountryRules:
     currency: str
     # Decimal places of the currency: amounts are rounded to this when computed.
@@ -33,6 +39,8 @@ class CountryRules:
     # Company fields that must be filled before an invoice is issued.
     required_seller_fields: tuple[str, ...]
     invoice_prefix: str
+    # How clients pay in this country: mobile money operators differ by country.
+    payment_methods: tuple[PaymentMethod, ...]
 
 
 COUNTRY_RULES = {
@@ -47,6 +55,14 @@ COUNTRY_RULES = {
         # NIU (taxpayer number) on every invoice.
         required_seller_fields=("tax_id",),
         invoice_prefix="FAC",
+        payment_methods=(
+            PaymentMethod("cash", _("Cash")),
+            PaymentMethod("mtn_momo", _("MTN Mobile Money")),
+            PaymentMethod("orange_money", _("Orange Money")),
+            PaymentMethod("bank_transfer", _("Bank transfer")),
+            PaymentMethod("cheque", _("Cheque")),
+            PaymentMethod("other", _("Other")),
+        ),
     ),
 }
 

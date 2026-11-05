@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
 
-from billing.models import Invoice, InvoiceLine, InvoiceSequence
+from billing.models import Invoice, InvoiceLine, InvoiceSequence, Payment
 from billing.rules import rules_for
 
 
@@ -39,6 +39,18 @@ class SellerDetailsMissing(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("Complete your company details (taxpayer number) before issuing.")
     default_code = "seller_details_missing"
+
+
+class InvoiceNotPayable(APIException):
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = _("Only an issued invoice with a balance due can receive a payment.")
+    default_code = "invoice_not_payable"
+
+
+class PaymentExceedsBalance(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("The payment is larger than the balance due.")
+    default_code = "payment_exceeds_balance"
 
 
 def _rules(company):
@@ -163,3 +175,48 @@ def issue_invoice(invoice, *, today=None):
     )
     invoice.save()
     return invoice
+
+
+@transaction.atomic
+def record_payment(invoice, *, amount, paid_on, method, user, reference=""):
+    """Record money received for an issued invoice (US-15).
+
+    The invoice row is locked so two payments entered at the same moment
+    cannot both pass the balance check. When the payments cover the total,
+    the invoice becomes paid.
+    """
+    invoice = Invoice.objects.select_for_update().select_related("company").get(pk=invoice.pk)
+    if invoice.status != Invoice.Status.ISSUED:
+        raise InvoiceNotPayable()
+
+    rules = _rules(invoice.company)
+    if method not in {m.code for m in rules.payment_methods}:
+        raise serializers.ValidationError(
+            {"method": [_("Unknown payment method.")]}, code="invalid_payment_method"
+        )
+    if paid_on > timezone.localdate():
+        raise serializers.ValidationError(
+            {"paid_on": [_("A payment cannot be dated in the future.")]}, code="future_payment"
+        )
+    amount = _round(amount, rules.currency_decimals)
+    if amount <= 0:
+        raise serializers.ValidationError(
+            {"amount": [_("The amount must be positive.")]}, code="invalid_amount"
+        )
+    if amount > invoice.balance_due:
+        raise PaymentExceedsBalance()
+
+    payment = Payment.objects.create(
+        company=invoice.company,
+        invoice=invoice,
+        amount=amount,
+        paid_on=paid_on,
+        method=method,
+        reference=reference,
+        created_by=user,
+    )
+    invoice.amount_paid += amount
+    if invoice.balance_due == 0:
+        invoice.status = Invoice.Status.PAID
+    invoice.save(update_fields=["amount_paid", "status", "updated_at"])
+    return payment

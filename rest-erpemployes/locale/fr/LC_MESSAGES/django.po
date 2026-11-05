@@ -58,3 +58,87 @@ msgstr "Complétez les informations de votre entreprise (NIU) avant d'émettre l
 #, python-format
 msgid "Unknown tax rate: %(code)s."
 msgstr "Taux de TVA inconnu : %(code)s."
+
+#: billing/models.py
+msgid "Paid"
+msgstr "Payée"
+
+#: billing/rules.py
+msgid "Cash"
+msgstr "Espèces"
+
+#: billing/rules.py
+msgid "MTN Mobile Money"
+msgstr "MTN Mobile Money"
+
+#: billing/rules.py
+msgid "Orange Money"
+msgstr "Orange Money"
+
+#: billing/rules.py
+msgid "Bank transfer"
+msgstr "Virement bancaire"
+
+#: billing/rules.py
+msgid "Cheque"
+msgstr "Chèque"
+
+#: billing/rules.py
+msgid "Other"
+msgstr "Autre"
+
+#: billing/services.py
+msgid "Only an issued invoice with a balance due can receive a payment."
+msgstr "Seule une facture émise avec un reste à payer peut recevoir un paiement."
+
+#: billing/services.py
+msgid "The payment is larger than the balance due."
+msgstr "Le paiement dépasse le reste à payer."
+
+#: billing/services.py
+msgid "Unknown payment method."
+msgstr "Moyen de paiement inconnu."
+
+#: billing/services.py
+msgid "A payment cannot be dated in the future."
+msgstr "Un paiement ne peut pas être daté dans le futur."
+
+#: billing/services.py
+msgid "The amount must be positive."
+msgstr "Le montant doit être positif."
+
+#: advisor/models.py
+msgid "Question"
+msgstr "Question"
+
+#: advisor/models.py
+msgid "Payment reminder draft"
+msgstr "Brouillon de relance"
+
+#: advisor/models.py
+msgid "High"
+msgstr "Élevée"
+
+#: advisor/models.py
+msgid "Medium"
+msgstr "Moyenne"
+
+#: advisor/models.py
+msgid "Low"
+msgstr "Faible"
+
+#: advisor/services.py
+msgid "There is no data to analyse yet. Record your clients, invoices and payments in the application, then ask again."
+msgstr "Il n'y a pas encore de données à analyser. Enregistrez vos clients, factures et paiements dans l'application, puis reposez votre question."
+
+#: advisor/services.py
+msgid "Only an issued invoice with a balance due can be reminded."
+msgstr "Seule une facture émise avec un reste à payer peut faire l'objet d'une relance."
+
+#: advisor/serializers.py
+msgid "Advice based on the data recorded in the application today. It does not replace a chartered accountant."
+msgstr "Conseil fondé sur les données enregistrées dans l'application à ce jour. Il ne remplace pas un expert-comptable."
+
+#: advisor/serializers.py
+msgid "The data does not answer this question with certainty. Before an important decision, ask a chartered accountant (expert-comptable)."
+msgstr "Les données ne permettent pas de répondre avec certitude. Avant une décision importante, consultez un expert-comptable."
