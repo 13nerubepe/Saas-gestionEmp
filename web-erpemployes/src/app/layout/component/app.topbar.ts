@@ -12,24 +12,41 @@ import { APP_NAME } from '@/app/constants';
     imports: [RouterModule, CommonModule, StyleClassModule],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
-            <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()" title="Menu">
-                <i class="pi pi-bars"></i>
+            <button type="button" class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()" title="Menu" aria-label="Ouvrir ou fermer le menu">
+                <i class="pi pi-bars" aria-hidden="true"></i>
             </button>
-            <a class="layout-topbar-logo" routerLink="/">
-                <i class="pi pi-briefcase text-3xl text-primary"></i>
+            <a class="layout-topbar-logo" routerLink="/" [attr.aria-label]="appName + ', tableau de bord'">
+                <i class="pi pi-briefcase text-3xl text-primary" aria-hidden="true"></i>
                 <span>{{ appName }}</span>
             </a>
         </div>
 
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
-                <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()" [title]="layoutService.isDarkTheme() ? 'Mode clair' : 'Mode sombre'">
-                    <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
+                <button
+                    type="button"
+                    class="layout-topbar-action"
+                    (click)="toggleDarkMode()"
+                    [title]="layoutService.isDarkTheme() ? 'Mode clair' : 'Mode sombre'"
+                    [attr.aria-label]="layoutService.isDarkTheme() ? 'Passer en mode clair' : 'Passer en mode sombre'"
+                >
+                    <i aria-hidden="true" [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
                 </button>
             </div>
 
-            <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
-                <i class="pi pi-ellipsis-v"></i>
+            <button
+                type="button"
+                class="layout-topbar-menu-button layout-topbar-action"
+                aria-label="Mon compte"
+                title="Mon compte"
+                pStyleClass="@next"
+                enterFromClass="hidden"
+                enterActiveClass="animate-scalein"
+                leaveToClass="hidden"
+                leaveActiveClass="animate-fadeout"
+                [hideOnOutsideClick]="true"
+            >
+                <i class="pi pi-user" aria-hidden="true"></i>
             </button>
 
             <div class="layout-topbar-menu hidden lg:block">

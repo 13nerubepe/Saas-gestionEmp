@@ -17,6 +17,20 @@ interface LayoutState {
     activePath: string | null;
 }
 
+/** localStorage key of the theme the user picked ('dark' | 'light'). */
+const THEME_KEY = 'theme';
+
+/** The user's last choice, else the phone or computer setting. */
+function initialDarkTheme(): boolean {
+    try {
+        const stored = localStorage.getItem(THEME_KEY);
+        if (stored) return stored === 'dark';
+    } catch {
+        // Storage blocked (private mode): fall back to the system setting.
+    }
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -25,7 +39,7 @@ export class LayoutService {
         preset: 'Aura',
         primary: 'emerald',
         surface: null,
-        darkTheme: false,
+        darkTheme: initialDarkTheme(),
         menuMode: 'static'
     });
 
@@ -55,6 +69,8 @@ export class LayoutService {
     private initialized = false;
 
     constructor() {
+        // Apply the initial theme at once (no transition), then follow changes.
+        this.toggleDarkMode();
         effect(() => {
             const config = this.layoutConfig();
 
@@ -64,6 +80,11 @@ export class LayoutService {
             }
 
             this.handleDarkModeTransition(config);
+            try {
+                localStorage.setItem(THEME_KEY, config.darkTheme ? 'dark' : 'light');
+            } catch {
+                // Not remembered: the theme still applies for this visit.
+            }
         });
     }
 

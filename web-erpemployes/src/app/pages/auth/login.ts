@@ -16,12 +16,6 @@ import { APP_NAME } from '@/app/constants';
     templateUrl: './login.html'
 })
 export class Login {
-    // email: string = '';
-    //
-    // password: string = '';
-    //
-    // checked: boolean = false;
-
     private readonly fb = inject(FormBuilder);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);

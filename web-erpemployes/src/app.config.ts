@@ -57,6 +57,14 @@ const AppPreset = definePreset(Lara, {
 
         colorScheme: {
             light: {
+                // Orange 500 on white is 2.8:1 (white text on buttons too); 600 reaches
+                // 3.6:1 and keeps the brand colour. Dark mode keeps the Lara default.
+                primary: {
+                    color: '{primary.600}',
+                    contrastColor: '#ffffff',
+                    hoverColor: '{primary.700}',
+                    activeColor: '{primary.800}'
+                },
                 surface: {
                     0: '#ffffff',
                     50: '{slate.50}',

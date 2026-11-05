@@ -28,7 +28,7 @@ function nowLocal(): string {
     providers: [ConfirmationService],
     template: `
         <div class="mb-4">
-            <a [routerLink]="['/', clientsPath]" class="text-sm text-primary"><i class="pi pi-arrow-left mr-1 text-xs"></i>Tous les clients</a>
+            <a [routerLink]="['/', clientsPath]" class="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-primary"><i class="pi pi-arrow-left text-xs" aria-hidden="true"></i>Tous les clients</a>
         </div>
 
         @if (error()) {
@@ -41,16 +41,31 @@ function nowLocal(): string {
                 <div class="col-span-12 lg:col-span-5">
                     <div class="card !mb-0 flex flex-col gap-4">
                         <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <h2 class="m-0 !text-xl font-semibold">{{ c.name }}</h2>
-                                <span class="text-sm text-surface-500">{{ kindLabels[c.kind] }}</span>
+                            <div class="min-w-0">
+                                <h1 class="!m-0 !text-2xl !font-semibold !leading-tight">{{ c.name }}</h1>
+                                <span class="text-sm text-muted-color">{{ kindLabels[c.kind] }}</span>
                             </div>
-                            <p-tag [value]="statusLabels[c.status]" [severity]="statusSeverity[c.status]" />
+                            <p-tag class="shrink-0 whitespace-nowrap" [value]="statusLabels[c.status]" [severity]="statusSeverity[c.status]" />
                         </div>
+
+                        <!-- One tap to reach the client: the founder is often on a phone. -->
+                        @if (c.phone || c.email) {
+                            <div class="flex flex-wrap gap-2">
+                                @if (c.phone) {
+                                    <a pButton [href]="'tel:' + phoneDigits(c.phone, true)" [outlined]="true"><i pButtonIcon class="pi pi-phone"></i><span pButtonLabel>Appeler</span></a>
+                                    @if (whatsappUrl(c.phone); as wa) {
+                                        <a pButton [href]="wa" target="_blank" rel="noopener" [outlined]="true" severity="success"><i pButtonIcon class="pi pi-whatsapp"></i><span pButtonLabel>WhatsApp</span></a>
+                                    }
+                                }
+                                @if (c.email) {
+                                    <a pButton [href]="'mailto:' + c.email" [outlined]="true" severity="secondary"><i pButtonIcon class="pi pi-envelope"></i><span pButtonLabel>Écrire</span></a>
+                                }
+                            </div>
+                        }
 
                         <dl class="m-0 grid grid-cols-3 gap-x-3 gap-y-2 text-sm">
                             @for (row of details(c); track row.label) {
-                                <dt class="text-surface-500">{{ row.label }}</dt>
+                                <dt class="text-muted-color">{{ row.label }}</dt>
                                 <dd class="col-span-2 m-0 break-words">{{ row.value || '—' }}</dd>
                             }
                         </dl>
@@ -59,9 +74,9 @@ function nowLocal(): string {
                             <p class="m-0 whitespace-pre-line rounded-lg bg-surface-100 p-3 text-sm dark:bg-surface-800">{{ c.notes }}</p>
                         }
 
-                        <div class="flex gap-2">
-                            <p-button label="Modifier" icon="pi pi-pencil" [outlined]="true" size="small" (onClick)="formVisible.set(true)" />
-                            <p-button label="Supprimer" icon="pi pi-trash" severity="danger" [text]="true" size="small" (onClick)="confirmDelete(c)" />
+                        <div class="flex flex-wrap justify-between gap-2 border-t border-surface-200 pt-4 dark:border-surface-700">
+                            <p-button label="Modifier" icon="pi pi-pencil" [outlined]="true" (onClick)="formVisible.set(true)" />
+                            <p-button label="Supprimer" icon="pi pi-trash" severity="danger" [text]="true" (onClick)="confirmDelete(c)" />
                         </div>
                     </div>
                 </div>
@@ -69,28 +84,31 @@ function nowLocal(): string {
                 <!-- History -->
                 <div class="col-span-12 lg:col-span-7">
                     <div class="card !mb-0 flex flex-col gap-4">
-                        <h2 class="m-0 !text-xl font-semibold">Historique des échanges</h2>
+                        <div>
+                            <h2 class="!m-0 !text-lg font-semibold">Historique des échanges</h2>
+                            <p class="m-0 mt-1 text-sm text-muted-color">Notez chaque appel, rendez-vous ou message pour garder le fil.</p>
+                        </div>
 
                         <form class="flex flex-col gap-3 rounded-lg border border-surface-200 p-3 dark:border-surface-700" (ngSubmit)="record(c)">
                             <div class="flex flex-wrap gap-3">
-                                <p-select name="kind" [(ngModel)]="newKind" [options]="interactionOptions" optionLabel="label" optionValue="value" ariaLabel="Type d'échange" />
+                                <p-select name="kind" class="min-w-36" [(ngModel)]="newKind" [options]="interactionOptions" optionLabel="label" optionValue="value" ariaLabel="Type d'échange" />
                                 <input type="datetime-local" name="occurred_at" [(ngModel)]="newOccurredAt" class="p-inputtext" aria-label="Date de l'échange" [max]="maxOccurredAt" />
                             </div>
-                            <textarea pTextarea name="summary" [(ngModel)]="newSummary" rows="2" [autoResize]="true" placeholder="Résumé de l'échange…" class="w-full"></textarea>
+                            <textarea pTextarea name="summary" [(ngModel)]="newSummary" rows="2" [autoResize]="true" placeholder="Résumé de l'échange…" aria-label="Résumé de l'échange" class="w-full"></textarea>
                             @if (recordError()) {
                                 <p class="m-0 text-sm text-red-600" role="alert">{{ recordError() }}</p>
                             }
                             <div class="flex justify-end">
-                                <p-button type="submit" label="Ajouter" icon="pi pi-plus" size="small" [loading]="recording()" [disabled]="!newSummary.trim() || !newOccurredAt" />
+                                <p-button type="submit" label="Ajouter" icon="pi pi-plus" [loading]="recording()" [disabled]="!newSummary.trim() || !newOccurredAt" />
                             </div>
                         </form>
 
                         <ol class="m-0 flex list-none flex-col gap-3 p-0">
                             @for (i of interactions(); track i.id) {
                                 <li class="flex gap-3">
-                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary dark:bg-primary-900"><i [class]="kindIcons[i.kind]"></i></span>
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary dark:bg-primary-400/10" aria-hidden="true"><i [class]="kindIcons[i.kind]"></i></span>
                                     <div class="flex flex-col gap-1">
-                                        <span class="text-xs text-surface-500"
+                                        <span class="text-xs text-muted-color"
                                             >{{ kindLabelsInteraction[i.kind] }} · {{ i.occurred_at | date: 'd MMM y, HH:mm' }}
                                             @if (i.created_by_email) {
                                                 · {{ i.created_by_email }}
@@ -101,7 +119,7 @@ function nowLocal(): string {
                                 </li>
                             } @empty {
                                 @if (!loadingInteractions()) {
-                                    <li class="text-sm text-surface-500">Aucun échange enregistré.</li>
+                                    <li class="py-4 text-center text-sm text-muted-color">Aucun échange enregistré. Notez le premier ci-dessus.</li>
                                 }
                             }
                         </ol>
@@ -161,6 +179,18 @@ export class ClientDetail implements OnInit {
             error: (error) => this.error.set(error?.status === 404 ? 'Client introuvable.' : apiErrorMessage(error))
         });
         this.loadInteractions(this.id(), 1);
+    }
+
+    /** Digits of a phone number, keeping a leading "+" for tel: links. */
+    phoneDigits(phone: string, keepPlus = false): string {
+        const digits = phone.replace(/[^\d+]/g, '');
+        return keepPlus ? digits : digits.replace(/^\+|^00/, '');
+    }
+
+    /** wa.me link, only for numbers written in international format (+237…, 00237…). */
+    whatsappUrl(phone: string): string | null {
+        const compact = phone.replace(/[^\d+]/g, '');
+        return /^(\+|00)\d{8,}$/.test(compact) ? `https://wa.me/${this.phoneDigits(compact)}` : null;
     }
 
     details(c: Client): { label: string; value: string }[] {
