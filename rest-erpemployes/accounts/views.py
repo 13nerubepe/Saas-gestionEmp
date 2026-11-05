@@ -12,11 +12,13 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from accounts.serializers import (
     AccessTokenSerializer,
+    CompanySerializer,
     LoginSerializer,
     RegisterSerializer,
     UserSerializer,
 )
 from accounts.services import register_founder
+from accounts.tenancy import COMPANY_HEADER_PARAMETER, IsCompanyFounder, IsCompanyMember
 
 
 def set_refresh_cookie(response, refresh_token):
@@ -126,3 +128,23 @@ class MeView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+@extend_schema(tags=["auth"], parameters=[COMPANY_HEADER_PARAMETER])
+class CompanyView(generics.RetrieveUpdateAPIView):
+    """The active company: every member reads it, only a founder edits it.
+
+    Its taxpayer number (NIU in Cameroon) is printed on invoices, which cannot
+    be issued without it.
+    """
+
+    serializer_class = CompanySerializer
+    http_method_names = ["get", "patch", "options"]
+
+    def get_permissions(self):
+        if self.request.method == "PATCH":
+            return [IsCompanyFounder()]
+        return [IsCompanyMember()]
+
+    def get_object(self):
+        return self.request.company

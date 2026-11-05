@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 from rest_framework.response import Response
-from rest_framework.test import APIRequestFactory, force_authenticate
+from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
 from rest_framework.views import APIView
 
 from accounts.models import Membership
@@ -90,3 +90,45 @@ def test_founder_only_view_rejects_employees():
 
     assert call(FounderView, user=employee.user).status_code == 403
     assert call(FounderView, user=founder.user).status_code == 200
+
+
+# Active company details (needed on invoices)
+
+COMPANY_URL = "/api/v1/auth/company/"
+
+
+def _api(membership):
+    api = APIClient()
+    api.force_authenticate(membership.user)
+    api.credentials(HTTP_X_COMPANY_ID=str(membership.company.id))
+    return api
+
+
+def test_founder_edits_company_details_but_not_country_or_currency():
+    founder = MembershipFactory()
+    response = _api(founder).patch(
+        COMPANY_URL, {"tax_id": "M0123", "legal_form": "SARL", "country": "FR", "currency": "EUR"}
+    )
+    assert response.status_code == 200
+    founder.company.refresh_from_db()
+    assert (founder.company.tax_id, founder.company.legal_form) == ("M0123", "SARL")
+    assert (founder.company.country, founder.company.currency) == ("CM", "XAF")
+
+
+def test_employee_reads_company_but_cannot_edit():
+    founder = MembershipFactory()
+    employee = MembershipFactory(company=founder.company, role=Membership.Role.EMPLOYEE)
+    api = _api(employee)
+    assert api.get(COMPANY_URL).data["name"] == founder.company.name
+    assert api.patch(COMPANY_URL, {"tax_id": "X"}).status_code == 403
+
+
+def test_company_endpoint_uses_the_active_company_only():
+    founder = MembershipFactory()
+    other = MembershipFactory()
+    api = APIClient()
+    api.force_authenticate(founder.user)
+    api.credentials(HTTP_X_COMPANY_ID=str(other.company.id))
+    assert api.patch(COMPANY_URL, {"tax_id": "HACK"}).status_code == 403
+    other.company.refresh_from_db()
+    assert other.company.tax_id == ""

@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from accounts.models import Membership, User
+from accounts.models import Company, Membership, User
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -63,6 +63,15 @@ class MembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
         fields = ["company_id", "company_name", "country", "role"]
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    """The active company. Country and currency drive the legal rules: read-only."""
+
+    class Meta:
+        model = Company
+        fields = ["id", "name", "country", "currency", "legal_form", "tax_id"]
+        read_only_fields = ["id", "country", "currency"]
 
 
 class UserSerializer(serializers.ModelSerializer):

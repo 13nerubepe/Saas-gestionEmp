@@ -21,3 +21,40 @@ msgstr "Aucun texte juridique applicable n'a été trouvé pour cette question. 
 #: agents/views.py
 msgid "The AI service is temporarily unavailable. Try again later."
 msgstr "Le service d'IA est momentanément indisponible. Réessayez plus tard."
+
+#: billing/models.py
+msgid "Draft"
+msgstr "Brouillon"
+
+#: billing/models.py
+msgid "Issued"
+msgstr "Émise"
+
+#: billing/rules.py
+msgid "VAT 17.5% + council tax (19.25%)"
+msgstr "TVA 17,5 % + CAC (19,25 %)"
+
+#: billing/rules.py
+msgid "Exempt from VAT"
+msgstr "Exonéré de TVA"
+
+#: billing/services.py
+msgid "Invoicing is not available yet for your company's country."
+msgstr "La facturation n'est pas encore disponible pour le pays de votre entreprise."
+
+#: billing/services.py
+msgid "An issued invoice can no longer be changed."
+msgstr "Une facture émise ne peut plus être modifiée."
+
+#: billing/services.py
+msgid "Add at least one line before issuing the invoice."
+msgstr "Ajoutez au moins une ligne avant d'émettre la facture."
+
+#: billing/services.py
+msgid "Complete your company details (taxpayer number) before issuing."
+msgstr "Complétez les informations de votre entreprise (NIU) avant d'émettre la facture."
+
+#: billing/services.py
+#, python-format
+msgid "Unknown tax rate: %(code)s."
+msgstr "Taux de TVA inconnu : %(code)s."

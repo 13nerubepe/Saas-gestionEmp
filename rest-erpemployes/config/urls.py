@@ -14,6 +14,7 @@ api_v1_patterns = [
     path("auth/", include("accounts.urls")),
     path("agents/", include("agents.urls")),
     path("crm/", include("crm.urls")),
+    path("billing/", include("billing.urls")),
 ]
 
 urlpatterns = [
