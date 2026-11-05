@@ -59,3 +59,27 @@ body {
         align-items: center;
     }
 }
+
+/* Printing an invoice: only the document, without the app's chrome. */
+@media print {
+    .layout-topbar,
+    .layout-sidebar,
+    .layout-footer,
+    .layout-mask {
+        display: none !important;
+    }
+    html,
+    body {
+        background: #fff !important;
+    }
+    .layout-wrapper .layout-main-container {
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        transition: none !important;
+    }
+    .card {
+        box-shadow: none !important;
+        border: 0 !important;
+    }
+}

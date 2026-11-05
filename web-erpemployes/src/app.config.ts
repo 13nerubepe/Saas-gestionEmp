@@ -1,5 +1,7 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import { ApplicationConfig, LOCALE_ID, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 // import Aura from '@primeuix/themes/aura';
 import Lara from '@primeuix/themes/lara';
@@ -101,11 +103,16 @@ const AppPreset = definePreset(Lara, {
     }
 });
 
+// Dates and numbers in French ("5 novembre 2026"), like the rest of the interface.
+// To follow the user's language once the i18n library is in place.
+registerLocaleData(localeFr);
+
 export const appConfig: ApplicationConfig = {
     providers: [
         provideRouter(appRoutes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation(), withComponentInputBinding()),
         provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
         provideZonelessChangeDetection(),
+        { provide: LOCALE_ID, useValue: 'fr' },
         // providePrimeNG({ theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } } })
         providePrimeNG({ theme: { preset: AppPreset, options: { darkModeSelector: '.app-dark' } } })
     ]

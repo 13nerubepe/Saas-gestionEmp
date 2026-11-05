@@ -86,8 +86,10 @@ API error `code`) and `agents/`. The API URL is in `src/environments/`.
   signal, or the view does not update.
 - Delivered scope is US-01 to US-04: login, sign-up, dashboard (stats
   and legal question card), legal assistant (history, follow-ups), profile
-  (name, answer language), clients (list, search, record, interaction
-  history; `core/crm/`, `pages/clients/`). The legal form is hidden for employees
+  (name, answer language, company details and NIU for founders), clients
+  (list, search, record, interaction history; `core/crm/`, `pages/clients/`),
+  invoices for founders (list, draft editor, issue, print; `core/billing/`,
+  `pages/invoices/`). Dates and numbers use the `fr` locale (`app.config.ts`). The legal form is hidden for employees
   (`AuthService.isFounder`). Product name: `APP_NAME` in `src/app/constants.ts`.
 - The Sakai template demos were removed. Work-in-progress components for
   later stories (created-user, created-entreprise, assistant-ai,
@@ -106,7 +108,7 @@ One Django app per business domain:
 | `accounts` | `Company`, `User`, `Membership`, `DataRequest` | M1 |
 | `agents` | `Agent`, `Conversation`, `Query`, `Answer`, `Source`, `LegalReference`, `ProposedAction`, `AuditLogEntry`, `UsageRecord` | M2, M3 |
 | `crm` | `Client`, `Interaction` (in place); `FollowUp`, `Opportunity` (planned) | M5 |
-| `billing` | `Invoice`, `InvoiceLine`, `Payment`, `CashMovement` | M4 |
+| `billing` | `Invoice`, `InvoiceLine`, `InvoiceSequence` (in place); `Payment`, `CashMovement` (planned) | M4 |
 | `documents` | `Document` | M3, M6 |
 | `hr` | `Employee`, `LeaveRequest`, `OnboardingPlan`, `OnboardingStep` | M6 |
 | `planning` | `Obligation`, `Alert`, `ExternalConnection` | M7 |
@@ -129,7 +131,8 @@ Rules:
   the curated texts the agents cite (country or regional body, source, date),
   one row per article, loaded with `manage.py load_legal_texts`.
   `agents/jurisdictions.py` maps a country to the bodies of law that apply
-  (CM → CM, CEMAC, OHADA). `Obligation` templates will be per country too. Money fields always come with a currency (XAF first).
+  (CM → CM, CEMAC, OHADA). `billing/rules.py` holds the invoicing rules per
+  country (currency, VAT rates, mandatory seller fields). `Obligation` templates will be per country too. Money fields always come with a currency (XAF first).
 - **Cash flow is entered manually** (`CashMovement`); no bank integration.
 - **Thin views, logic in services.** Each app has `models.py`,
   `serializers.py`, `views.py`, `urls.py`, `services.py` (writes and business

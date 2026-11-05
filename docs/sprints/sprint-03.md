@@ -42,7 +42,7 @@ Le rattachement exact de chaque élément ci-dessous à une US reste à confirme
 | # | Élément | Thème | Qui | Points | État |
 |---|---|---|---|---|---|
 | 1 | US-03/04 : intégrer l'API clients et interactions, écrans liste et fiche | Clients, prospection | Front 1 + backend (revue) | 3 | Fait |
-| 2 | Factures : app `billing`, `Invoice` et `InvoiceLine`, brouillon → émise → payée / en retard, numérotation, mentions et TVA par pays, écrans | Facturation | Backend + Front 2 | 5 | À faire |
+| 2 | Factures : app `billing`, `Invoice` et `InvoiceLine`, brouillon → émise → payée / en retard, numérotation, mentions et TVA par pays, écrans | Facturation | Backend + Front 2 | 5 | Fait |
 | 3 | Paiements et trésorerie : `Payment`, `CashMovement`, solde, seuil d'alerte, vue « qui me doit quoi » | Sécuriser l'argent | Backend + Front 1 | 3 | À faire |
 | 4 | Agent comptable et fiscal : pipeline US-02 généralisé, textes OHADA comptables et CGI Cameroun | Conseils en comptabilité | Backend | 3 | À faire |
 | 5 | Relance des impayés : factures en retard, texte de relance rédigé par l'agent, envoyé par le fondateur | Rappels | Backend + Front 2 | 2 | À faire |
@@ -62,6 +62,20 @@ Le rattachement exact de chaque élément ci-dessous à une US reste à confirme
 ## Constat de l'élément 1
 
 - `ng test` ne fonctionne pas aujourd'hui : le builder Karma ne résout pas l'alias `@/` de `src/assets/styles.scss` (« Can't find stylesheet to import »). Aucun spec frontend ne peut donc tourner, ni en local ni en CI. À corriger avant d'ajouter `ng test` à la CI (action qualité du QA). Le spec de `CrmService` passe (4 sur 4) quand on retire les styles globaux de la config de test.
+
+## Constat de l'élément 2 (factures)
+
+Décisions prises, à valider par l'équipe :
+
+- **Numérotation** : continue par entreprise et par année, `FAC-2026-0001`, attribuée à l'émission sous verrou de ligne (deux émissions simultanées n'obtiennent jamais le même numéro, un échec n'en saute aucun).
+- **Facture émise figée** : plus de modification ni de suppression. L'émission copie le nom et le NIU du vendeur, le nom, le NIU et l'adresse du client. Une correction passera par un avoir (à faire).
+- **Règles par pays** dans `billing/rules.py` : devise, décimales, taux de TVA, mentions obligatoires. Cameroun : XAF sans centimes, TVA 17,5 % + CAC 10 % de la TVA = 19,25 %, ou exonéré. À vérifier avec les textes du CGI chargés à l'élément 4.
+- **Le NIU du vendeur est obligatoire** pour émettre. Nouvel endpoint `/api/v1/auth/company/` et section « Mon entreprise » dans le profil pour le saisir.
+- **Sans échéance**, la facture est payable à réception (échéance = date d'émission).
+- **Factures réservées aux fondateurs** (API et menu).
+- **Arrondi** : chaque ligne est arrondie, puis sa TVA. L'aperçu de l'éditeur applique la même règle que l'API, avec un test de chaque côté sur les mêmes chiffres.
+
+Pas encore fait : avoirs, RCCM et adresse du vendeur sur la facture, PDF (l'impression du navigateur donne un document propre), fuseau horaire par entreprise (les dates suivent `TIME_ZONE=UTC`, donc une facture émise entre minuit et 1 h à Douala porte la date de la veille).
 
 ## Sprint 4 pressenti
 

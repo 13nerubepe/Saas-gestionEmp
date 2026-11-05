@@ -8,7 +8,12 @@ const MESSAGES_BY_CODE: Record<string, string> = {
     not_authenticated: 'Votre session a expiré. Reconnectez-vous.',
     permission_denied: "Vous n'avez pas accès à cette action.",
     throttled: 'Trop de tentatives. Réessayez dans une minute.',
-    llm_unavailable: "Le service d'IA est momentanément indisponible. Réessayez plus tard."
+    llm_unavailable: "Le service d'IA est momentanément indisponible. Réessayez plus tard.",
+    invoicing_not_available: "La facturation n'est pas encore disponible pour le pays de votre entreprise.",
+    invoice_not_draft: 'Cette facture est émise : elle ne peut plus être modifiée.',
+    invoice_empty: "Ajoutez au moins une ligne avant d'émettre la facture.",
+    seller_details_missing: "Renseignez le NIU de votre entreprise (Mon profil) avant d'émettre une facture.",
+    invalid_tax_rate: 'Taux de TVA inconnu.'
 };
 
 /** A message to show the user for any failed API call. */

@@ -28,6 +28,27 @@ export const appRoutes: Routes = [
                 loadComponent: () => import('./app/pages/clients/client-detail').then((c) => c.ClientDetail),
                 data: { breadcrumb: 'Fiche client' }
             },
+            // US-14 invoices. Static paths first: 'nouvelle' must not be read as an id.
+            {
+                path: AppConstantRoute.Invoices_PATH,
+                loadComponent: () => import('./app/pages/invoices/invoices').then((c) => c.Invoices),
+                data: { breadcrumb: 'Factures' }
+            },
+            {
+                path: `${AppConstantRoute.Invoices_PATH}/nouvelle`,
+                loadComponent: () => import('./app/pages/invoices/invoice-editor').then((c) => c.InvoiceEditor),
+                data: { breadcrumb: 'Nouvelle facture' }
+            },
+            {
+                path: `${AppConstantRoute.Invoices_PATH}/:id`,
+                loadComponent: () => import('./app/pages/invoices/invoice-detail').then((c) => c.InvoiceDetail),
+                data: { breadcrumb: 'Facture' }
+            },
+            {
+                path: `${AppConstantRoute.Invoices_PATH}/:id/modifier`,
+                loadComponent: () => import('./app/pages/invoices/invoice-editor').then((c) => c.InvoiceEditor),
+                data: { breadcrumb: 'Modifier la facture' }
+            },
             {
                 path: AppConstantRoute.Profile_PATH,
                 loadComponent: () => import('./app/pages/profile/profile').then((c) => c.Profile),

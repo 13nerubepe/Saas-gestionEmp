@@ -12,6 +12,7 @@ import { Client, CrmService, Interaction, InteractionKind } from '@/app/core/crm
 import { CLIENT_KIND_LABELS, CLIENT_STATUS_LABELS, CLIENT_STATUS_SEVERITY, INTERACTION_KIND_ICONS, INTERACTION_KIND_LABELS, selectOptions } from '@/app/core/crm/crm-labels';
 import { apiErrorMessage } from '@/app/core/api-errors';
 import { AppConstantRoute } from '@/app/constants';
+import { AuthService } from '@/app/core/auth/auth.service';
 import { ClientForm } from './client-form';
 
 /** Local date-time for <input type="datetime-local">, e.g. 2026-11-05T14:30. */
@@ -72,6 +73,10 @@ function nowLocal(): string {
 
                         @if (c.notes) {
                             <p class="m-0 whitespace-pre-line rounded-lg bg-surface-100 p-3 text-sm dark:bg-surface-800">{{ c.notes }}</p>
+                        }
+
+                        @if (auth.isFounder()) {
+                            <a pButton [routerLink]="['/', invoicesPath, 'nouvelle']" [queryParams]="{ client: c.id }" class="w-full"><i pButtonIcon class="pi pi-file"></i><span pButtonLabel>Nouvelle facture</span></a>
                         }
 
                         <div class="flex flex-wrap justify-between gap-2 border-t border-surface-200 pt-4 dark:border-surface-700">
@@ -145,6 +150,7 @@ export class ClientDetail implements OnInit {
     private readonly crm = inject(CrmService);
     private readonly router = inject(Router);
     private readonly confirmation = inject(ConfirmationService);
+    protected readonly auth = inject(AuthService);
 
     /** Route parameter (withComponentInputBinding). */
     readonly id = input.required<string>();
@@ -159,6 +165,7 @@ export class ClientDetail implements OnInit {
     readonly formVisible = signal(false);
 
     readonly clientsPath = AppConstantRoute.Clients_PATH;
+    readonly invoicesPath = AppConstantRoute.Invoices_PATH;
     readonly kindLabels = CLIENT_KIND_LABELS;
     readonly statusLabels = CLIENT_STATUS_LABELS;
     readonly statusSeverity = CLIENT_STATUS_SEVERITY;
