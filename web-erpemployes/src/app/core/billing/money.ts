@@ -31,21 +31,23 @@ export function lineTotals(quantity: number, unitPrice: number, ratePercent: num
     return { subtotal, tax: roundAmount((subtotal * ratePercent) / 100, decimals) };
 }
 
-export type InvoiceDisplayStatus = 'draft' | 'issued' | 'overdue';
+export type InvoiceDisplayStatus = 'draft' | 'issued' | 'overdue' | 'paid';
 
 export function displayStatus(invoice: Invoice): InvoiceDisplayStatus {
-    if (invoice.status === 'draft') return 'draft';
+    if (invoice.status === 'draft' || invoice.status === 'paid') return invoice.status;
     return invoice.is_overdue ? 'overdue' : 'issued';
 }
 
 export const INVOICE_STATUS_LABELS: Record<InvoiceDisplayStatus, string> = {
     draft: 'Brouillon',
     issued: 'Émise',
-    overdue: 'En retard'
+    overdue: 'En retard',
+    paid: 'Payée'
 };
 
-export const INVOICE_STATUS_SEVERITY: Record<InvoiceDisplayStatus, 'secondary' | 'info' | 'danger'> = {
+export const INVOICE_STATUS_SEVERITY: Record<InvoiceDisplayStatus, 'secondary' | 'info' | 'danger' | 'success'> = {
     draft: 'secondary',
     issued: 'info',
-    overdue: 'danger'
+    overdue: 'danger',
+    paid: 'success'
 };

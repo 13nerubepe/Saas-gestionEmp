@@ -28,6 +28,11 @@ export const appRoutes: Routes = [
                 loadComponent: () => import('./app/pages/clients/client-detail').then((c) => c.ClientDetail),
                 data: { breadcrumb: 'Fiche client' }
             },
+            {
+                path: AppConstantRoute.Advisor_PATH,
+                loadComponent: () => import('./app/pages/advisor/advisor').then((c) => c.Advisor),
+                data: { breadcrumb: 'Conseiller financier' }
+            },
             // US-14 invoices. Static paths first: 'nouvelle' must not be read as an id.
             {
                 path: AppConstantRoute.Invoices_PATH,

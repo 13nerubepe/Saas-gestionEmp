@@ -20,10 +20,11 @@ describe('invoice amounts', () => {
         expect(formatMoney('65589.00', 'XAF').replace(/\s/g, ' ')).toBe('65 589 FCFA');
     });
 
-    it('shows an issued invoice past its due date as overdue', () => {
+    it('shows an unpaid invoice past its due date as overdue, never a paid one', () => {
         const invoice = { status: 'issued', is_overdue: true } as Invoice;
         expect(displayStatus(invoice)).toBe('overdue');
         expect(displayStatus({ ...invoice, is_overdue: false })).toBe('issued');
         expect(displayStatus({ ...invoice, status: 'draft' })).toBe('draft');
+        expect(displayStatus({ ...invoice, status: 'paid' })).toBe('paid');
     });
 });

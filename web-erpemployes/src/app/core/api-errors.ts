@@ -13,7 +13,10 @@ const MESSAGES_BY_CODE: Record<string, string> = {
     invoice_not_draft: 'Cette facture est émise : elle ne peut plus être modifiée.',
     invoice_empty: "Ajoutez au moins une ligne avant d'émettre la facture.",
     seller_details_missing: "Renseignez le NIU de votre entreprise (Mon profil) avant d'émettre une facture.",
-    invalid_tax_rate: 'Taux de TVA inconnu.'
+    invalid_tax_rate: 'Taux de TVA inconnu.',
+    invoice_not_payable: 'Seule une facture émise avec un reste à payer peut recevoir un paiement.',
+    payment_exceeds_balance: 'Le paiement dépasse le reste à payer.',
+    nothing_to_remind: 'Cette facture est déjà réglée : rien à relancer.'
 };
 
 /** A message to show the user for any failed API call. */

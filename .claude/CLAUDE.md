@@ -88,8 +88,10 @@ API error `code`) and `agents/`. The API URL is in `src/environments/`.
   and legal question card), legal assistant (history, follow-ups), profile
   (name, answer language, company details and NIU for founders), clients
   (list, search, record, interaction history; `core/crm/`, `pages/clients/`),
-  invoices for founders (list, draft editor, issue, print; `core/billing/`,
-  `pages/invoices/`). Dates and numbers use the `fr` locale (`app.config.ts`). The legal form is hidden for employees
+  invoices for founders (list, draft editor, issue, print, payments, AI
+  payment reminder draft; `core/billing/`, `pages/invoices/`), financial
+  advisor for founders (key figures, who owes what, AI advisor;
+  `core/advisor/`, `pages/advisor/`), client financial card. Dates and numbers use the `fr` locale (`app.config.ts`). The legal form is hidden for employees
   (`AuthService.isFounder`). Product name: `APP_NAME` in `src/app/constants.ts`.
 - The Sakai template demos were removed. Work-in-progress components for
   later stories (created-user, created-entreprise, assistant-ai,
@@ -108,7 +110,8 @@ One Django app per business domain:
 | `accounts` | `Company`, `User`, `Membership`, `DataRequest` | M1 |
 | `agents` | `Agent`, `Conversation`, `Query`, `Answer`, `Source`, `LegalReference`, `ProposedAction`, `AuditLogEntry`, `UsageRecord` | M2, M3 |
 | `crm` | `Client`, `Interaction` (in place); `FollowUp`, `Opportunity` (planned) | M5 |
-| `billing` | `Invoice`, `InvoiceLine`, `InvoiceSequence` (in place); `Payment`, `CashMovement` (planned) | M4 |
+| `billing` | `Invoice`, `InvoiceLine`, `InvoiceSequence`, `Payment` (in place); `CashMovement` (planned) | M4 |
+| `advisor` | `AdvisorExchange`; numbered facts from billing and crm (`facts.py`) | M4, M5 |
 | `documents` | `Document` | M3, M6 |
 | `hr` | `Employee`, `LeaveRequest`, `OnboardingPlan`, `OnboardingStep` | M6 |
 | `planning` | `Obligation`, `Alert`, `ExternalConnection` | M7 |
@@ -116,7 +119,9 @@ One Django app per business domain:
 Rules:
 
 - **Dependency direction.** Business apps may import from `accounts` and
-  `agents`. `accounts` and `agents` never import from business apps.
+  `agents`. `accounts` and `agents` never import from business apps. An agent
+  that reads business data is therefore a business app: `advisor` imports
+  `billing`, `crm` and `agents.llm`, never the other way round.
 - **Custom user model** (`accounts.User`, login by email) set in
   `AUTH_USER_MODEL` before the first migration.
 - **A user can belong to several companies.** `Membership` links `User` and
@@ -148,6 +153,15 @@ Rules:
   called. Cited passage numbers are checked against those sent. The disclaimer
   is added by the code, translated, never generated. Model calls happen before
   any write, so a provider failure leaves nothing half-saved.
+- **Advisor answers are grounded in the company's own data.** Figures (who
+  owes what, aging, revenue, payment delays) are computed by selectors in
+  `billing` and `crm`, never by the model. `advisor/facts.py` turns them into
+  numbered facts (user text quoted in « » and truncated); the model cites fact
+  numbers, the service keeps only valid ones, caps the confidence (no valid
+  citation means low) and low confidence sets a referral to a chartered
+  accountant. No data means no model call. Reminders are drafts the founder
+  sends: the agent sends nothing. Every exchange is stored (`AdvisorExchange`)
+  with the cited facts, model and prompt version.
 - **API errors carry a stable `code`** next to `detail` (`core/exceptions.py`).
 - **"My day" has no model.** It is a read over follow-ups, obligations, pending
   actions and overdue invoices.
@@ -225,6 +239,10 @@ npm run format
   Answer names the model that answered. On 2026-10-15, `gemini-flash-latest`
   and `gemini-3.7-flash` were overloaded (503) and `gemini-3.8-flash` took about
   15 minutes; `gemini-2.5-flash` is a fast fallback.
+- Advisor prompt `advisor-v1` has only run on the `fake` provider so far:
+  check its answers on Gemini with the fictitious demo data before a demo.
+- Payments are never edited or deleted; a correction mechanism (reversal) is
+  still to design, with credit notes.
 - French translations are compiled by hand (`locale/fr/LC_MESSAGES/django.mo`)
   because GNU gettext is not installed on every machine; recompile after
   editing the `.po` file.

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -15,13 +15,14 @@ import { EmptyState } from '@/app/commons/empty-state';
 import { mediaQuery, NARROW_SCREEN } from '@/app/commons/media';
 import { PageHeader } from '@/app/commons/page-header';
 
-type Filter = 'all' | 'draft' | 'issued' | 'overdue';
+type Filter = 'all' | 'draft' | 'issued' | 'overdue' | 'paid';
 
 const FILTERS: Record<Filter, InvoiceFilters> = {
     all: {},
     draft: { status: 'draft' },
     issued: { status: 'issued' },
-    overdue: { overdue: true }
+    overdue: { overdue: true },
+    paid: { status: 'paid' }
 };
 
 /** US-14: the company's invoices, filtered by status. A table on wide screens, cards on phones. */
@@ -142,13 +143,19 @@ export class Invoices implements OnInit {
         { label: 'Toutes', value: 'all' },
         { label: 'Brouillons', value: 'draft' },
         { label: 'Émises', value: 'issued' },
-        { label: 'En retard', value: 'overdue' }
+        { label: 'En retard', value: 'overdue' },
+        { label: 'Payées', value: 'paid' }
     ];
+
+    /** ?filtre=overdue, e.g. from the advisor page. */
+    readonly filtre = input<string>();
 
     filter: Filter = 'all';
     page = 1;
 
     ngOnInit(): void {
+        const requested = this.filtre();
+        if (requested && requested in FILTERS) this.filter = requested as Filter;
         this.loadPage(1);
     }
 

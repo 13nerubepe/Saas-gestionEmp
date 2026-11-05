@@ -13,6 +13,8 @@ import { CLIENT_KIND_LABELS, CLIENT_STATUS_LABELS, CLIENT_STATUS_SEVERITY, INTER
 import { apiErrorMessage } from '@/app/core/api-errors';
 import { AppConstantRoute } from '@/app/constants';
 import { AuthService } from '@/app/core/auth/auth.service';
+import { BillingService, ClientFinancials } from '@/app/core/billing/billing.service';
+import { formatMoney } from '@/app/core/billing/money';
 import { ClientForm } from './client-form';
 
 /** Local date-time for <input type="datetime-local">, e.g. 2026-11-05T14:30. */
@@ -73,6 +75,36 @@ function nowLocal(): string {
 
                         @if (c.notes) {
                             <p class="m-0 whitespace-pre-line rounded-lg bg-surface-100 p-3 text-sm dark:bg-surface-800">{{ c.notes }}</p>
+                        }
+
+                        @if (auth.isFounder() && financials(); as f) {
+                            <!-- Money side of the relationship, computed by the API. -->
+                            <section class="flex flex-col gap-2 rounded-xl border border-surface-200 p-3 dark:border-surface-700" aria-labelledby="client-money-title">
+                                <h3 id="client-money-title" class="!m-0 text-sm font-semibold">Situation financière</h3>
+                                @if (f.invoice_count === 0) {
+                                    <p class="!m-0 text-sm text-muted-color">Aucune facture émise pour ce client.</p>
+                                } @else {
+                                    <dl class="m-0 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                                        <dt class="text-muted-color">Facturé</dt>
+                                        <dd class="m-0 text-right tabular-nums">{{ money(f.invoiced, f.currency) }}</dd>
+                                        <dt class="text-muted-color">Payé</dt>
+                                        <dd class="m-0 text-right tabular-nums">{{ money(f.paid, f.currency) }}</dd>
+                                        <dt class="font-medium">Reste dû</dt>
+                                        <dd class="m-0 text-right font-semibold tabular-nums">{{ money(f.due, f.currency) }}</dd>
+                                        @if (Number(f.overdue) > 0) {
+                                            <dt class="text-red-600 dark:text-red-400">dont en retard</dt>
+                                            <dd class="m-0 text-right tabular-nums text-red-600 dark:text-red-400">{{ money(f.overdue, f.currency) }}</dd>
+                                        }
+                                    </dl>
+                                    <p class="!m-0 text-xs text-muted-color">
+                                        {{ f.invoice_count }} {{ f.invoice_count > 1 ? 'factures' : 'facture' }}
+                                        @if (f.average_days_late !== null) {
+                                            · paie en moyenne {{ f.average_days_late === 0 ? 'à l’échéance' : f.average_days_late + ' j après l’échéance' }}
+                                        }
+                                    </p>
+                                    <a [routerLink]="['/', invoicesPath]" class="text-xs font-medium text-primary">Voir les factures</a>
+                                }
+                            </section>
                         }
 
                         @if (auth.isFounder()) {
@@ -151,6 +183,10 @@ export class ClientDetail implements OnInit {
     private readonly router = inject(Router);
     private readonly confirmation = inject(ConfirmationService);
     protected readonly auth = inject(AuthService);
+    private readonly billing = inject(BillingService);
+
+    readonly financials = signal<ClientFinancials | null>(null);
+    readonly Number = Number;
 
     /** Route parameter (withComponentInputBinding). */
     readonly id = input.required<string>();
@@ -186,6 +222,16 @@ export class ClientDetail implements OnInit {
             error: (error) => this.error.set(error?.status === 404 ? 'Client introuvable.' : apiErrorMessage(error))
         });
         this.loadInteractions(this.id(), 1);
+        if (this.auth.isFounder()) {
+            this.billing.getClientFinancials(this.id()).subscribe({
+                next: (financials) => this.financials.set(financials),
+                error: () => undefined // The record is still useful without its money side.
+            });
+        }
+    }
+
+    money(amount: string, currency: string): string {
+        return formatMoney(amount, currency);
     }
 
     /** Digits of a phone number, keeping a leading "+" for tel: links. */

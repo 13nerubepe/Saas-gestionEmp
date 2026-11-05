@@ -31,7 +31,12 @@ export class AppMenu {
                 { label: 'Tableau de bord', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
                 { label: 'Assistant juridique', icon: 'pi pi-fw pi-briefcase', routerLink: ['/' + AppConstantRoute.Legal_Assistant_PATH] },
                 { label: 'Clients', icon: 'pi pi-fw pi-users', routerLink: ['/' + AppConstantRoute.Clients_PATH] },
-                ...(this.auth.isFounder() ? [{ label: 'Factures', icon: 'pi pi-fw pi-file', routerLink: ['/' + AppConstantRoute.Invoices_PATH] }] : []),
+                ...(this.auth.isFounder()
+                    ? [
+                          { label: 'Factures', icon: 'pi pi-fw pi-file', routerLink: ['/' + AppConstantRoute.Invoices_PATH] },
+                          { label: 'Conseiller financier', icon: 'pi pi-fw pi-sparkles', routerLink: ['/' + AppConstantRoute.Advisor_PATH] }
+                      ]
+                    : []),
                 { label: 'Mon profil', icon: 'pi pi-fw pi-user', routerLink: ['/' + AppConstantRoute.Profile_PATH] }
             ]
         }
