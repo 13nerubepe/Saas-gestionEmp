@@ -3,5 +3,6 @@ export const APP_NAME = 'GestionEmp';
 
 export const AppConstantRoute = {
     Legal_Assistant_PATH: 'assistant-juridique',
-    Profile_PATH: 'profil'
+    Profile_PATH: 'profil',
+    Clients_PATH: 'clients'
 };

@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '@/environments/environment';
+import { Page } from '@/app/core/page';
 
 const AGENTS_URL = `${environment.apiUrl}/agents`;
 
@@ -36,13 +37,7 @@ export interface ConversationDetail extends Conversation {
     exchanges: LegalAnswer[];
 }
 
-/** DRF page: `next` / `previous` are full URLs, or null. */
-export interface Page<T> {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: T[];
-}
+export type { Page } from '@/app/core/page';
 
 @Injectable({ providedIn: 'root' })
 export class LegalService {

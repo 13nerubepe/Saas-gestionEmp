@@ -19,6 +19,16 @@ export const appRoutes: Routes = [
                 data: { breadcrumb: 'Assistant juridique' }
             },
             {
+                path: AppConstantRoute.Clients_PATH,
+                loadComponent: () => import('./app/pages/clients/clients').then((c) => c.Clients),
+                data: { breadcrumb: 'Clients' }
+            },
+            {
+                path: `${AppConstantRoute.Clients_PATH}/:id`,
+                loadComponent: () => import('./app/pages/clients/client-detail').then((c) => c.ClientDetail),
+                data: { breadcrumb: 'Fiche client' }
+            },
+            {
                 path: AppConstantRoute.Profile_PATH,
                 loadComponent: () => import('./app/pages/profile/profile').then((c) => c.Profile),
                 data: { breadcrumb: 'Profil' }
