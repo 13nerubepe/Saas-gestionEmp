@@ -10,9 +10,12 @@ export interface Company {
     currency: string;
     legal_form: string;
     tax_id: string;
+    trade_register: string;
+    address: string;
+    cash_alert_threshold: string | null;
 }
 
-export type CompanyPayload = Partial<Pick<Company, 'name' | 'legal_form' | 'tax_id'>>;
+export type CompanyPayload = Partial<Pick<Company, 'name' | 'legal_form' | 'tax_id' | 'trade_register' | 'address' | 'cash_alert_threshold'>>;
 
 /** The active company: every member reads it, only a founder edits it. */
 @Injectable({ providedIn: 'root' })

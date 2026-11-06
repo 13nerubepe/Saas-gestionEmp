@@ -6,5 +6,6 @@ export const AppConstantRoute = {
     Profile_PATH: 'profil',
     Clients_PATH: 'clients',
     Invoices_PATH: 'factures',
-    Advisor_PATH: 'conseiller'
+    Advisor_PATH: 'conseiller',
+    Cash_PATH: 'tresorerie'
 };

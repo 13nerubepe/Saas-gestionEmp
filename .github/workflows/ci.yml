@@ -63,3 +63,7 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Production build
         run: npx ng build --configuration production
+      # Specs of the delivered code (API services, amounts). Specs of the
+      # work-in-progress components (not routed yet) join when their story starts.
+      - name: Unit tests
+        run: npm run test:ci

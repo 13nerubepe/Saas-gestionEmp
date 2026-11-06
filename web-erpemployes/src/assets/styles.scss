@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @use 'primeicons/primeicons.css';
-@use '@/assets/layout/layout.scss';
+// Relative path: the Karma test build does not resolve the "@/" alias in Sass.
+@use './layout/layout.scss';
 
 /* =========================================================
    IDENTITÉ VISUELLE

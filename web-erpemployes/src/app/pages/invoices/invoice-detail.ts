@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, OnInit, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ConfirmationService } from 'primeng/api';
@@ -20,12 +20,13 @@ import { CrmService } from '@/app/core/crm/crm.service';
 import { displayStatus, formatMoney, INVOICE_STATUS_LABELS, INVOICE_STATUS_SEVERITY } from '@/app/core/billing/money';
 import { apiErrorMessage } from '@/app/core/api-errors';
 import { AppConstantRoute } from '@/app/constants';
+import { ReasonDialog } from '@/app/commons/reason-dialog';
 
 /** US-14: one invoice, laid out like the document the client receives. */
 @Component({
     selector: 'app-invoice-detail',
     standalone: true,
-    imports: [DatePipe, FormsModule, RouterLink, ButtonModule, ConfirmDialogModule, DialogModule, InputNumberModule, InputTextModule, SelectModule, SelectButtonModule, SkeletonModule, TagModule, TextareaModule],
+    imports: [DatePipe, FormsModule, RouterLink, ButtonModule, ConfirmDialogModule, DialogModule, InputNumberModule, InputTextModule, SelectModule, SelectButtonModule, SkeletonModule, TagModule, TextareaModule, ReasonDialog],
     providers: [ConfirmationService],
     template: `
         <div class="mb-4 print:hidden">
@@ -49,9 +50,12 @@ import { AppConstantRoute } from '@/app/constants';
                     <p-button label="Modifier" icon="pi pi-pencil" [outlined]="true" [routerLink]="['/', invoicesPath, inv.id, 'modifier']" />
                     <p-button label="Supprimer" icon="pi pi-trash" severity="danger" [text]="true" (onClick)="confirmDelete(inv)" />
                 } @else {
-                    @if (inv.status === 'issued') {
+                    @if (inv.kind === 'invoice' && inv.status === 'issued') {
                         <p-button label="Enregistrer un paiement" icon="pi pi-wallet" (onClick)="openPayment(inv)" />
                         <p-button label="Rédiger une relance" icon="pi pi-sparkles" [outlined]="true" (onClick)="openReminder(inv)" />
+                        @if (Number(inv.amount_paid) === 0) {
+                            <p-button label="Annuler par un avoir" icon="pi pi-undo" severity="danger" [text]="true" (onClick)="creditNoteVisible = true" />
+                        }
                     }
                     <p-button label="Imprimer" icon="pi pi-print" [outlined]="true" (onClick)="print()" />
                 }
@@ -61,7 +65,7 @@ import { AppConstantRoute } from '@/app/constants';
             <article class="card !mb-0 mx-auto flex max-w-4xl flex-col gap-6" aria-label="Facture">
                 <header class="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                        <p class="!m-0 text-xs uppercase tracking-wide text-muted-color">Facture</p>
+                        <p class="!m-0 text-xs uppercase tracking-wide text-muted-color">{{ inv.kind === 'credit_note' ? 'Avoir' : 'Facture' }}</p>
                         <h1 class="!m-0 !text-2xl !font-semibold">{{ inv.number || 'Brouillon' }}</h1>
                         @if (inv.issue_date) {
                             <p class="!m-0 mt-1 text-sm text-muted-color">Émise le {{ inv.issue_date | date: 'd MMMM y' }}</p>
@@ -70,6 +74,17 @@ import { AppConstantRoute } from '@/app/constants';
                     <p-tag class="whitespace-nowrap" [value]="statusLabel()" [severity]="statusSeverity()" />
                 </header>
 
+                @if (inv.kind === 'credit_note' && inv.credited_invoice_id) {
+                    <p class="!m-0 rounded-lg bg-surface-100 p-3 text-sm dark:bg-surface-800">
+                        <i class="pi pi-undo mr-2"></i>Cet avoir annule la facture <a [routerLink]="['/', invoicesPath, inv.credited_invoice_id]" class="font-semibold text-primary">{{ inv.credited_invoice_number }}</a> pour son montant total.
+                    </p>
+                }
+                @if (inv.status === 'cancelled' && inv.credit_note_id) {
+                    <p class="!m-0 rounded-lg border border-surface-300 bg-surface-100 p-3 text-sm dark:border-surface-600 dark:bg-surface-800">
+                        <i class="pi pi-ban mr-2"></i>Facture annulée par l'avoir <a [routerLink]="['/', invoicesPath, inv.credit_note_id]" class="font-semibold text-primary">{{ inv.credit_note_number }}</a
+                        >. Elle ne compte plus dans vos créances.
+                    </p>
+                }
                 @if (inv.status === 'draft') {
                     <p class="!m-0 rounded-lg bg-surface-100 p-3 text-sm dark:bg-surface-800"><i class="pi pi-info-circle mr-2"></i>Brouillon : le numéro est attribué à l'émission. Une fois émise, la facture ne peut plus être modifiée.</p>
                 }
@@ -80,6 +95,12 @@ import { AppConstantRoute } from '@/app/constants';
                         @if (inv.status !== 'draft') {
                             <p class="!m-0 font-semibold">{{ inv.seller_name }}</p>
                             <p class="!m-0 text-sm">NIU : {{ inv.seller_tax_id }}</p>
+                            @if (inv.seller_trade_register) {
+                                <p class="!m-0 text-sm">RCCM : {{ inv.seller_trade_register }}</p>
+                            }
+                            @if (inv.seller_address) {
+                                <p class="!m-0 text-sm">{{ inv.seller_address }}</p>
+                            }
                         } @else {
                             <p class="!m-0 text-sm text-muted-color">Votre entreprise (figée à l'émission)</p>
                         }
@@ -138,7 +159,7 @@ import { AppConstantRoute } from '@/app/constants';
                         <dt>Total TTC</dt>
                         <dd class="m-0 tabular-nums">{{ money(inv.total) }}</dd>
                     </div>
-                    @if (inv.status !== 'draft') {
+                    @if (inv.kind === 'invoice' && inv.status !== 'draft' && inv.status !== 'cancelled') {
                         <div class="flex justify-between">
                             <dt class="text-muted-color">Déjà payé</dt>
                             <dd class="m-0 tabular-nums">{{ money(inv.amount_paid) }}</dd>
@@ -151,7 +172,9 @@ import { AppConstantRoute } from '@/app/constants';
                 </dl>
 
                 <footer class="flex flex-col gap-1 text-sm">
-                    @if (inv.due_date) {
+                    @if (inv.kind === 'credit_note') {
+                        <!-- A credit note has no due date: it only cancels an invoice. -->
+                    } @else if (inv.due_date) {
                         <p class="!m-0" [class.text-red-600]="inv.is_overdue">
                             <strong>Échéance :</strong> {{ inv.due_date | date: 'd MMMM y' }}
                             @if (inv.is_overdue) {
@@ -168,27 +191,67 @@ import { AppConstantRoute } from '@/app/constants';
             </article>
 
             <!-- Payments received (not printed: the totals above show what is paid) -->
-            @if (inv.status !== 'draft') {
+            @if (inv.kind === 'invoice' && inv.status !== 'draft') {
                 <section class="card !mb-0 mx-auto mt-6 flex max-w-4xl flex-col gap-3 print:hidden" aria-labelledby="payments-title">
                     <h2 id="payments-title" class="!m-0 !text-lg font-semibold">Paiements reçus</h2>
                     @for (p of inv.payments; track p.id) {
                         <div class="flex items-center justify-between gap-3 border-b border-surface-100 pb-2 text-sm last:border-0 dark:border-surface-800">
-                            <div>
-                                <div class="font-medium">{{ methodLabel(p.method) }}</div>
+                            <div class="min-w-0">
+                                <div class="font-medium" [class.line-through]="p.is_reversed" [class.text-muted-color]="p.is_reversed">
+                                    @if (p.reversal_of) {
+                                        Annulation · {{ methodLabel(p.method) }}
+                                    } @else {
+                                        {{ methodLabel(p.method) }}
+                                    }
+                                </div>
                                 <div class="text-xs text-muted-color">
                                     {{ p.paid_on | date: 'd MMMM y' }}
                                     @if (p.reference) {
                                         · réf. {{ p.reference }}
                                     }
+                                    @if (p.reason) {
+                                        · motif : {{ p.reason }}
+                                    }
+                                    @if (p.is_reversed) {
+                                        · annulé
+                                    }
                                 </div>
                             </div>
-                            <span class="font-semibold tabular-nums">{{ money(p.amount) }}</span>
+                            <div class="flex shrink-0 items-center gap-1">
+                                <span class="font-semibold tabular-nums" [class.line-through]="p.is_reversed" [class.text-muted-color]="p.is_reversed">{{ money(p.amount) }}</span>
+                                @if (!p.reversal_of && !p.is_reversed && inv.status !== 'cancelled') {
+                                    <p-button icon="pi pi-replay" [text]="true" severity="danger" size="small" [ariaLabel]="'Annuler le paiement de ' + money(p.amount)" (onClick)="askReversal(p.id)" />
+                                }
+                            </div>
                         </div>
                     } @empty {
                         <p class="!m-0 text-sm text-muted-color">Aucun paiement enregistré pour l'instant.</p>
                     }
+                    @if (inv.status === 'issued' && Number(inv.amount_paid) > 0) {
+                        <p class="!m-0 text-xs text-muted-color">Pour annuler cette facture par un avoir, annulez d'abord ses paiements.</p>
+                    }
                 </section>
             }
+
+            <!-- Corrections: nothing is deleted, a reversing entry is added -->
+            <app-reason-dialog
+                header="Annuler un paiement"
+                message="Le paiement reste dans l'historique : une écriture d'annulation du même montant est ajoutée et le reste à payer est rétabli."
+                confirmLabel="Annuler le paiement"
+                [(visible)]="reversalVisible"
+                [loading]="busy()"
+                [error]="correctionError()"
+                (confirmed)="reversePayment(inv, $event)"
+            />
+            <app-reason-dialog
+                header="Annuler la facture par un avoir"
+                [message]="'Un avoir numéroté annulera la facture ' + inv.number + ' pour ' + money(inv.total) + '. La facture reste dans l’historique, marquée « Annulée ».'"
+                confirmLabel="Émettre l'avoir"
+                [(visible)]="creditNoteVisible"
+                [loading]="busy()"
+                [error]="correctionError()"
+                (confirmed)="createCreditNote(inv, $event)"
+            />
 
             <!-- Record a payment -->
             <!-- focusOnShow off: PrimeNG focusing the number field during a render pass trips a dev-mode check (NG0100). -->
@@ -288,6 +351,11 @@ export class InvoiceDetail implements OnInit {
     readonly busy = signal(false);
     readonly paymentMethods = signal<PaymentMethod[]>([]);
     readonly paymentError = signal('');
+    readonly correctionError = signal('');
+    readonly Number = Number;
+    reversalVisible = false;
+    creditNoteVisible = false;
+    private reversalTarget = '';
     readonly drafting = signal(false);
     readonly drafted = signal(false);
     readonly reminderError = signal('');
@@ -331,7 +399,21 @@ export class InvoiceDetail implements OnInit {
             },
             error: () => undefined // Only needed to record a payment.
         });
-        this.billing.getInvoice(this.id()).subscribe({
+    }
+
+    constructor() {
+        // Reload when the id changes: following the link between an invoice and
+        // its credit note reuses this component with another id.
+        effect(() => {
+            const id = this.id();
+            untracked(() => this.load(id));
+        });
+    }
+
+    private load(id: string): void {
+        this.invoice.set(null);
+        this.error.set('');
+        this.billing.getInvoice(id).subscribe({
             next: (invoice) => this.invoice.set(invoice),
             // Another company's invoice is a 404, like an unknown one.
             error: (error) => this.error.set(error?.status === 404 ? 'Facture introuvable.' : apiErrorMessage(error))
@@ -409,6 +491,50 @@ export class InvoiceDetail implements OnInit {
             },
             error: (error) => {
                 this.paymentError.set(apiErrorMessage(error));
+                this.busy.set(false);
+            }
+        });
+    }
+
+    askReversal(paymentId: string): void {
+        this.reversalTarget = paymentId;
+        this.correctionError.set('');
+        this.reversalVisible = true;
+    }
+
+    reversePayment(inv: Invoice, reason: string): void {
+        this.busy.set(true);
+        this.correctionError.set('');
+        this.billing.reversePayment(this.reversalTarget, reason).subscribe({
+            next: () => this.reload(inv.id, () => (this.reversalVisible = false)),
+            error: (error) => {
+                this.correctionError.set(apiErrorMessage(error));
+                this.busy.set(false);
+            }
+        });
+    }
+
+    createCreditNote(inv: Invoice, reason: string): void {
+        this.busy.set(true);
+        this.correctionError.set('');
+        this.billing.createCreditNote(inv.id, reason).subscribe({
+            next: () => this.reload(inv.id, () => (this.creditNoteVisible = false)),
+            error: (error) => {
+                this.correctionError.set(apiErrorMessage(error));
+                this.busy.set(false);
+            }
+        });
+    }
+
+    private reload(id: string, done: () => void): void {
+        this.billing.getInvoice(id).subscribe({
+            next: (invoice) => {
+                done();
+                this.invoice.set(invoice);
+                this.busy.set(false);
+            },
+            error: (error) => {
+                this.error.set(apiErrorMessage(error));
                 this.busy.set(false);
             }
         });

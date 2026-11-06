@@ -16,7 +16,11 @@ const MESSAGES_BY_CODE: Record<string, string> = {
     invalid_tax_rate: 'Taux de TVA inconnu.',
     invoice_not_payable: 'Seule une facture émise avec un reste à payer peut recevoir un paiement.',
     payment_exceeds_balance: 'Le paiement dépasse le reste à payer.',
-    nothing_to_remind: 'Cette facture est déjà réglée : rien à relancer.'
+    nothing_to_remind: 'Cette facture est déjà réglée : rien à relancer.',
+    invoice_has_payments: "Annulez d'abord les paiements de cette facture.",
+    invoice_not_cancellable: 'Seule une facture émise peut être annulée par un avoir.',
+    already_reversed: 'Cette écriture est déjà annulée.',
+    invalid_category: 'Cette catégorie ne correspond pas au sens du mouvement.'
 };
 
 /** A message to show the user for any failed API call. */

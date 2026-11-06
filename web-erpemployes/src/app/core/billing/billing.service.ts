@@ -7,7 +7,8 @@ import { Page } from '@/app/core/page';
 // Mirrors the API contract (tag "billing" in /api/docs/). Amounts are decimal strings.
 const BILLING_URL = `${environment.apiUrl}/billing`;
 
-export type InvoiceStatus = 'draft' | 'issued' | 'paid';
+export type InvoiceStatus = 'draft' | 'issued' | 'paid' | 'cancelled';
+export type InvoiceKind = 'invoice' | 'credit_note';
 
 export interface InvoiceLine {
     description: string;
@@ -25,6 +26,10 @@ export interface Payment {
     paid_on: string;
     method: string;
     reference: string;
+    /** Set on a reversal: the payment it cancels. Reversals have a negative amount. */
+    reversal_of: string | null;
+    reason: string;
+    is_reversed: boolean;
     created_at: string;
 }
 
@@ -37,9 +42,16 @@ export interface PaymentPayload {
 
 export interface Invoice {
     id: string;
+    kind: InvoiceKind;
     number: string;
     status: InvoiceStatus;
     is_overdue: boolean;
+    /** On a credit note: the invoice it cancels. */
+    credited_invoice_id: string | null;
+    credited_invoice_number: string | null;
+    /** On a cancelled invoice: its credit note. */
+    credit_note_id: string | null;
+    credit_note_number: string | null;
     client_id: string;
     client_display_name: string;
     issue_date: string | null;
@@ -55,6 +67,8 @@ export interface Invoice {
     payments: Payment[];
     seller_name: string;
     seller_tax_id: string;
+    seller_trade_register: string;
+    seller_address: string;
     client_name: string;
     client_tax_id: string;
     client_address: string;
@@ -115,6 +129,36 @@ export interface Aging {
     days_over_90: string;
 }
 
+export interface CashPosition {
+    balance: string;
+    in_this_month: string;
+    payments_this_month: string;
+    out_this_month: string;
+    expenses_this_month: { category: CashCategory; total: string }[];
+    alert_threshold: string | null;
+    below_threshold: boolean;
+    has_entries: boolean;
+}
+
+export type CashDirection = 'in' | 'out';
+export type CashCategory = 'opening_balance' | 'sale' | 'owner_contribution' | 'loan' | 'supplies' | 'rent' | 'staff' | 'transport' | 'utilities' | 'taxes' | 'bank_fees' | 'owner_withdrawal' | 'other';
+
+export interface CashMovement {
+    id: string;
+    direction: CashDirection;
+    category: CashCategory;
+    amount: string;
+    occurred_on: string;
+    method: string;
+    label: string;
+    reversal_of: string | null;
+    reason: string;
+    is_reversed: boolean;
+    created_at: string;
+}
+
+export type CashMovementPayload = Pick<CashMovement, 'direction' | 'category' | 'amount' | 'occurred_on' | 'method' | 'label'>;
+
 export interface FinancialSummary {
     currency: string;
     today: string;
@@ -130,6 +174,7 @@ export interface FinancialSummary {
     aging: Aging;
     receivables: Receivable[];
     receivables_count: number;
+    cash: CashPosition;
 }
 
 export interface ClientFinancials {
@@ -188,6 +233,30 @@ export class BillingService {
     /** US-15: returns the invoice with its new balance. */
     recordPayment(id: string, payload: PaymentPayload): Observable<Invoice> {
         return this.http.post<Invoice>(`${BILLING_URL}/invoices/${id}/payments/`, payload);
+    }
+
+    /** Cancels a payment entered by mistake: a negative payment is added. */
+    reversePayment(paymentId: string, reason: string): Observable<Payment> {
+        return this.http.post<Payment>(`${BILLING_URL}/payments/${paymentId}/reverse/`, { reason });
+    }
+
+    /** Cancels an issued invoice with no payment; returns the credit note. */
+    createCreditNote(invoiceId: string, reason: string): Observable<Invoice> {
+        return this.http.post<Invoice>(`${BILLING_URL}/invoices/${invoiceId}/credit-note/`, { reason });
+    }
+
+    listCashMovements(page = 1, direction?: CashDirection): Observable<Page<CashMovement>> {
+        let params = new HttpParams().set('page', page);
+        if (direction) params = params.set('direction', direction);
+        return this.http.get<Page<CashMovement>>(`${BILLING_URL}/cash-movements/`, { params });
+    }
+
+    recordCashMovement(payload: CashMovementPayload): Observable<CashMovement> {
+        return this.http.post<CashMovement>(`${BILLING_URL}/cash-movements/`, payload);
+    }
+
+    reverseCashMovement(id: string, reason: string): Observable<CashMovement> {
+        return this.http.post<CashMovement>(`${BILLING_URL}/cash-movements/${id}/reverse/`, { reason });
     }
 
     getSummary(): Observable<FinancialSummary> {

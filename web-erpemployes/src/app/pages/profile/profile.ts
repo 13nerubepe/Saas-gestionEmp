@@ -72,6 +72,14 @@ import { PageHeader } from '@/app/commons/page-header';
                                 <label for="company_tax_id" class="text-sm font-semibold">NIU (numéro d'identifiant unique)</label>
                                 <input pInputText id="company_tax_id" formControlName="tax_id" maxlength="100" placeholder="M0XXXXXXXXXXXX" />
                             </div>
+                            <div class="flex flex-col gap-2">
+                                <label for="company_trade_register" class="text-sm font-semibold">RCCM</label>
+                                <input pInputText id="company_trade_register" formControlName="trade_register" maxlength="100" placeholder="RC/DLA/2024/B/1234" />
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label for="company_address" class="text-sm font-semibold">Adresse</label>
+                                <input pInputText id="company_address" formControlName="address" maxlength="500" placeholder="Rue, quartier, ville" />
+                            </div>
                             @if (companyError()) {
                                 <p class="m-0 text-sm text-red-600" role="alert">{{ companyError() }}</p>
                             }
@@ -126,7 +134,7 @@ export class Profile implements OnInit {
         language: ['fr' as 'fr' | 'en']
     });
 
-    companyForm = this.fb.nonNullable.group({ name: [''], legal_form: [''], tax_id: [''] });
+    companyForm = this.fb.nonNullable.group({ name: [''], legal_form: [''], tax_id: [''], trade_register: [''], address: [''] });
 
     ngOnInit(): void {
         const user = this.auth.user();
@@ -135,7 +143,7 @@ export class Profile implements OnInit {
         }
         if (this.auth.isFounder()) {
             this.company.get().subscribe({
-                next: (c) => this.companyForm.reset({ name: c.name, legal_form: c.legal_form, tax_id: c.tax_id }),
+                next: (c) => this.companyForm.reset({ name: c.name, legal_form: c.legal_form, tax_id: c.tax_id, trade_register: c.trade_register, address: c.address }),
                 error: (error) => this.companyError.set(apiErrorMessage(error))
             });
         }
@@ -146,9 +154,9 @@ export class Profile implements OnInit {
         this.companySaved.set(false);
         this.companyError.set('');
         const value = this.companyForm.getRawValue();
-        this.company.update({ name: value.name.trim(), legal_form: value.legal_form.trim(), tax_id: value.tax_id.trim() }).subscribe({
+        this.company.update({ name: value.name.trim(), legal_form: value.legal_form.trim(), tax_id: value.tax_id.trim(), trade_register: value.trade_register.trim(), address: value.address.trim() }).subscribe({
             next: (c) => {
-                this.companyForm.reset({ name: c.name, legal_form: c.legal_form, tax_id: c.tax_id });
+                this.companyForm.reset({ name: c.name, legal_form: c.legal_form, tax_id: c.tax_id, trade_register: c.trade_register, address: c.address });
                 this.companySaving.set(false);
                 this.companySaved.set(true);
             },

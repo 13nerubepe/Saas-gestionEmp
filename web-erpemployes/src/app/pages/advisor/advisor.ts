@@ -18,6 +18,7 @@ import { AdvisorAnswerView } from './advisor-answer-view';
 const SUGGESTED_QUESTIONS = [
     { icon: 'pi-wallet', text: 'Qui me doit de l’argent, et qui relancer en priorité ?' },
     { icon: 'pi-chart-line', text: 'Comment améliorer ma trésorerie ce mois-ci ?' },
+    { icon: 'pi-shopping-cart', text: 'Où partent mes dépenses, et lesquelles réduire ?' },
     { icon: 'pi-megaphone', text: 'Quels prospects relancer cette semaine, et comment ?' },
     { icon: 'pi-heart', text: 'Quels clients risquent de partir, et comment les fidéliser ?' },
     { icon: 'pi-bullseye', text: 'Sur quel type de client concentrer ma prospection ?' }
@@ -55,8 +56,15 @@ const AGING_SEGMENTS: AgingSegment[] = [
             </div>
         }
 
+        @if (summary()?.cash?.below_threshold) {
+            <a [routerLink]="['/', cashPath]" class="mb-6 flex items-center gap-3 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-800 no-underline dark:border-red-800 dark:bg-red-950 dark:text-red-200" role="alert">
+                <i class="pi pi-exclamation-triangle text-xl" aria-hidden="true"></i>
+                <span><strong>Trésorerie sous votre seuil d'alerte</strong> : {{ money(summary()!.cash.balance) }}. Voir la trésorerie</span>
+            </a>
+        }
+
         <!-- Key figures -->
-        <section class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-6" aria-label="Chiffres clés">
+        <section class="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5 xl:gap-6" aria-label="Chiffres clés">
             @if (summary(); as s) {
                 @for (kpi of kpis(); track kpi.label) {
                     <div class="card !mb-0 flex flex-col gap-1 !p-4 sm:!p-5">
@@ -66,7 +74,7 @@ const AGING_SEGMENTS: AgingSegment[] = [
                     </div>
                 }
             } @else if (!summaryError()) {
-                @for (i of [1, 2, 3, 4]; track i) {
+                @for (i of [1, 2, 3, 4, 5]; track i) {
                     <p-skeleton height="6rem" borderRadius="0.75rem" />
                 }
             }
@@ -242,6 +250,7 @@ export class Advisor implements OnInit {
     readonly agingSegments = AGING_SEGMENTS;
     readonly clientsPath = AppConstantRoute.Clients_PATH;
     readonly invoicesPath = AppConstantRoute.Invoices_PATH;
+    readonly cashPath = AppConstantRoute.Cash_PATH;
     readonly Number = Number;
 
     question = '';
@@ -250,6 +259,7 @@ export class Advisor implements OnInit {
         const s = this.summary();
         if (!s) return [];
         return [
+            { label: 'Trésorerie', value: this.money(s.cash.balance), hint: s.cash.alert_threshold ? `seuil ${this.money(s.cash.alert_threshold)}` : 'paiements + entrées − sorties', alert: s.cash.below_threshold || Number(s.cash.balance) < 0 },
             { label: 'Reste à encaisser', value: this.money(s.outstanding), hint: `${s.open_count} ${s.open_count > 1 ? 'factures ouvertes' : 'facture ouverte'}`, alert: false },
             { label: 'En retard', value: this.money(s.overdue), hint: `${s.overdue_count} ${s.overdue_count > 1 ? 'factures' : 'facture'}`, alert: Number(s.overdue) > 0 },
             { label: 'Encaissé ce mois', value: this.money(s.collected_this_month), hint: `${this.money(s.collected_this_year)} cette année`, alert: false },

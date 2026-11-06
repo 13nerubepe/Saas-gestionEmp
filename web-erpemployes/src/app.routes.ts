@@ -29,6 +29,11 @@ export const appRoutes: Routes = [
                 data: { breadcrumb: 'Fiche client' }
             },
             {
+                path: AppConstantRoute.Cash_PATH,
+                loadComponent: () => import('./app/pages/cash/cash').then((c) => c.Cash),
+                data: { breadcrumb: 'Trésorerie' }
+            },
+            {
                 path: AppConstantRoute.Advisor_PATH,
                 loadComponent: () => import('./app/pages/advisor/advisor').then((c) => c.Advisor),
                 data: { breadcrumb: 'Conseiller financier' }

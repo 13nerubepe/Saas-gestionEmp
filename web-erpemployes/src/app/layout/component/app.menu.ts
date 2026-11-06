@@ -34,6 +34,7 @@ export class AppMenu {
                 ...(this.auth.isFounder()
                     ? [
                           { label: 'Factures', icon: 'pi pi-fw pi-file', routerLink: ['/' + AppConstantRoute.Invoices_PATH] },
+                          { label: 'Trésorerie', icon: 'pi pi-fw pi-wallet', routerLink: ['/' + AppConstantRoute.Cash_PATH] },
                           { label: 'Conseiller financier', icon: 'pi pi-fw pi-sparkles', routerLink: ['/' + AppConstantRoute.Advisor_PATH] }
                       ]
                     : []),
