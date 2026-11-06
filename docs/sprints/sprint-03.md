@@ -43,7 +43,7 @@ Le rattachement exact de chaque élément ci-dessous à une US reste à confirme
 |---|---|---|---|---|---|
 | 1 | US-03/04 : intégrer l'API clients et interactions, écrans liste et fiche | Clients, prospection | Front 1 + backend (revue) | 3 | Fait |
 | 2 | Factures : app `billing`, `Invoice` et `InvoiceLine`, brouillon → émise → payée / en retard, numérotation, mentions et TVA par pays, écrans | Facturation | Backend + Front 2 | 5 | Fait |
-| 3 | Paiements et trésorerie : `Payment`, `CashMovement`, solde, seuil d'alerte, vue « qui me doit quoi » | Sécuriser l'argent | Backend + Front 1 | 3 | Fait en partie : paiements, qui doit quoi, synthèse. Reste `CashMovement` et le seuil d'alerte |
+| 3 | Paiements et trésorerie : `Payment`, `CashMovement`, solde, seuil d'alerte, vue « qui me doit quoi » | Sécuriser l'argent | Backend + Front 1 | 3 | Fait : paiements, qui doit quoi, synthèse, trésorerie (`CashMovement`) et seuil d'alerte |
 | 4 | Agent comptable et fiscal : pipeline US-02 généralisé, textes OHADA comptables et CGI Cameroun | Conseils en comptabilité | Backend | 3 | Remplacé en partie : conseiller financier fondé sur les données (voir plus bas). Reste les textes OHADA comptables et le CGI |
 | 5 | Relance des impayés : factures en retard, texte de relance rédigé par l'agent, envoyé par le fondateur | Rappels | Backend + Front 2 | 2 | Fait |
 | 6 | Socle i18n frontend avant les nouveaux écrans | — | Front 2 | inclus | À faire |
@@ -85,6 +85,20 @@ Ajouté à la demande de l'équipe, pour la partie IA des modules finance et CRM
 - **Qui me doit quoi** (US-17), calculé en base : par client, montant dû, part en retard, jours de retard ; ancienneté des impayés (0, 1-30, 31-60, 61-90, +90 jours) ; facturé et encaissé du mois et de l'année ; situation financière et retard moyen de paiement de chaque client.
 - **Conseiller IA** (`advisor`) : répond sur la trésorerie, les relances, la prospection (ciblage à partir des meilleurs clients et de l'activité des prospects) et la fidélisation (clients actifs sans contact depuis 60 jours). Il ne voit que des faits numérotés calculés par l'application, cite ceux qu'il utilise (vérifiés par le code), affiche sa fiabilité et renvoie vers un expert-comptable quand elle est faible.
 - **Relance rédigée par l'agent** (élément 5) : WhatsApp ou email, ton cordial ou ferme ; le fondateur relit, modifie et envoie lui-même.
+
+## Fin de sprint (6 novembre)
+
+Ajouté pour solder les points ouverts :
+
+- **Avoirs** : une facture émise sans paiement s'annule par un avoir numéroté à part (`AV-2026-0001`) ; la facture passe à « Annulée » et ne compte plus.
+- **Corrections** : un paiement ou un mouvement de trésorerie erroné est contre-passé (écriture inverse motivée), jamais supprimé.
+- **Trésorerie** : mouvements saisis à la main (catégorie, moyen), solde = paiements + entrées − sorties, seuil d'alerte réglable.
+- **Mentions** : RCCM et adresse du vendeur sur la facture ; dates à l'heure de Douala (`TIME_ZONE=Africa/Douala`).
+- **CI frontend** : `ng test` réparé et lancé en CI (`npm run test:ci`).
+
+Restent au Product Backlog : agent comptable sur textes OHADA / CGI (textes à fournir), i18n frontend, déploiement EC2.
+
+Présentation de la Sprint Review, de la release, de la rétrospective et du Sprint Planning 4 : `sprint-03-review-release-planning.pptx`.
 
 ## Sprint 4 pressenti
 
