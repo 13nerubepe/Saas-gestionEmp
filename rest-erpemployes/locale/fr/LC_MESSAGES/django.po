@@ -142,3 +142,91 @@ msgstr "Conseil fondé sur les données enregistrées dans l'application à ce j
 #: advisor/serializers.py
 msgid "The data does not answer this question with certainty. Before an important decision, ask a chartered accountant (expert-comptable)."
 msgstr "Les données ne permettent pas de répondre avec certitude. Avant une décision importante, consultez un expert-comptable."
+
+#: billing/models.py
+msgid "Invoice"
+msgstr "Facture"
+
+#: billing/models.py
+msgid "Credit note"
+msgstr "Avoir"
+
+#: billing/models.py
+msgid "Cancelled"
+msgstr "Annulée"
+
+#: billing/models.py
+msgid "Money in"
+msgstr "Entrée"
+
+#: billing/models.py
+msgid "Money out"
+msgstr "Sortie"
+
+#: billing/models.py
+msgid "Opening balance"
+msgstr "Solde de départ"
+
+#: billing/models.py
+msgid "Sale without invoice"
+msgstr "Vente sans facture"
+
+#: billing/models.py
+msgid "Owner contribution"
+msgstr "Apport du fondateur"
+
+#: billing/models.py
+msgid "Loan"
+msgstr "Emprunt"
+
+#: billing/models.py
+msgid "Supplies and goods"
+msgstr "Achats et marchandises"
+
+#: billing/models.py
+msgid "Rent"
+msgstr "Loyer"
+
+#: billing/models.py
+msgid "Staff"
+msgstr "Personnel"
+
+#: billing/models.py
+msgid "Transport"
+msgstr "Transport"
+
+#: billing/models.py
+msgid "Water, power, phone, internet"
+msgstr "Eau, électricité, téléphone, internet"
+
+#: billing/models.py
+msgid "Taxes and duties"
+msgstr "Impôts et taxes"
+
+#: billing/models.py
+msgid "Bank and mobile money fees"
+msgstr "Frais bancaires et Mobile Money"
+
+#: billing/models.py
+msgid "Owner withdrawal"
+msgstr "Prélèvement du fondateur"
+
+#: billing/services.py
+msgid "Reverse the payments of this invoice before cancelling it."
+msgstr "Annulez d'abord les paiements de cette facture."
+
+#: billing/services.py
+msgid "Only an issued invoice can be cancelled by a credit note."
+msgstr "Seule une facture émise peut être annulée par un avoir."
+
+#: billing/services.py
+msgid "This entry is already reversed, or is itself a reversal."
+msgstr "Cette écriture est déjà annulée, ou est elle-même une annulation."
+
+#: billing/services.py
+msgid "This date is in the future."
+msgstr "Cette date est dans le futur."
+
+#: billing/services.py
+msgid "This category does not match the direction of the movement."
+msgstr "Cette catégorie ne correspond pas au sens du mouvement."

@@ -268,3 +268,32 @@ def test_advisor_is_founder_only_and_scoped(founder, books):
     )
     assert answer.data["sources"] == []
     assert "Late SARL" not in answer.data["answer"]
+
+
+def test_cash_facts(founder, books):
+    company = founder.company
+    company.cash_alert_threshold = Decimal(1000000)
+    company.save()
+    billing.record_cash_movement(
+        company=company,
+        direction="out",
+        category="rent",
+        amount=Decimal(75000),
+        occurred_on=TODAY,
+        method="cash",
+        label="Loyer",
+        user=None,
+    )
+    cash = [f.text for f in company_facts(company, today=TODAY) if f.topic == "cash"]
+    assert "balance -75 000 XAF" in cash[0]
+    assert "balance is BELOW it" in cash[0]
+    assert cash[1] == "Money out this month by category: rent 75 000 XAF."
+
+
+def test_credit_note_cannot_be_reminded(founder, books, stub):
+    stub(error=AssertionError("must not be called"))
+    note = billing.create_credit_note(books["invoice"], reason="Annulée")
+    with pytest.raises(services.NothingToRemind):
+        services.draft_payment_reminder(
+            membership=founder, invoice=note, channel="email", tone="firm"
+        )

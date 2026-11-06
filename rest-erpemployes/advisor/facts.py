@@ -16,7 +16,7 @@ from decimal import Decimal
 from django.utils import timezone
 
 from billing import selectors as billing
-from billing.models import Invoice
+from billing.models import CashMovement, Invoice
 from billing.rules import rules_for
 from crm import selectors as crm
 from crm.models import Client
@@ -29,6 +29,19 @@ MAX_PROSPECTS = 10
 MAX_DORMANT = 10
 DORMANT_AFTER_DAYS = 60
 NOTE_LENGTH = 160
+
+# Category codes in plain English for the model (labels shown to users are translated).
+CATEGORY_LABELS = {
+    CashMovement.Category.SUPPLIES: "supplies and goods",
+    CashMovement.Category.RENT: "rent",
+    CashMovement.Category.STAFF: "staff",
+    CashMovement.Category.TRANSPORT: "transport",
+    CashMovement.Category.UTILITIES: "water, power, phone, internet",
+    CashMovement.Category.TAXES: "taxes and duties",
+    CashMovement.Category.BANK_FEES: "bank and mobile money fees",
+    CashMovement.Category.OWNER_WITHDRAWAL: "owner withdrawals",
+    CashMovement.Category.OTHER: "other",
+}
 
 
 @dataclass(frozen=True)
@@ -99,6 +112,30 @@ def company_facts(company, *, today=None):
                 f"{money(aging['days_over_90'])}.",
             )
         )
+
+    cash = billing.cash_position(company, today=today)
+    if cash["has_entries"]:
+        alert = ""
+        if cash["alert_threshold"] is not None:
+            alert = f" The founder's alert threshold is {money(cash['alert_threshold'])}: the " + (
+                "balance is BELOW it." if cash["below_threshold"] else "balance is above it."
+            )
+        facts.append(
+            Fact(
+                "cash",
+                f"Cash position (payments received plus money in, minus money out, as "
+                f"recorded): balance {money(cash['balance'])}. This month: money in "
+                f"{money(cash['in_this_month'])} (of which invoice payments "
+                f"{money(cash['payments_this_month'])}), money out "
+                f"{money(cash['out_this_month'])}." + alert,
+            )
+        )
+        if cash["expenses_this_month"]:
+            spent = "; ".join(
+                f"{CATEGORY_LABELS.get(row['category'], row['category'])} {money(row['total'])}"
+                for row in cash["expenses_this_month"][:6]
+            )
+            facts.append(Fact("cash", f"Money out this month by category: {spent}."))
 
     for row in billing.receivables_by_client(company, today=today, limit=MAX_DEBTORS):
         client = Client.objects.get(pk=row["client_id"], company=company)
@@ -252,7 +289,9 @@ def invoice_facts(invoice, *, today=None):
             )
         )
     other_open = (
-        Invoice.objects.filter(client=client, status=Invoice.Status.ISSUED)
+        Invoice.objects.filter(
+            client=client, kind=Invoice.Kind.INVOICE, status=Invoice.Status.ISSUED
+        )
         .exclude(pk=invoice.pk)
         .count()
     )

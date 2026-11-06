@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.utils import timezone
 from rest_framework import serializers
 
-from billing.models import Invoice, InvoiceLine, Payment
+from billing.models import CashMovement, Invoice, InvoiceLine, Payment
 from crm.models import Client
 
 
@@ -28,10 +28,57 @@ class InvoiceLineSerializer(serializers.ModelSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
+    reversal_of = serializers.UUIDField(source="reversal_of_id", allow_null=True)
+    is_reversed = serializers.SerializerMethodField()
+
     class Meta:
         model = Payment
-        fields = ["id", "amount", "paid_on", "method", "reference", "created_at"]
+        fields = [
+            "id",
+            "amount",
+            "paid_on",
+            "method",
+            "reference",
+            "reversal_of",
+            "reason",
+            "is_reversed",
+            "created_at",
+        ]
         read_only_fields = fields
+
+    def get_is_reversed(self, payment) -> bool:
+        return hasattr(payment, "reversal")
+
+
+class ReasonSerializer(serializers.Serializer):
+    """Why a payment, a cash movement or an invoice is cancelled: kept in the books."""
+
+    reason = serializers.CharField(min_length=3, max_length=255)
+
+
+class CashMovementSerializer(serializers.ModelSerializer):
+    reversal_of = serializers.UUIDField(source="reversal_of_id", allow_null=True, read_only=True)
+    is_reversed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CashMovement
+        fields = [
+            "id",
+            "direction",
+            "category",
+            "amount",
+            "occurred_on",
+            "method",
+            "label",
+            "reversal_of",
+            "reason",
+            "is_reversed",
+            "created_at",
+        ]
+        read_only_fields = ["id", "reversal_of", "reason", "is_reversed", "created_at"]
+
+    def get_is_reversed(self, movement) -> bool:
+        return hasattr(movement, "reversal")
 
 
 class PaymentWriteSerializer(serializers.Serializer):
@@ -46,6 +93,12 @@ class InvoiceSerializer(serializers.ModelSerializer):
     """Read side: an invoice with its lines and totals."""
 
     client_id = serializers.UUIDField(read_only=True)
+    credited_invoice_id = serializers.UUIDField(read_only=True, allow_null=True)
+    credited_invoice_number = serializers.CharField(
+        source="credited_invoice.number", read_only=True, allow_null=True, default=None
+    )
+    credit_note_id = serializers.SerializerMethodField()
+    credit_note_number = serializers.SerializerMethodField()
     client_display_name = serializers.SerializerMethodField()
     is_overdue = serializers.SerializerMethodField()
     lines = InvoiceLineSerializer(many=True, read_only=True)
@@ -56,9 +109,14 @@ class InvoiceSerializer(serializers.ModelSerializer):
         model = Invoice
         fields = [
             "id",
+            "kind",
             "number",
             "status",
             "is_overdue",
+            "credited_invoice_id",
+            "credited_invoice_number",
+            "credit_note_id",
+            "credit_note_number",
             "client_id",
             "client_display_name",
             "issue_date",
@@ -74,6 +132,8 @@ class InvoiceSerializer(serializers.ModelSerializer):
             "payments",
             "seller_name",
             "seller_tax_id",
+            "seller_trade_register",
+            "seller_address",
             "client_name",
             "client_tax_id",
             "client_address",
@@ -82,13 +142,25 @@ class InvoiceSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+    def _credit_note(self, invoice):
+        return getattr(invoice, "credit_note", None)
+
+    def get_credit_note_id(self, invoice) -> str | None:
+        note = self._credit_note(invoice)
+        return str(note.id) if note else None
+
+    def get_credit_note_number(self, invoice) -> str | None:
+        note = self._credit_note(invoice)
+        return note.number if note else None
+
     def get_client_display_name(self, invoice) -> str:
         # Issued: the frozen name. Draft: the client record as it is now.
         return invoice.client_name or invoice.client.name
 
     def get_is_overdue(self, invoice) -> bool:
         return (
-            invoice.status == Invoice.Status.ISSUED
+            invoice.kind == Invoice.Kind.INVOICE
+            and invoice.status == Invoice.Status.ISSUED
             and invoice.due_date is not None
             and invoice.due_date < timezone.localdate()
         )
@@ -153,6 +225,22 @@ class AgingSerializer(serializers.Serializer):
     days_over_90 = _amount()
 
 
+class ExpenseByCategorySerializer(serializers.Serializer):
+    category = serializers.CharField()
+    total = _amount()
+
+
+class CashPositionSerializer(serializers.Serializer):
+    balance = _amount()
+    in_this_month = _amount()
+    payments_this_month = _amount()
+    out_this_month = _amount()
+    expenses_this_month = ExpenseByCategorySerializer(many=True)
+    alert_threshold = _amount(allow_null=True)
+    below_threshold = serializers.BooleanField()
+    has_entries = serializers.BooleanField()
+
+
 class FinancialSummarySerializer(serializers.Serializer):
     currency = serializers.CharField()
     today = serializers.DateField()
@@ -168,6 +256,7 @@ class FinancialSummarySerializer(serializers.Serializer):
     aging = AgingSerializer()
     receivables = ReceivableSerializer(many=True)
     receivables_count = serializers.IntegerField()
+    cash = CashPositionSerializer()
 
 
 class ClientFinancialsSerializer(serializers.Serializer):

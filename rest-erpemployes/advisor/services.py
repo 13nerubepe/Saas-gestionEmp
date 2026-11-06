@@ -94,7 +94,11 @@ def ask_advisor(*, membership, question):
 
 def draft_payment_reminder(*, membership, invoice, channel, tone):
     """A reminder for an unpaid invoice, for the founder to review and send."""
-    if invoice.status != Invoice.Status.ISSUED or invoice.balance_due <= 0:
+    if (
+        invoice.kind != Invoice.Kind.INVOICE
+        or invoice.status != Invoice.Status.ISSUED
+        or invoice.balance_due <= 0
+    ):
         raise NothingToRemind()
 
     user, company = membership.user, membership.company

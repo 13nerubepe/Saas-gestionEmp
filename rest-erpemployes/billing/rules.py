@@ -39,6 +39,7 @@ class CountryRules:
     # Company fields that must be filled before an invoice is issued.
     required_seller_fields: tuple[str, ...]
     invoice_prefix: str
+    credit_note_prefix: str
     # How clients pay in this country: mobile money operators differ by country.
     payment_methods: tuple[PaymentMethod, ...]
 
@@ -55,6 +56,7 @@ COUNTRY_RULES = {
         # NIU (taxpayer number) on every invoice.
         required_seller_fields=("tax_id",),
         invoice_prefix="FAC",
+        credit_note_prefix="AV",
         payment_methods=(
             PaymentMethod("cash", _("Cash")),
             PaymentMethod("mtn_momo", _("MTN Mobile Money")),

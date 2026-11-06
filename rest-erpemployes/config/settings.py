@@ -217,7 +217,9 @@ LANGUAGES = [
 
 LOCALE_PATHS = [BASE_DIR / "locale"]
 
-TIME_ZONE = "UTC"
+# Dates on invoices and payments follow this zone: Cameroon first (UTC+1).
+# One zone for every company until companies outside it need their own.
+TIME_ZONE = env("TIME_ZONE", default="Africa/Douala")
 
 USE_I18N = True
 

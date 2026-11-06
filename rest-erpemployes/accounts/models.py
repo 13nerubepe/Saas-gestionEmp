@@ -34,6 +34,13 @@ class Company(BaseModel):
     currency = models.CharField(max_length=3, default="XAF", help_text="ISO 4217")
     legal_form = models.CharField(max_length=100, blank=True)
     tax_id = models.CharField(max_length=100, blank=True)
+    # Trade register number (RCCM in OHADA countries) and address, printed on invoices.
+    trade_register = models.CharField(max_length=100, blank=True)
+    address = models.CharField(max_length=500, blank=True)
+    # Cash below this amount (in `currency`) is flagged to the founder. Empty: no alert.
+    cash_alert_threshold = models.DecimalField(
+        max_digits=18, decimal_places=2, null=True, blank=True
+    )
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL, through="Membership", related_name="companies"
     )

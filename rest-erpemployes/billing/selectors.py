@@ -11,7 +11,7 @@ from django.db.models import Case, Count, DecimalField, F, Max, Min, Q, Sum, Val
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
-from billing.models import Invoice, Payment
+from billing.models import CashMovement, Invoice, Payment
 
 ZERO = Value(Decimal(0), output_field=DecimalField(max_digits=18, decimal_places=2))
 BALANCE = F("total") - F("amount_paid")
@@ -40,14 +40,22 @@ def filter_invoices(queryset, *, status=None, client_id=None, overdue=False, tod
         queryset = queryset.filter(client_id=client_id)
     if overdue:
         queryset = queryset.filter(
-            status=Invoice.Status.ISSUED, due_date__lt=today or timezone.localdate()
+            kind=Invoice.Kind.INVOICE,
+            status=Invoice.Status.ISSUED,
+            due_date__lt=today or timezone.localdate(),
         )
     return queryset.select_related("client").order_by("-created_at", "id")
 
 
+def invoices_only(company):
+    """The company's invoices, without credit notes: credit notes owe nothing
+    and their invoice is cancelled, so neither counts in what is invoiced."""
+    return Invoice.objects.filter(company=company, kind=Invoice.Kind.INVOICE)
+
+
 def open_invoices(company):
     """Issued and not fully paid: what clients still owe."""
-    return Invoice.objects.filter(company=company, status=Invoice.Status.ISSUED)
+    return invoices_only(company).filter(status=Invoice.Status.ISSUED)
 
 
 def receivables_by_client(company, *, today=None, limit=None):
@@ -98,9 +106,7 @@ def financial_summary(company, *, today=None):
     """The company's invoicing at a glance: invoiced, collected, owed, overdue, aging."""
     today = today or timezone.localdate()
     year_start, month_start = date(today.year, 1, 1), today.replace(day=1)
-    billed = Invoice.objects.filter(
-        company=company, status__in=[Invoice.Status.ISSUED, Invoice.Status.PAID]
-    )
+    billed = invoices_only(company).filter(status__in=[Invoice.Status.ISSUED, Invoice.Status.PAID])
 
     invoiced = billed.aggregate(
         year=_sum(F("total"), issue_date__gte=year_start),
@@ -136,7 +142,7 @@ def financial_summary(company, *, today=None):
         "overdue": open_totals["overdue"],
         "open_count": open_totals["open_count"],
         "overdue_count": open_totals["overdue_count"],
-        "draft_count": Invoice.objects.filter(company=company, status=Invoice.Status.DRAFT).count(),
+        "draft_count": invoices_only(company).filter(status=Invoice.Status.DRAFT).count(),
         "aging": {name: open_totals[name] for name, _low, _high in AGING_BUCKETS},
     }
 
@@ -144,7 +150,7 @@ def financial_summary(company, *, today=None):
 def client_financials(client, *, today=None):
     """One client's account: invoiced, paid, owed, overdue, and how late they pay."""
     today = today or timezone.localdate()
-    invoices = Invoice.objects.filter(
+    invoices = invoices_only(client.company).filter(
         client=client, status__in=[Invoice.Status.ISSUED, Invoice.Status.PAID]
     )
     totals = invoices.aggregate(
@@ -175,8 +181,8 @@ def client_financials(client, *, today=None):
 def revenue_by_client(company, *, since, limit=None):
     """Clients by amount invoiced since `since` (a date), largest first."""
     rows = (
-        Invoice.objects.filter(
-            company=company,
+        invoices_only(company)
+        .filter(
             status__in=[Invoice.Status.ISSUED, Invoice.Status.PAID],
             issue_date__gte=since,
         )
@@ -185,3 +191,48 @@ def revenue_by_client(company, *, since, limit=None):
         .order_by("-invoiced", "client__name")
     )
     return list(rows[:limit] if limit else rows)
+
+
+def cash_position(company, *, today=None):
+    """Cash in hand: payments received plus money in, minus money out.
+
+    Reversals are negative rows, so plain sums stay right. `below_threshold`
+    is true when the company set an alert threshold and the balance is under it.
+    """
+    today = today or timezone.localdate()
+    month_start = today.replace(day=1)
+    payments = Payment.objects.filter(company=company).aggregate(
+        total=_sum(F("amount")), month=_sum(F("amount"), paid_on__gte=month_start)
+    )
+    movements = CashMovement.objects.filter(company=company)
+    moves = movements.aggregate(
+        total_in=_sum(F("amount"), direction=CashMovement.Direction.IN),
+        total_out=_sum(F("amount"), direction=CashMovement.Direction.OUT),
+        month_in=_sum(
+            F("amount"), direction=CashMovement.Direction.IN, occurred_on__gte=month_start
+        ),
+        month_out=_sum(
+            F("amount"), direction=CashMovement.Direction.OUT, occurred_on__gte=month_start
+        ),
+    )
+    expenses = (
+        movements.filter(direction=CashMovement.Direction.OUT, occurred_on__gte=month_start)
+        .values("category")
+        .annotate(total=_sum(F("amount")))
+        .filter(total__gt=0)
+        .order_by("-total")
+    )
+    balance = payments["total"] + moves["total_in"] - moves["total_out"]
+    threshold = company.cash_alert_threshold
+    return {
+        "balance": balance,
+        "in_this_month": payments["month"] + moves["month_in"],
+        "payments_this_month": payments["month"],
+        "out_this_month": moves["month_out"],
+        "expenses_this_month": [
+            {"category": row["category"], "total": row["total"]} for row in expenses
+        ],
+        "alert_threshold": threshold,
+        "below_threshold": threshold is not None and balance < threshold,
+        "has_entries": movements.exists() or payments["total"] != 0,
+    }

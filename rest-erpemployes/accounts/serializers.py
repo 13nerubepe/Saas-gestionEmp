@@ -70,7 +70,17 @@ class CompanySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Company
-        fields = ["id", "name", "country", "currency", "legal_form", "tax_id"]
+        fields = [
+            "id",
+            "name",
+            "country",
+            "currency",
+            "legal_form",
+            "tax_id",
+            "trade_register",
+            "address",
+            "cash_alert_threshold",
+        ]
         read_only_fields = ["id", "country", "currency"]
 
 
