@@ -7,23 +7,26 @@ import { Conversation, ConversationDetail, LegalService } from '@/app/core/agent
 import { AuthService } from '@/app/core/auth/auth.service';
 import { apiErrorMessage } from '@/app/core/api-errors';
 import { LegalAnswerView } from '@/app/commons/legal-question/legal-answer-view';
+import { EXAMPLE_LEGAL_QUESTIONS } from '@/app/commons/legal-question/example-questions';
+import { PageHeader } from '@/app/commons/page-header';
 
 /** Legal assistant: conversation history, a conversation's exchanges, follow-up questions. */
 @Component({
     selector: 'app-legal-assistant',
     standalone: true,
-    imports: [DatePipe, FormsModule, ButtonModule, TextareaModule, LegalAnswerView],
+    imports: [DatePipe, FormsModule, ButtonModule, TextareaModule, LegalAnswerView, PageHeader],
     template: `
+        <app-page-header title="Assistant juridique" subtitle="Des réponses fondées sur les textes applicables à votre entreprise, avec leurs sources.">
+            @if (auth.isFounder() && selected()) {
+                <p-button label="Nouvelle conversation" icon="pi pi-plus" [outlined]="true" (onClick)="startNew()" />
+            }
+        </app-page-header>
+
         <div class="grid grid-cols-12 gap-6">
-            <!-- Conversations -->
-            <div class="col-span-12 lg:col-span-4">
+            <!-- Conversations: under the question box on phones, on the left on wide screens. -->
+            <div class="order-last col-span-12 lg:order-first lg:col-span-4">
                 <div class="card !mb-0 flex flex-col gap-3">
-                    <div class="flex items-center justify-between">
-                        <h2 class="m-0 !text-xl font-semibold">Conversations</h2>
-                        @if (auth.isFounder()) {
-                            <p-button label="Nouvelle" icon="pi pi-plus" size="small" [outlined]="true" (onClick)="startNew()" />
-                        }
-                    </div>
+                    <h2 class="!m-0 !text-lg font-semibold">Conversations</h2>
 
                     @if (listError()) {
                         <p class="m-0 text-sm text-red-600" role="alert">{{ listError() }}</p>
@@ -32,17 +35,17 @@ import { LegalAnswerView } from '@/app/commons/legal-question/legal-answer-view'
                     @for (c of conversations(); track c.id) {
                         <button
                             type="button"
-                            class="flex flex-col gap-1 rounded-lg border p-3 text-left transition-colors hover:border-primary"
-                            [class.border-primary]="c.id === selected()?.id"
-                            [class.border-surface-200]="c.id !== selected()?.id"
+                            class="flex min-h-[44px] flex-col gap-1 rounded-lg border p-3 text-left text-color transition-colors hover:border-primary"
+                            [class]="c.id === selected()?.id ? 'border-primary bg-primary-50 dark:bg-primary-400/10' : 'border-surface-200 dark:border-surface-700'"
+                            [attr.aria-current]="c.id === selected()?.id ? 'true' : null"
                             (click)="open(c.id)"
                         >
                             <span class="line-clamp-2 text-sm font-medium">{{ c.title }}</span>
-                            <span class="text-xs text-surface-500">{{ c.created_at | date: 'd MMM y, HH:mm' }}</span>
+                            <span class="text-xs text-muted-color">{{ c.created_at | date: 'd MMM y, HH:mm' }}</span>
                         </button>
                     } @empty {
                         @if (!loadingList()) {
-                            <p class="m-0 text-sm text-surface-500">Aucune conversation pour l'instant.</p>
+                            <p class="m-0 text-sm text-muted-color">Aucune conversation pour l'instant. Vos questions et leurs réponses s'afficheront ici.</p>
                         }
                     }
 
@@ -57,7 +60,24 @@ import { LegalAnswerView } from '@/app/commons/legal-question/legal-answer-view'
             <!-- Selected conversation -->
             <div class="col-span-12 lg:col-span-8">
                 <div class="card !mb-0 flex flex-col gap-6">
-                    <h2 class="m-0 !text-xl font-semibold">{{ selected()?.title ?? 'Nouvelle conversation' }}</h2>
+                    <h2 class="!m-0 !text-lg font-semibold">{{ selected()?.title ?? 'Nouvelle conversation' }}</h2>
+
+                    @if (!selected() && !loadingDetail() && auth.isFounder()) {
+                        <div class="flex flex-col gap-3 rounded-xl bg-surface-50 p-4 text-sm dark:bg-surface-800">
+                            <p class="!m-0 text-muted-color">L'assistant cherche les articles applicables à votre situation et cite ses sources. Par exemple :</p>
+                            <div class="flex flex-wrap gap-2">
+                                @for (example of examples; track example) {
+                                    <button
+                                        type="button"
+                                        class="min-h-[44px] rounded-full border border-surface-200 bg-surface-0 px-3 py-2 text-left text-sm text-color transition-colors hover:border-primary hover:text-primary dark:border-surface-700 dark:bg-surface-900 sm:min-h-9 sm:py-1"
+                                        (click)="question = example"
+                                    >
+                                        {{ example }}
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
 
                     @if (loadingDetail()) {
                         <p class="m-0 text-sm text-surface-500"><i class="pi pi-spin pi-spinner mr-2"></i>Chargement…</p>
@@ -72,7 +92,17 @@ import { LegalAnswerView } from '@/app/commons/legal-question/legal-answer-view'
 
                     @if (auth.isFounder()) {
                         <form class="flex flex-col gap-3 border-t border-surface-200 pt-4 dark:border-surface-700" (ngSubmit)="ask()">
-                            <textarea pTextarea name="question" [(ngModel)]="question" rows="3" [autoResize]="true" [placeholder]="selected() ? 'Question de suivi…' : 'Posez votre question juridique…'" class="w-full" [disabled]="asking()"></textarea>
+                            <textarea
+                                pTextarea
+                                name="question"
+                                [(ngModel)]="question"
+                                rows="3"
+                                [autoResize]="true"
+                                [placeholder]="selected() ? 'Question de suivi…' : 'Posez votre question juridique…'"
+                                aria-label="Votre question juridique"
+                                class="w-full"
+                                [disabled]="asking()"
+                            ></textarea>
                             @if (askError()) {
                                 <p class="m-0 text-sm text-red-600" role="alert">{{ askError() }}</p>
                             }
@@ -81,7 +111,7 @@ import { LegalAnswerView } from '@/app/commons/legal-question/legal-answer-view'
                             </div>
                         </form>
                     } @else {
-                        <p class="m-0 text-sm text-surface-500">L'assistant juridique est réservé aux fondateurs de l'entreprise.</p>
+                        <p class="m-0 text-sm text-muted-color">L'assistant juridique est réservé aux fondateurs de l'entreprise.</p>
                     }
                 </div>
             </div>
@@ -102,6 +132,7 @@ export class LegalAssistant implements OnInit {
     readonly askError = signal('');
 
     question = '';
+    readonly examples = EXAMPLE_LEGAL_QUESTIONS;
     private page = 1;
 
     ngOnInit(): void {

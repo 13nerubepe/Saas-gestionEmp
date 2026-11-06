@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @use 'primeicons/primeicons.css';
-@use '@/assets/layout/layout.scss';
+// Relative path: the Karma test build does not resolve the "@/" alias in Sass.
+@use './layout/layout.scss';
 
 /* =========================================================
    IDENTITÉ VISUELLE
@@ -8,7 +9,7 @@
 
 :root {
     //--app-primary: #2563eb;
-    --app-primary: #FB923C;
+    --app-primary: #fb923c;
     --app-primary-dark: #1d4ed8;
     --app-coral: #f97360;
     --app-beige: #f8f5ef;
@@ -28,4 +29,58 @@ body {
     font-family: var(--font-family);
     color: var(--text-color);
     background: var(--surface-ground);
+}
+
+/* =========================================================
+   ACCESSIBILITÉ
+   ========================================================= */
+
+/* Visible keyboard focus on links, clickable rows and plain buttons.
+   :where() keeps the specificity at zero so PrimeNG's own focus rings win. */
+:where(a, button, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: 2px;
+}
+
+/* Table rows are clickable: draw the ring inside the row. */
+:where(tr[tabindex]):focus-visible {
+    outline-offset: -2px;
+}
+
+/* Touch screens: controls at least 44px high (WCAG 2.5.5 target size).
+   In px: the root font size is 14px, so rem values come out smaller. */
+@media (pointer: coarse) {
+    .p-button,
+    .p-inputtext,
+    .p-select {
+        min-height: 44px;
+    }
+
+    .p-select {
+        align-items: center;
+    }
+}
+
+/* Printing an invoice: only the document, without the app's chrome. */
+@media print {
+    .layout-topbar,
+    .layout-sidebar,
+    .layout-footer,
+    .layout-mask {
+        display: none !important;
+    }
+    html,
+    body {
+        background: #fff !important;
+    }
+    .layout-wrapper .layout-main-container {
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        transition: none !important;
+    }
+    .card {
+        box-shadow: none !important;
+        border: 0 !important;
+    }
 }

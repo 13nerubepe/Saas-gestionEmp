@@ -1,6 +1,8 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import { ApplicationConfig, LOCALE_ID, provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter, withComponentInputBinding, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 // import Aura from '@primeuix/themes/aura';
 import Lara from '@primeuix/themes/lara';
 import { providePrimeNG } from 'primeng/config';
@@ -57,6 +59,14 @@ const AppPreset = definePreset(Lara, {
 
         colorScheme: {
             light: {
+                // Orange 500 on white is 2.8:1 (white text on buttons too); 600 reaches
+                // 3.6:1 and keeps the brand colour. Dark mode keeps the Lara default.
+                primary: {
+                    color: '{primary.600}',
+                    contrastColor: '#ffffff',
+                    hoverColor: '{primary.700}',
+                    activeColor: '{primary.800}'
+                },
                 surface: {
                     0: '#ffffff',
                     50: '{slate.50}',
@@ -93,11 +103,16 @@ const AppPreset = definePreset(Lara, {
     }
 });
 
+// Dates and numbers in French ("5 novembre 2026"), like the rest of the interface.
+// To follow the user's language once the i18n library is in place.
+registerLocaleData(localeFr);
+
 export const appConfig: ApplicationConfig = {
     providers: [
-        provideRouter(appRoutes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation()),
+        provideRouter(appRoutes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation(), withComponentInputBinding()),
         provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
         provideZonelessChangeDetection(),
+        { provide: LOCALE_ID, useValue: 'fr' },
         // providePrimeNG({ theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } } })
         providePrimeNG({ theme: { preset: AppPreset, options: { darkModeSelector: '.app-dark' } } })
     ]

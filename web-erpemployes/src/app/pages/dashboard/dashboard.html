@@ -1,8 +1,8 @@
-<div class="grid grid-cols-12 items-stretch gap-8">
-    <!-- Indicateurs clés -->
-    <app-stats-widget class="col-span-12 contents" />
-    <!-- Question juridique (US-02) -->
-    <div class="col-span-12">
-        <app-legal-question class="block w-full"></app-legal-question>
-    </div>
+<app-page-header [title]="greeting()" [subtitle]="companyLine()" />
+
+<div class="flex flex-col gap-6">
+    <!-- Shortcuts to the daily tasks, with counts from the API -->
+    <app-stats-widget />
+    <!-- Legal question (US-02) -->
+    <app-legal-question class="block w-full" />
 </div>
