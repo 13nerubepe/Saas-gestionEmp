@@ -130,7 +130,11 @@ def _rows(text):
     if not header or not any(h.strip() for h in header):
         raise ImportFileError("import_file_empty", _("The file is empty."))
     columns = [HEADERS.get(h.strip().lower()) for h in header]
-    person_name = "name" not in columns and ("first_name" in columns or "last_name" in columns)
+    if "first_name" in columns and "last_name" not in columns:
+        # "Prénom;Nom" (phone exports): "Nom" is the family name, so Jean and
+        # Paul Mbarga stay two contacts.
+        columns = ["last_name" if c == "name" else c for c in columns]
+    person_name = "first_name" in columns or "last_name" in columns
     if "name" not in columns and not person_name and "organization" not in columns:
         raise ImportFileError(
             "import_name_column_missing", _('The file needs a "nom" (name) column.')

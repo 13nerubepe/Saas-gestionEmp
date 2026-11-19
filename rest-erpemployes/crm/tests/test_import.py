@@ -93,6 +93,16 @@ def test_line_numbers_follow_the_file_with_multiline_fields(founder):
     assert [e["line"] for e in result["errors"]] == [5]
 
 
+def test_first_name_and_name_columns_make_one_name(founder):
+    raw = "Prénom;Nom;Téléphone\nJean;Mbarga;+237 690 00 00 01\nPaul;Mbarga;690000002\n".encode()
+    import_clients(company=founder.company, raw=raw, dry_run=False)
+    people = Client.objects.filter(name__endswith="Mbarga").order_by("name")
+    assert [(c.name, c.kind) for c in people] == [
+        ("Jean Mbarga", "individual"),
+        ("Paul Mbarga", "individual"),
+    ]
+
+
 def test_google_contacts_export(founder):
     raw = (
         b"First Name,Last Name,Organization Name,E-mail 1 - Value,Phone 1 - Value\n"
