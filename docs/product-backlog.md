@@ -1,6 +1,6 @@
 # Product Backlog — GestionEmp
 
-Mis à jour le 19 novembre 2026, au début du sprint 4 (sur 8).
+Mis à jour le 19 novembre 2026, à la fin du sprint 4 (sur 8).
 
 > **Sources.** La répartition des 29 US par cas d'utilisation et la description
 > de chaque cas viennent de `diagrams/diagramme_de_cas_d_utilisation_uml_2.html`.
@@ -74,7 +74,7 @@ décisions prises avec les bons chiffres.
 | US-12 | En tant que fondateur, je veux poser des questions comptables et fiscales et obtenir des réponses sourcées (OHADA, Code général des impôts), afin d'éviter les erreurs. | 4 | 3 | 🟡 Le conseiller répond sur les chiffres de l'entreprise. Reste : réponses sur les textes, **pas Ready** tant que les textes ne sont pas fournis. |
 | US-14 | En tant que fondateur, je veux créer et émettre des factures conformes (XAF, TVA, NIU, RCCM, numérotation continue), afin d'être payé et en règle. | 5 | 5 | ✅ Sprint 3, avec les avoirs. |
 | US-15 | En tant que fondateur, je veux enregistrer les paiements (Mobile Money, espèces, virement) et suivre les impayés, afin de savoir qui me doit quoi. | 5 | 3 | ✅ Sprint 3, avec les relances rédigées par l'IA. |
-| US-17 | En tant que fondateur, je veux suivre ma trésorerie et voir ce qu'elle sera dans les semaines à venir, afin d'anticiper un manque d'argent. | 5 | 3 | 🟡 Le solde réel et le seuil d'alerte sont faits (sprint 3). 🎯 Reste : la prévision à 30, 60 et 90 jours. |
+| US-17 | En tant que fondateur, je veux suivre ma trésorerie et voir ce qu'elle sera dans les semaines à venir, afin d'anticiper un manque d'argent. | 5 | 3 | ✅ Sprint 3 (solde, seuil) et sprint 4 (prévision à 30, 60 et 90 jours). |
 
 ### M5 · Gestion des clients (UC-04, UC-05)
 
@@ -82,10 +82,10 @@ décisions prises avec les bons chiffres.
 |---|---|---|---|---|
 | US-03 | En tant que fondateur, je veux une fiche par client et prospect, afin d'avoir toutes ses informations au même endroit. | 5 | 3 | ✅ Sprint 3 |
 | US-04 | En tant que fondateur, je veux noter chaque échange avec un client, afin de reprendre une relation là où je l'ai laissée. | 4 | — | ✅ Sprint 3 (avec US-03) |
-| US-05 | En tant que fondateur, je veux programmer un suivi daté pour un client ou un prospect, afin de ne jamais oublier de le recontacter. | 5 | 3 | 🎯 Sprint 4 |
+| US-05 | En tant que fondateur, je veux programmer un suivi daté pour un client ou un prospect, afin de ne jamais oublier de le recontacter. | 5 | 3 | ✅ Sprint 4 |
 | US-08 | En tant que fondateur, je veux qu'un agent rédige mes emails et messages aux clients, afin de relancer et prospecter plus vite. | 4 | 3 | 🟡 Les relances d'impayés sont rédigées (sprint 3). Reste : messages de suivi et de prospection, et envoi après validation (dépend d'US-07). |
 | US-18 | En tant que fondateur, je veux suivre mes opportunités dans un pipeline, afin de savoir ce que je peux signer et quand. | 3 | 5 | ⬜ |
-| US-23 | En tant que fondateur, je veux importer mes contacts (CSV, carnet du téléphone), afin de démarrer sans tout ressaisir. | 3 | 3 | ⬜ |
+| US-23 | En tant que fondateur, je veux importer mes contacts (CSV, carnet du téléphone), afin de démarrer sans tout ressaisir. | 3 | 3 | ✅ Sprint 4, à la place d'US-10 |
 
 ### M6 · Gestion des collaborateurs (UC-06, UC-08)
 
@@ -100,8 +100,8 @@ décisions prises avec les bons chiffres.
 
 | ID | User Story | Valeur | Pts | Statut |
 |---|---|---|---|---|
-| US-06 | En tant que fondateur, je veux un écran « Ma journée » qui rassemble mes suivis du jour, mes impayés, mes échéances et mes alertes, afin de savoir quoi faire en ouvrant l'application. | 5 | 3 | 🎯 Sprint 4 |
-| US-10 | En tant que fondateur, je veux un calendrier de mes obligations fiscales et sociales, avec un rappel avant chaque échéance, afin de ne jamais payer de pénalité. | 5 | 5 | 🎯 Sprint 4, à condition que le calendrier officiel soit fourni (Definition of Ready). |
+| US-06 | En tant que fondateur, je veux un écran « Ma journée » qui rassemble mes suivis du jour, mes impayés, mes échéances et mes alertes, afin de savoir quoi faire en ouvrant l'application. | 5 | 3 | ✅ Sprint 4. Le bloc « échéances » arrivera avec US-10. |
+| US-10 | En tant que fondateur, je veux un calendrier de mes obligations fiscales et sociales, avec un rappel avant chaque échéance, afin de ne jamais payer de pénalité. | 5 | 5 | ⬜ Pas Ready : la liste officielle des obligations n'a pas été fournie. Reportée au sprint 5. |
 | US-29 | En tant que fondateur, je veux synchroniser mon agenda et ma messagerie, afin de tout voir au même endroit. | 2 | 8 | ⬜ |
 
 ### Éléments techniques (enablers)
@@ -110,24 +110,23 @@ Ils n'apportent pas de valeur seuls, mais conditionnent celle des US.
 
 | Élément | Valeur rendue possible | Pts | Statut |
 |---|---|---|---|
-| Mise en ligne (serveur AWS) | Sans elle, aucun utilisateur ne peut se servir de l'application | 1 | 🎯 Sprint 4 |
-| Validation de l'IA sur le vrai modèle (Gemini) | Les réponses du conseiller sont utiles, pas seulement factices | 1 | 🎯 Sprint 4 |
+| Mise en ligne (serveur AWS) | Sans elle, aucun utilisateur ne peut se servir de l'application | 1 | ⛔ Bloquée au sprint 4 (accès serveur) : sprint 5 |
+| Validation de l'IA sur le vrai modèle (Gemini) | Les réponses du conseiller sont utiles, pas seulement factices | 1 | ⛔ Bloquée au sprint 4 (pas de clé) : sprint 5 |
 | Traduction de l'interface FR / EN (i18n) | Ouverture à l'Europe et aux pays anglophones | 3 | ⬜ Dette acceptée (voir sprint 4) |
 | Tâches planifiées (Celery + Redis) | Rappels envoyés à heure fixe, appels IA en arrière-plan | 3 | ⬜ |
 | PDF des factures | Envoi de la facture en pièce jointe | 2 | ⬜ |
 
 ## Où en est-on
 
-| Fin du sprint 3 | Nombre | User Stories |
+| Fin du sprint 4 | Nombre | User Stories |
 |---|---|---|
-| ✅ Done | 6 | US-01, 02, 03, 04, 14, 15 |
-| 🟡 Partielles | 7 | US-08, 09, 12, 16, 17, 19, 20 |
-| ⬜ À faire | 16 | US-05, 06, 07, 10, 11, 13, 18, 21, 22, 23, 24, 25, 26, 27, 28, 29 |
+| ✅ Done | 10 | US-01, 02, 03, 04, 05, 06, 14, 15, 17, 23 |
+| 🟡 Partielles | 6 | US-08, 09, 12, 16, 19, 20 |
+| ⬜ À faire | 13 | US-07, 10, 11, 13, 18, 21, 22, 24, 25, 26, 27, 28, 29 |
 
-Les modules M4 (finance) et M5 (clients) sont les plus avancés. M6
-(collaborateurs) et M7 (pilotage) n'ont pas commencé. Avec 3 sprints sur 8
-effectués, l'équipe a livré l'essentiel de la valeur « argent et clients » ;
-il reste à aider le fondateur à piloter son quotidien, puis à gérer son équipe.
+À la fin du sprint 3 : 6 Done, 7 partielles, 16 à faire. Les modules M4
+(finance) et M5 (clients) sont presque terminés ; M7 (pilotage) a démarré avec
+« Ma journée » ; M6 (collaborateurs) n'a pas commencé.
 
 ## Évolution du backlog
 
@@ -139,6 +138,7 @@ il reste à aider le fondateur à piloter son quotidien, puis à gérer son équ
 | Pendant le sprint 3 | Ajouts négociés avec le PO : conseiller financier IA (couvre une partie d'US-12, 16, 20), avoirs et contre-passations (complètent US-14 et 15), relances rédigées par l'IA (partie d'US-08) | Les impayés sont le premier problème du fondateur : l'IA l'aide à les récupérer |
 | Revue du sprint 3 | US-12 (textes comptables) reportée, faute de textes fournis ; déploiement et i18n non faits | Ne pas citer de textes de loi qu'on n'a pas : la fiabilité passe avant tout |
 | Planning du sprint 4 | **Changement par rapport au deck du sprint 3** : US-05, 06, 10 et la prévision d'US-17 passent devant US-07/09 et l'i18n (voir `sprints/sprint-04.md`) | Aujourd'hui l'agent n'envoie rien seul : la validation humaine n'apporte de la valeur qu'avec l'envoi automatique. Le fondateur a d'abord besoin de savoir quoi faire chaque jour |
+| Pendant le sprint 4 | US-10 pas Ready (liste officielle non fournie) : remplacée par US-23. Mise en ligne bloquée. US-17 complétée par la prévision. | Ne jamais afficher une échéance fiscale sans source, et livrer quand même de la valeur (import de contacts) |
 
 ## Ordre de priorité des US restantes
 
@@ -146,17 +146,13 @@ Rang par valeur divisée par effort, puis par dépendances.
 
 | Rang | Élément | Valeur | Pts | Note |
 |---|---|---|---|---|
-| 1 | Mise en ligne et validation de l'IA | (enabler) | 2 | Sprint 4 |
-| 2 | US-05 Suivis datés | 5 | 3 | Sprint 4 |
-| 3 | US-06 Ma journée | 5 | 3 | Sprint 4 |
-| 4 | US-17 Prévision de trésorerie | 5 | 3 | Sprint 4 |
-| 5 | US-10 Calendrier des obligations | 5 | 5 | Sprint 4 si Ready, sinon sprint 5 |
-| 6 | US-16 et US-20 pour l'agent juridique | 4 | 4 | Petit effort, fiabilité de l'agent phare |
-| 7 | US-07 Validation des actions, puis US-08 envoi des emails | 4 | 8 | Ensemble : l'agent envoie enfin, sous contrôle |
-| 8 | US-23 Import de contacts | 3 | 3 | Remplaçant d'US-10 au sprint 4 si besoin |
-| 9 | US-12 Questions comptables sur textes | 4 | 3 | Dès que les textes sont fournis |
-| 10 | US-13 Brouillons de contrats | 4 | 8 | |
-| 11 | US-09 Journal d'audit | 3 | 3 | |
-| 12 | US-18 Pipeline | 3 | 5 | |
-| 13 | US-24, 25, 26, 27 (collaborateurs) | 2-3 | 16 | Bloc M6, sprints 6-7 |
-| 14 | US-22, 11, 21, 28, 29 | 2-3 | 22 | Sprints 7-8, ou après le projet |
+| 1 | Mise en ligne et validation de l'IA | (enabler) | 2 | Sprint 5 (bloquée au sprint 4) |
+| 2 | US-10 Calendrier des obligations | 5 | 5 | Sprint 5, si la liste officielle est fournie avant le planning |
+| 3 | US-16 et US-20 pour l'agent juridique | 4 | 4 | Sprint 5 : petit effort, fiabilité de l'agent phare |
+| 4 | US-07 Validation des actions, puis US-08 envoi des emails | 4 | 8 | Ensemble : l'agent envoie enfin, sous contrôle. Sprint 5 si US-10 n'est pas Ready, sinon sprint 6 |
+| 5 | US-12 Questions comptables sur textes | 4 | 3 | Dès que les textes sont fournis |
+| 6 | US-13 Brouillons de contrats | 4 | 8 | |
+| 7 | US-09 Journal d'audit | 3 | 3 | |
+| 8 | US-18 Pipeline | 3 | 5 | |
+| 9 | US-24, 25, 26, 27 (collaborateurs) | 2-3 | 16 | Bloc M6, sprints 6-7 |
+| 10 | US-22, 11, 21, 28, 29 | 2-3 | 22 | Sprints 7-8, ou après le projet |

@@ -46,13 +46,13 @@ pour un effort faible ou moyen, et répondent au retour du professeur
 
 Prévision : 18 points (voir le deck du sprint 3). Engagement : **16 points**.
 
-| Rang | Élément | Valeur | Pts | Qui |
-|---|---|---|---|---|
-| 1 | Mise en ligne et validation de l'IA sur Gemini | enabler | 2 | Back / IA |
-| 2 | US-05 Suivis datés | 5 | 3 | Back + Front 1 |
-| 3 | US-06 Ma journée | 5 | 3 | Front 1 |
-| 4 | US-17 Prévision de trésorerie | 5 | 3 | Back / IA + Front 2 |
-| 5 | US-10 Calendrier des obligations fiscales et sociales | 5 | 5 | Back + Front 2 |
+| Rang | Élément | Valeur | Pts | Qui | Statut |
+|---|---|---|---|---|---|
+| 1 | Mise en ligne et validation de l'IA sur Gemini | enabler | 2 | Back / IA | ⛔ Bloqué (impediment) |
+| 2 | US-05 Suivis datés | 5 | 3 | Back + Front 1 | ✅ Done (PR #4) |
+| 3 | US-06 Ma journée | 5 | 3 | Front 1 | ✅ Done (PR #5) |
+| 4 | US-17 Prévision de trésorerie | 5 | 3 | Back / IA + Front 2 | ✅ Done (PR #6) |
+| 5 | ~~US-10 Calendrier des obligations~~ → **US-23 Import de contacts** | 3 | 3 | Back + Front 2 | ✅ Done (PR #7) |
 
 **Condition sur US-10 (Definition of Ready)** : le Product Owner fournit avant
 J+2 la liste des obligations du Cameroun pour une SARL et un entrepreneur
@@ -60,6 +60,24 @@ individuel (intitulé, organisme, périodicité, date limite, source officielle)
 L'application ne doit afficher aucune date qui ne vienne pas d'une source.
 Sans cette liste, US-10 retourne au backlog et **US-23 (import de contacts,
 3 pts)** prend sa place.
+
+## Déroulement du sprint
+
+- **J+2, Definition of Ready** : la liste officielle des obligations fiscales
+  et sociales n'a pas été fournie. US-10 n'est pas Ready : elle retourne au
+  Product Backlog et **US-23 (import de contacts)** prend sa place, comme
+  prévu au planning. Aucune échéance n'a été inventée.
+- **Revue de code** : chaque PR est relue par un relecteur avant fusion
+  (revue de la PR #5 : 3 corrections faites avant de fusionner).
+- **Défauts trouvés en test, corrigés avant fusion** : prévision qui
+  extrapolait trois jours de dépenses sur un mois ; champ fichier de l'import
+  qui ne se vidait pas à la fermeture.
+- **Mise en ligne** : impossible depuis l'environnement de l'équipe (pas
+  d'accès au serveur, pas de clé Gemini). C'est un impediment à lever au
+  sprint 5 ; il n'est pas compté dans la vélocité.
+
+Bilan : **12 points Done** sur 16 engagés (les 4 points d'écart : la mise en
+ligne bloquée, 2 pts, et le remplacement d'US-10, 5 pts, par US-23, 3 pts).
 
 ## User Stories et critères d'acceptation
 
@@ -123,7 +141,8 @@ Les critères sont écrits pour être vérifiés devant le jury : chaque
    - les suivis du jour et en retard (US-05) ;
    - les factures en retard, les plus anciennes d'abord, avec le montant dû et
      les jours de retard ;
-   - les échéances des 7 prochains jours (US-10) ;
+   - les échéances des 7 prochains jours (US-10, reportée : ce bloc arrivera
+     avec elle) ;
    - les alertes : trésorerie sous le seuil, risque de passer sous le seuil
      (US-17), brouillons de facture non émis.
 3. **Quand** je clique sur un élément, **alors** j'arrive directement à
@@ -133,8 +152,8 @@ Les critères sont écrits pour être vérifiés devant le jury : chaque
    l'indique (« Rien d'urgent aujourd'hui »).
 5. Les montants sont exactement ceux du conseiller et de la page Trésorerie :
    « Ma journée » n'a pas de modèle à elle, elle lit les mêmes données.
-6. **Étant donné** un collaborateur, **alors** il voit ses suivis, mais aucune
-   donnée financière.
+6. **Étant donné** un collaborateur, **alors** il voit les suivis qu'il a
+   programmés, mais aucune donnée financière.
 7. Lisible sans défilement horizontal sur un téléphone de 390 px de large.
 
 ### US-17 Prévision de trésorerie (3 pts)
@@ -158,7 +177,29 @@ Les critères sont écrits pour être vérifiés devant le jury : chaque
    résultat est connu, scénario prudent comme optimiste, y compris sans
    historique (prévision = solde actuel + encaissements attendus).
 
-### US-10 Calendrier des obligations fiscales et sociales (5 pts)
+### US-23 Import de contacts (3 pts), à la place d'US-10
+
+> En tant que **fondateur**, je veux importer mes contacts (CSV, carnet du
+> téléphone), afin de démarrer sans tout ressaisir.
+
+1. **Étant donné** un fichier CSV (virgule ou point-virgule, UTF-8 ou format
+   Excel Windows) avec au moins une colonne « Nom », **quand** je le vérifie,
+   **alors** l'application annonce ce qui sera créé, ignoré et refusé, sans
+   rien créer.
+2. **Quand** je confirme, **alors** seuls les contacts valides et nouveaux sont
+   créés, dans mon entreprise.
+3. Un contact déjà présent (même nom, ou même téléphone avec ou sans +237) est
+   ignoré, y compris s'il apparaît deux fois dans le fichier.
+4. Une ligne invalide (statut ou type inconnu, email invalide) est refusée
+   avec son numéro de ligne et la raison.
+5. Un fichier illisible, sans colonne « Nom », de plus de 1 Mo ou de plus de
+   1 000 lignes n'importe rien et l'explique.
+6. Un modèle de fichier est téléchargeable depuis la fenêtre d'import.
+
+### US-10 Calendrier des obligations fiscales et sociales (5 pts), reportée
+
+Pas Ready : la liste officielle n'a pas été fournie. Critères conservés pour
+le sprint où elle le sera.
 
 > En tant que **fondateur**, je veux un calendrier de mes obligations fiscales
 > et sociales, avec un rappel avant chaque échéance, afin de ne jamais payer de
@@ -195,19 +236,55 @@ Les critères sont écrits pour être vérifiés devant le jury : chaque
 7. Textes de l'interface en français. **Dette acceptée par le PO** : la
    traduction anglaise (i18n) est planifiée au sprint 6.
 
-## Démonstration prévue au jury
+## Démonstration au jury
 
-Avec le compte de démo, en ligne :
+Avec le compte de démo (données fictives). La mise en ligne étant bloquée, la
+démonstration se fait sur un poste de l'équipe (`docker compose`, puis
+`manage.py seed_demo`).
 
 1. Connexion : « Ma journée » s'ouvre et montre un suivi en retard, la facture
-   de l'hôtel en retard, une échéance fiscale dans 5 jours et le risque de
-   trésorerie.
-2. Clic sur la facture → « Rédiger une relance » → le fondateur l'envoie par
-   WhatsApp.
+   de l'hôtel en retard et le risque de trésorerie. (Les échéances fiscales
+   arriveront avec US-10.)
+2. « Relancer » sur la facture de l'hôtel → le brouillon de relance s'ouvre,
+   avec le montant et le numéro de facture ; le fondateur l'envoie lui-même
+   par WhatsApp.
 3. Clic sur le suivi → marqué comme fait avec un compte rendu, qui apparaît
    dans l'historique du client.
-4. Page Trésorerie : la prévision à 30, 60 et 90 jours, les deux scénarios et
-   la date de risque.
-5. Question au conseiller : « Aurai-je assez d'argent fin décembre ? ». La
+4. Page Trésorerie : la prévision à 30, 60 et 90 jours, les fins de mois, les
+   deux scénarios et la date de risque.
+5. Question au conseiller : « Aurai-je assez d'argent dans 3 mois ? ». La
    réponse cite la prévision et affiche sa fiabilité.
-6. Calendrier : une échéance marquée comme faite disparaît de « Ma journée ».
+6. Clients → « Importer » : un fichier exporté d'Excel est vérifié (créés,
+   doublons ignorés, lignes refusées), puis importé.
+
+## Rétrospective
+
+**Ce qui a marché**
+
+- Classer le backlog par valeur pour le fondateur, pas par ordre technique :
+  le sprint livre des actions du quotidien (relancer, programmer, anticiper).
+- La relecture de chaque PR avant fusion : une dizaine de corrections, dont
+  un défaut bloquant dans le calcul de la prévision (une contre-passation
+  restait seule dans la fenêtre de calcul).
+- Respecter la Definition of Ready : US-10 n'est pas partie sans source
+  officielle, aucune échéance n'a été inventée.
+- Tester chaque écran dans un navigateur, sur ordinateur et téléphone, avant
+  de livrer.
+
+**Ce qui n'a pas marché**
+
+- La mise en ligne et l'IA réelle : pas d'accès au serveur ni de clé Gemini
+  depuis l'environnement de l'équipe.
+- Une seule branche de travail pour toutes les US : il a fallu mettre du
+  travail de côté pour garder une PR par US.
+- La liste des obligations a été demandée trop tard pour US-10.
+- L'interface reste en français seulement.
+
+**Ce que nous améliorons au sprint 5**
+
+| Action | Responsable |
+|---|---|
+| Obtenir l'accès au serveur et la clé Gemini avant le planning | Scrum Master |
+| Une branche par US (`feature/US-xx-...`) | Developers |
+| Demander les données métier dès le refinement | Product Owner |
+| Ajouter une revue humaine à la revue de code par agent | Developers |
