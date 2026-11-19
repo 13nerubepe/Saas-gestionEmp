@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { StatsWidget } from '@/app/commons/statswidget';
 import { LegalQuestion } from '@/app/commons/legal-question/legal-question';
 import { PageHeader } from '@/app/commons/page-header';
+import { MyDay } from './my-day';
 import { AuthService } from '@/app/core/auth/auth.service';
 
 /** Country name in French from an ISO code (CM → Cameroun), with the browser's own data. */
@@ -9,7 +10,7 @@ const countryNames = new Intl.DisplayNames(['fr'], { type: 'region' });
 
 @Component({
     selector: 'app-dashboard',
-    imports: [StatsWidget, LegalQuestion, PageHeader],
+    imports: [StatsWidget, LegalQuestion, PageHeader, MyDay],
     templateUrl: './dashboard.html'
 })
 export class Dashboard {

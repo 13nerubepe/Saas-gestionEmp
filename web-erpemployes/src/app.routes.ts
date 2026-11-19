@@ -12,7 +12,7 @@ export const appRoutes: Routes = [
         component: AppLayout,
         canActivate: [authGuard],
         children: [
-            { path: '', component: Dashboard, data: { breadcrumb: 'Tableau de bord' } },
+            { path: '', component: Dashboard, data: { breadcrumb: 'Ma journée' } },
             {
                 path: AppConstantRoute.Legal_Assistant_PATH,
                 loadComponent: () => import('./app/pages/legal-assistant/legal-assistant').then((c) => c.LegalAssistant),

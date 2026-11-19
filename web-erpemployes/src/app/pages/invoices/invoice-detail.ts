@@ -344,6 +344,8 @@ export class InvoiceDetail implements OnInit {
 
     /** Route parameter (withComponentInputBinding). */
     readonly id = input.required<string>();
+    /** ?relancer=1, from "Ma journée": open the reminder draft at once. */
+    readonly relancer = input<string>();
 
     readonly invoice = signal<Invoice | null>(null);
     readonly error = signal('');
@@ -378,7 +380,9 @@ export class InvoiceDetail implements OnInit {
     paymentMethod = '';
     paymentReference = '';
 
-    reminderVisible = false;
+    // A signal: it is opened from an HTTP callback (?relancer=1), and the view
+    // is zoneless.
+    readonly reminderVisible = signal(false);
     reminderChannel: ReminderChannel = 'whatsapp';
     reminderTone: ReminderTone = 'friendly';
     reminderSubject = '';
@@ -414,7 +418,10 @@ export class InvoiceDetail implements OnInit {
         this.invoice.set(null);
         this.error.set('');
         this.billing.getInvoice(id).subscribe({
-            next: (invoice) => this.invoice.set(invoice),
+            next: (invoice) => {
+                this.invoice.set(invoice);
+                if (this.relancer() && invoice.kind === 'invoice' && invoice.status === 'issued') this.openReminder(invoice);
+            },
             // Another company's invoice is a 404, like an unknown one.
             error: (error) => this.error.set(error?.status === 404 ? 'Facture introuvable.' : apiErrorMessage(error))
         });
@@ -543,7 +550,7 @@ export class InvoiceDetail implements OnInit {
     openReminder(inv: Invoice): void {
         this.reminderError.set('');
         this.copied.set(false);
-        this.reminderVisible = true;
+        this.reminderVisible.set(true);
         this.crm.getClient(inv.client_id).subscribe({
             next: (client) => {
                 this.clientPhone = client.phone;

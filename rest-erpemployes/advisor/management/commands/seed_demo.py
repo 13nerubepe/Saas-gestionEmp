@@ -17,7 +17,8 @@ from django.utils import timezone
 from accounts.models import Company, Membership, User
 from accounts.services import register_founder
 from billing import services as billing
-from crm.models import Client, Interaction
+from crm import services as crm_services
+from crm.models import Client, FollowUp, Interaction
 
 COMPANY_NAME = "Awa Services SARL (démo)"
 FOUNDER_EMAIL = "demo@gestionemp.cm"
@@ -112,6 +113,18 @@ class Command(BaseCommand):
         talk(bakery, "meeting", 3, "Satisfait des livraisons, envisage un contrat mensuel.")
         talk(restaurant, "meeting", 9, "Intéressé par une livraison quotidienne, demande un devis.")
         talk(garage, "call", 95, "Commande ponctuelle.")
+
+        # US-05 follow-ups: one late, one for today, one later, for "Ma journée".
+        def follow(who, reason, days, channel):
+            follow_up = crm_services.plan_follow_up(
+                client=who, user=founder, due_date=today, reason=reason, channel=channel
+            )
+            # Planning in the past is refused: move the demo date afterwards.
+            FollowUp.objects.filter(pk=follow_up.pk).update(due_date=today + timedelta(days=days))
+
+        follow(hotel, "Rappeler le comptable pour le virement promis", -2, "call")
+        follow(restaurant, "Envoyer le devis de livraison quotidienne", 0, "whatsapp")
+        follow(bakery, "Proposer le contrat mensuel", 5, "meeting")
 
         def invoice(who, description, quantity, price, *, issued_days_ago, due_in, exempt=False):
             line = {
