@@ -91,9 +91,6 @@ import { FollowUp } from '@/app/core/crm/crm.service';
                                 <li class="text-sm text-muted-color">Aucun suivi pour aujourd'hui.</li>
                             }
                         </ul>
-                        @if (d.follow_up_count > d.follow_ups.length) {
-                            <a [routerLink]="['/', paths.clients]" class="text-sm font-medium text-primary">Voir les {{ d.follow_up_count }} suivis</a>
-                        }
                     </div>
 
                     <!-- Overdue invoices (founders only) -->
@@ -123,6 +120,9 @@ import { FollowUp } from '@/app/core/crm/crm.service';
                                     <li class="text-sm text-muted-color">Aucune facture en retard.</li>
                                 }
                             </ul>
+                            @if ((d.overdue_invoice_count ?? 0) > d.overdue_invoices.length) {
+                                <a [routerLink]="['/', paths.invoices]" [queryParams]="{ filtre: 'overdue' }" class="text-sm font-medium text-primary">Voir les {{ d.overdue_invoice_count }} factures en retard</a>
+                            }
                         </div>
                     }
                 </div>

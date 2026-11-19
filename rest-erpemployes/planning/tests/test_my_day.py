@@ -96,10 +96,10 @@ def test_nothing_to_do(founder):
     assert (data["follow_ups"], data["overdue_invoices"], data["alerts"]) == ([], [], [])
 
 
-def test_employee_sees_follow_ups_but_no_money(founder, day):
+def test_employee_sees_no_money(founder, day):
     employee = MembershipFactory(company=founder.company, role=Membership.Role.EMPLOYEE)
     data = api_for(employee).get(URL).data
-    assert data["follow_up_count"] == 2
+    assert data["follow_up_count"] == 0  # the founder planned them
     assert (data["overdue_invoices"], data["overdue_total"], data["alerts"]) == (None, None, None)
 
 
@@ -107,3 +107,36 @@ def test_scoped_to_the_active_company(founder, day):
     data = api_for(MembershipFactory(company__country="CM")).get(URL).data
     assert (data["follow_up_count"], data["overdue_invoices"]) == (0, [])
     assert APIClient().get(URL).status_code == 401
+
+
+def test_overdue_invoices_oldest_first_and_capped(founder, monkeypatch):
+    from planning import selectors
+
+    monkeypatch.setattr(selectors, "MAX_ITEMS", 2)
+    client = Client.objects.create(company=founder.company, name="Client")
+    line = {
+        "description": "x",
+        "quantity": Decimal(1),
+        "unit_price": Decimal(1000),
+        "tax_rate_code": "exempt",
+    }
+    for days_late in (5, 30, 12):
+        draft = billing.create_invoice(
+            company=founder.company,
+            client=client,
+            lines=[line],
+            due_date=TODAY - timedelta(days=days_late),
+        )
+        billing.issue_invoice(draft, today=TODAY - timedelta(days=60))
+
+    data = api_for(founder).get(URL).data
+    assert [i["days_late"] for i in data["overdue_invoices"]] == [30, 12]
+    assert data["overdue_invoice_count"] == 3
+
+
+def test_employee_sees_the_follow_ups_they_planned(founder, day):
+    employee = MembershipFactory(company=founder.company, role=Membership.Role.EMPLOYEE)
+    client = Client.objects.get(name="Hôtel")
+    crm.plan_follow_up(client=client, user=employee.user, due_date=TODAY, reason="Le mien")
+    data = api_for(employee).get(URL).data
+    assert [f["reason"] for f in data["follow_ups"]] == ["Le mien"]

@@ -380,7 +380,9 @@ export class InvoiceDetail implements OnInit {
     paymentMethod = '';
     paymentReference = '';
 
-    reminderVisible = false;
+    // A signal: it is opened from an HTTP callback (?relancer=1), and the view
+    // is zoneless.
+    readonly reminderVisible = signal(false);
     reminderChannel: ReminderChannel = 'whatsapp';
     reminderTone: ReminderTone = 'friendly';
     reminderSubject = '';
@@ -548,7 +550,7 @@ export class InvoiceDetail implements OnInit {
     openReminder(inv: Invoice): void {
         this.reminderError.set('');
         this.copied.set(false);
-        this.reminderVisible = true;
+        this.reminderVisible.set(true);
         this.crm.getClient(inv.client_id).subscribe({
             next: (client) => {
                 this.clientPhone = client.phone;

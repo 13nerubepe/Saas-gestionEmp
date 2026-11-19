@@ -13,16 +13,25 @@ from crm import selectors as crm
 from crm.models import FollowUp
 
 MAX_ITEMS = 8
+# Today's follow-ups are the to-do list itself: all of them are shown.
+MAX_FOLLOW_UPS = 50
 
 
 def my_day(membership, *, today=None):
-    """Blocks of "Ma journée" for this member. Employees get no financial data."""
+    """Blocks of "Ma journée" for this member.
+
+    Employees get the follow-ups they planned and no financial data.
+    """
     today = today or timezone.localdate()
     company = membership.company
-    due = crm.follow_ups(FollowUp.objects.filter(company=company), due="today", today=today)
+    founder = membership.role == Membership.Role.FOUNDER
+    mine = FollowUp.objects.filter(company=company)
+    if not founder:
+        mine = mine.filter(created_by=membership.user)
+    due = crm.follow_ups(mine, due="today", today=today)
     day = {
         "today": today,
-        "follow_ups": list(due[:MAX_ITEMS]),
+        "follow_ups": list(due[:MAX_FOLLOW_UPS]),
         "follow_up_count": due.count(),
         "overdue_invoices": None,
         "overdue_invoice_count": None,
@@ -30,7 +39,7 @@ def my_day(membership, *, today=None):
         "alerts": None,
         "currency": None,
     }
-    if membership.role != Membership.Role.FOUNDER:
+    if not founder:
         return day
 
     summary = billing.financial_summary(company, today=today)
