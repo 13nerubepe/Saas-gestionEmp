@@ -3,7 +3,7 @@
 #   docker compose up           -> PostgreSQL + API on http://localhost:8000
 services:
   db:
-    # PostgreSQL with the pgvector extension, needed later for legal sources.
+    # PostgreSQL with the pgvector extension (vector search of legal texts).
     image: pgvector/pgvector:pg17
     environment:
       POSTGRES_DB: app
@@ -33,6 +33,13 @@ services:
       ALLOWED_HOSTS: localhost,127.0.0.1
       DATABASE_URL: postgres://app:app@db:5432/app
       CORS_ALLOWED_ORIGINS: http://localhost:4200
+      # Local HTTP: a Secure refresh cookie would never be sent, and login would
+      # not survive a reload.
+      REFRESH_COOKIE_SECURE: "False"
+      # "fake" answers without a key; set LLM_PROVIDER=gemini and GEMINI_API_KEY
+      # in a .env file at the repository root to use the real model.
+      LLM_PROVIDER: ${LLM_PROVIDER:-fake}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     ports:
       - "8000:8000"
     volumes:

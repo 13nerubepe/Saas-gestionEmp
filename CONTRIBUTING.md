@@ -3,6 +3,11 @@
 Product context, architecture and the reasons behind these rules are in
 [.claude/CLAUDE.md](.claude/CLAUDE.md). This page is the day-to-day checklist.
 
+## Setup
+
+First run, demo accounts and common problems: see the [README](README.md).
+The frontend lockfile needs **npm 11** (`npm install -g npm@11`).
+
 ## Backend setup
 
 Requires Python 3.13 and Docker.
@@ -16,7 +21,8 @@ venv\Scripts\activate            # Windows; on macOS/Linux: source venv/bin/acti
 pip install -r requirements-dev.txt
 cp .env.example .env             # then set SECRET_KEY
 python manage.py migrate
-python manage.py createsuperuser
+python manage.py seed_demo       # fictitious demo company and accounts (DEBUG only)
+python manage.py createsuperuser # for the Django admin
 python manage.py runserver
 ```
 
@@ -31,7 +37,8 @@ python manage.py load_legal_texts path/to/texts.json
 ```
 
 `python manage.py help load_legal_texts` shows the file format. Without a key,
-set `LLM_PROVIDER=fake` to exercise the whole flow with canned answers.
+keep `LLM_PROVIDER=fake` (the default in `.env.example`) to exercise the whole
+flow with canned answers.
 
 - API: http://localhost:8000/api/v1/
 - Interactive API docs: http://localhost:8000/api/docs/
@@ -52,7 +59,8 @@ python manage.py makemigrations --check --dry-run
 pytest
 ```
 
-CI runs the same four commands and must be green to merge.
+CI runs the same four commands, plus `npm run test:ci` and a production build
+in `web-erpemployes/`, and must be green to merge.
 
 ## Git
 
