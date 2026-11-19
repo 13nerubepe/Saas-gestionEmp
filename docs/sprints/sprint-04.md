@@ -68,7 +68,7 @@ Sans cette liste, US-10 retourne au backlog et **US-23 (import de contacts,
   Product Backlog et **US-23 (import de contacts)** prend sa place, comme
   prévu au planning. Aucune échéance n'a été inventée.
 - **Revue de code** : chaque PR est relue par un relecteur avant fusion
-  (revue de la PR #5 : 3 corrections faites avant de fusionner).
+  (PR #5 à #7 : près de 20 corrections faites avant de fusionner).
 - **Défauts trouvés en test, corrigés avant fusion** : prévision qui
   extrapolait trois jours de dépenses sur un mois ; champ fichier de l'import
   qui ne se vidait pas à la fermeture.
@@ -238,6 +238,10 @@ le sprint où elle le sera.
 
 ## Démonstration au jury
 
+Support de la revue : `sprint-04-revue.pptx` (vision, backlog, sprint, US,
+démonstration, rétrospective, proposition de sprint 5).
+
+
 Avec le compte de démo (données fictives). La mise en ligne étant bloquée, la
 démonstration se fait sur un poste de l'équipe (`docker compose`, puis
 `manage.py seed_demo`).
@@ -263,13 +267,16 @@ démonstration se fait sur un poste de l'équipe (`docker compose`, puis
 
 - Classer le backlog par valeur pour le fondateur, pas par ordre technique :
   le sprint livre des actions du quotidien (relancer, programmer, anticiper).
-- La relecture de chaque PR avant fusion : une dizaine de corrections, dont
-  un défaut bloquant dans le calcul de la prévision (une contre-passation
-  restait seule dans la fenêtre de calcul).
+- La relecture de chaque PR avant fusion : près de 20 corrections, dont deux
+  défauts bloquants (une contre-passation restait seule dans la fenêtre de
+  calcul de la prévision ; un fichier d'import était lu en entier avant le
+  contrôle de taille).
 - Respecter la Definition of Ready : US-10 n'est pas partie sans source
   officielle, aucune échéance n'a été inventée.
 - Tester chaque écran dans un navigateur, sur ordinateur et téléphone, avant
-  de livrer.
+  de livrer. La recette QA de toute l'application en fin de sprint n'a trouvé
+  aucun défaut bloquant ; 3 défauts mineurs (un employé pouvait ouvrir les pages
+  finances par leur adresse, sans accès aux données) ont été corrigés.
 
 **Ce qui n'a pas marché**
 

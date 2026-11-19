@@ -20,3 +20,14 @@ export const guestGuard: CanActivateFn = () => {
     const router = inject(Router);
     return auth.isAuthenticated() ? router.createUrlTree(['/']) : true;
 };
+
+/**
+ * Founder-only pages (invoices, cash, advisor, legal assistant): an employee
+ * goes back to "Ma journée". Runs after `authGuard` on the parent route, so
+ * the user is loaded. The API refuses employees anyway; this keeps them
+ * away from pages whose every action would fail.
+ */
+export const founderGuard: CanActivateFn = () => {
+    const auth = inject(AuthService);
+    return auth.isFounder() || inject(Router).createUrlTree(['/']);
+};
