@@ -129,11 +129,15 @@ def _rows(text):
     header = next(reader, None)
     if not header or not any(h.strip() for h in header):
         raise ImportFileError("import_file_empty", _("The file is empty."))
-    columns = [HEADERS.get(h.strip().lower()) for h in header]
+    headers = [h.strip().lower() for h in header]
+    columns = [HEADERS.get(h) for h in headers]
     if "first_name" in columns and "last_name" not in columns:
-        # "Prénom;Nom" (phone exports): "Nom" is the family name, so Jean and
-        # Paul Mbarga stay two contacts.
-        columns = ["last_name" if c == "name" else c for c in columns]
+        # "Prénom;Nom;Entreprise" (phone exports): "Nom" is the family name, so
+        # Jean and Paul Mbarga stay two contacts, and "Entreprise" is where they work.
+        columns = [
+            ("last_name" if h in ("nom", "name") else "organization") if c == "name" else c
+            for h, c in zip(headers, columns, strict=True)
+        ]
     person_name = "first_name" in columns or "last_name" in columns
     if "name" not in columns and not person_name and "organization" not in columns:
         raise ImportFileError(

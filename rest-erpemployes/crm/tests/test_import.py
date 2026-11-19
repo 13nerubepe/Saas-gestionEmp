@@ -102,6 +102,11 @@ def test_first_name_and_name_columns_make_one_name(founder):
         ("Paul Mbarga", "individual"),
     ]
 
+    raw = "Prénom;Nom;Entreprise\nAlice;Ngo;Pharmacie Ngo\n".encode()
+    import_clients(company=founder.company, raw=raw, dry_run=False)
+    pharmacy = Client.objects.get(name="Pharmacie Ngo")
+    assert (pharmacy.kind, pharmacy.contact_name) == ("company", "Alice Ngo")
+
 
 def test_google_contacts_export(founder):
     raw = (
