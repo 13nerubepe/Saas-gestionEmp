@@ -6,6 +6,7 @@ import { Page } from '@/app/core/page';
 
 // Mirrors the API contract (tag "crm" in /api/docs/).
 const CLIENTS_URL = `${environment.apiUrl}/crm/clients`;
+const FOLLOW_UPS_URL = `${environment.apiUrl}/crm/follow-ups`;
 
 export type ClientKind = 'company' | 'individual';
 export type ClientStatus = 'prospect' | 'active' | 'inactive';
@@ -26,6 +27,8 @@ export interface Client {
     notes: string;
     interaction_count: number;
     last_interaction_at: string | null;
+    /** Earliest open follow-up (US-05), or null. */
+    next_follow_up_date: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -41,6 +44,27 @@ export interface Interaction {
     created_by_email: string | null;
     created_at: string;
 }
+
+export type FollowUpChannel = '' | 'call' | 'whatsapp' | 'email' | 'meeting' | 'other';
+export type FollowUpDue = 'today' | 'overdue' | 'upcoming' | 'done';
+
+/** US-05: a dated reminder to get back to a client. */
+export interface FollowUp {
+    id: string;
+    client_id: string;
+    client_name: string;
+    due_date: string;
+    reason: string;
+    channel: FollowUpChannel;
+    status: 'open' | 'done';
+    is_overdue: boolean;
+    postponements: { from: string; to: string; at: string }[];
+    done_at: string | null;
+    outcome_summary: string | null;
+    created_at: string;
+}
+
+export type FollowUpPayload = Pick<FollowUp, 'due_date' | 'reason' | 'channel'>;
 
 export type InteractionPayload = Pick<Interaction, 'kind' | 'occurred_at' | 'summary'>;
 
@@ -78,5 +102,32 @@ export class CrmService {
 
     recordInteraction(clientId: string, payload: InteractionPayload): Observable<Interaction> {
         return this.http.post<Interaction>(`${CLIENTS_URL}/${clientId}/interactions/`, payload);
+    }
+
+    /** US-05: a client's follow-ups, open ones first. */
+    listClientFollowUps(clientId: string, due?: FollowUpDue): Observable<Page<FollowUp>> {
+        let params = new HttpParams();
+        if (due) params = params.set('due', due);
+        return this.http.get<Page<FollowUp>>(`${CLIENTS_URL}/${clientId}/follow-ups/`, { params });
+    }
+
+    planFollowUp(clientId: string, payload: FollowUpPayload): Observable<FollowUp> {
+        return this.http.post<FollowUp>(`${CLIENTS_URL}/${clientId}/follow-ups/`, payload);
+    }
+
+    /** The company's follow-ups, e.g. 'today' (due today or late) for "Ma journée". */
+    listFollowUps(due?: FollowUpDue, page = 1): Observable<Page<FollowUp>> {
+        let params = new HttpParams().set('page', page);
+        if (due) params = params.set('due', due);
+        return this.http.get<Page<FollowUp>>(`${FOLLOW_UPS_URL}/`, { params });
+    }
+
+    /** Closes the follow-up; the summary joins the client's history. */
+    completeFollowUp(id: string, summary: string): Observable<FollowUp> {
+        return this.http.post<FollowUp>(`${FOLLOW_UPS_URL}/${id}/complete/`, { summary });
+    }
+
+    postponeFollowUp(id: string, dueDate: string): Observable<FollowUp> {
+        return this.http.post<FollowUp>(`${FOLLOW_UPS_URL}/${id}/postpone/`, { due_date: dueDate });
     }
 }

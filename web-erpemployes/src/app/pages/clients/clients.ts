@@ -10,7 +10,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { Client, CrmService } from '@/app/core/crm/crm.service';
-import { CLIENT_KIND_LABELS, CLIENT_STATUS_LABELS, CLIENT_STATUS_SEVERITY } from '@/app/core/crm/crm-labels';
+import { CLIENT_KIND_LABELS, CLIENT_STATUS_LABELS, CLIENT_STATUS_SEVERITY, localDate, relativeDay } from '@/app/core/crm/crm-labels';
 import { apiErrorMessage } from '@/app/core/api-errors';
 import { AppConstantRoute } from '@/app/constants';
 import { EmptyState } from '@/app/commons/empty-state';
@@ -106,12 +106,18 @@ import { ClientForm } from './client-form';
                                         Aucun échange
                                     }
                                 </div>
+                                @if (client.next_follow_up_date) {
+                                    <div class="flex items-center gap-2 text-xs" [class.text-red-600]="isLate(client)" [class.text-primary]="!isLate(client)">
+                                        <i class="pi pi-bell text-xs" aria-hidden="true"></i>
+                                        Prochain suivi : {{ followUpLabel(client) }}
+                                    </div>
+                                }
                             </a>
                         </li>
                     }
                 </ul>
             } @else {
-                <p-table [value]="clients()" dataKey="id" [tableStyle]="{ 'min-width': '40rem' }" [class.opacity-60]="loading()">
+                <p-table [value]="clients()" dataKey="id" [tableStyle]="{ 'min-width': '48rem' }" [class.opacity-60]="loading()">
                     <ng-template #header>
                         <tr>
                             <th>Nom</th>
@@ -119,6 +125,7 @@ import { ClientForm } from './client-form';
                             <th>Contact</th>
                             <th>Ville</th>
                             <th>Dernier échange</th>
+                            <th>Prochain suivi</th>
                         </tr>
                     </ng-template>
                     <ng-template #body let-client>
@@ -140,6 +147,9 @@ import { ClientForm } from './client-form';
                                 } @else {
                                     <span class="text-muted-color">Aucun</span>
                                 }
+                            </td>
+                            <td [class.text-red-600]="isLate(client)" [class.font-medium]="isLate(client)">
+                                {{ client.next_follow_up_date ? followUpLabel(client) : '—' }}
                             </td>
                         </tr>
                     </ng-template>
@@ -206,6 +216,16 @@ export class Clients implements OnInit {
 
     statusSeverity(client: Client) {
         return CLIENT_STATUS_SEVERITY[client.status];
+    }
+
+    /** US-05: "Aujourd'hui", "En retard de 2 j", or the date. */
+    followUpLabel(client: Client): string {
+        const date = client.next_follow_up_date!;
+        return relativeDay(date) ?? new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' }).format(new Date(date + 'T00:00:00'));
+    }
+
+    isLate(client: Client): boolean {
+        return !!client.next_follow_up_date && client.next_follow_up_date < localDate(0);
     }
 
     search(): void {

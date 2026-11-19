@@ -60,3 +60,46 @@ class Interaction(BaseModel):
 
     def __str__(self):
         return f"{self.get_kind_display()} — {self.client}"
+
+
+class FollowUp(CompanyOwnedModel):
+    """US-05: a dated reminder to get back to a client or prospect.
+
+    Done once: completing it records what happened as an Interaction, so the
+    client's history (US-04) stays the single place where exchanges live.
+    Postponing keeps the earlier dates in `postponements`.
+    """
+
+    class Channel(models.TextChoices):
+        CALL = "call", _("Call")
+        WHATSAPP = "whatsapp", _("WhatsApp")
+        EMAIL = "email", _("Email")
+        MEETING = "meeting", _("Meeting")
+        OTHER = "other", _("Other")
+
+    class Status(models.TextChoices):
+        OPEN = "open", _("To do")
+        DONE = "done", _("Done")
+
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="follow_ups")
+    due_date = models.DateField()
+    reason = models.CharField(max_length=255)
+    channel = models.CharField(max_length=20, choices=Channel.choices, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.OPEN)
+    # [{"from": "2026-11-20", "to": "2026-11-25", "at": "<iso datetime>"}]
+    postponements = models.JSONField(default=list, blank=True)
+    done_at = models.DateTimeField(null=True, blank=True)
+    # The exchange recorded when the follow-up was done.
+    outcome = models.OneToOneField(
+        Interaction, on_delete=models.SET_NULL, null=True, blank=True, related_name="follow_up"
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["due_date", "created_at"]
+        indexes = [models.Index(fields=["company", "status", "due_date"])]
+
+    def __str__(self):
+        return f"{self.reason} — {self.client} ({self.due_date})"

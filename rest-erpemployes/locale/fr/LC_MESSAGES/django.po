@@ -230,3 +230,63 @@ msgstr "Cette date est dans le futur."
 #: billing/services.py
 msgid "This category does not match the direction of the movement."
 msgstr "Cette catégorie ne correspond pas au sens du mouvement."
+
+#: crm/models.py
+msgid "To do"
+msgstr "À faire"
+
+#: crm/models.py
+msgid "Done"
+msgstr "Fait"
+
+#: crm/services.py
+msgid "This follow-up is already done."
+msgstr "Ce suivi est déjà fait."
+
+#: crm/services.py
+msgid "A follow-up cannot be planned in the past."
+msgstr "Un suivi ne peut pas être programmé dans le passé."
+
+#: crm/models.py
+msgid "Company"
+msgstr "Entreprise"
+
+#: crm/models.py
+msgid "Individual"
+msgstr "Particulier"
+
+#: crm/models.py
+msgid "Prospect"
+msgstr "Prospect"
+
+#: crm/models.py
+msgid "Active"
+msgstr "Client actif"
+
+#: crm/models.py
+msgid "Inactive"
+msgstr "Inactif"
+
+#: crm/models.py
+msgid "Call"
+msgstr "Appel"
+
+#: crm/models.py
+msgid "Email"
+msgstr "Email"
+
+#: crm/models.py
+msgid "Meeting"
+msgstr "Rendez-vous"
+
+#: crm/models.py
+msgid "Message"
+msgstr "Message"
+
+#: crm/models.py
+msgid "Note"
+msgstr "Note"
+
+#: crm/models.py
+msgid "WhatsApp"
+msgstr "WhatsApp"
