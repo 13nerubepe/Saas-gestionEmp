@@ -8,7 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { SkeletonModule } from 'primeng/skeleton';
-import { BillingService, CashDirection, CashMovement, CashPosition, PaymentMethod } from '@/app/core/billing/billing.service';
+import { BillingService, CashDirection, CashForecast, CashMovement, CashPosition, PaymentMethod } from '@/app/core/billing/billing.service';
 import { CASH_CATEGORIES_BY_DIRECTION, CASH_CATEGORY_LABELS, formatMoney } from '@/app/core/billing/money';
 import { CompanyService } from '@/app/core/company/company.service';
 import { apiErrorMessage } from '@/app/core/api-errors';
@@ -96,6 +96,46 @@ function today(): string {
                 @for (i of [1, 2, 3]; track i) {
                     <p-skeleton height="7rem" borderRadius="0.75rem" />
                 }
+            </section>
+        }
+
+        <!-- US-17: forecast -->
+        @if (forecast(); as f) {
+            <section class="card !mb-6 flex flex-col gap-4" aria-labelledby="forecast-title">
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                    <h2 id="forecast-title" class="!m-0 !text-lg font-semibold">Prévision</h2>
+                    <span class="text-xs text-muted-color">Calculée par l'application à partir de vos factures et de vos dépenses</span>
+                </div>
+                @if (f.risk_date) {
+                    <p class="!m-0 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200" role="alert">
+                        <i class="pi pi-exclamation-triangle mt-0.5" aria-hidden="true"></i>
+                        <span
+                            >Au rythme actuel, votre trésorerie passerait sous {{ f.threshold !== null ? 'votre seuil d’alerte' : 'zéro' }} {{ f.risk_date === f.today ? 'dès aujourd’hui' : 'vers le ' + (f.risk_date | date: 'd MMMM y') }}. Relancez
+                            les impayés ou reportez une dépense.</span
+                        >
+                    </p>
+                }
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    @for (h of f.horizons; track h.days) {
+                        <div class="flex flex-col gap-1 rounded-xl bg-surface-100 p-4 dark:bg-surface-800">
+                            <span class="text-xs font-medium uppercase tracking-wide text-muted-color">Dans {{ h.days }} jours · {{ h.date | date: 'd MMM' }}</span>
+                            <span class="text-xl font-semibold tabular-nums" [class.text-red-600]="Number(h.cautious) < 0">{{ money(h.cautious) }}</span>
+                            <span class="text-xs text-muted-color">{{ money(h.if_overdue_paid) }} si les retards sont payés</span>
+                        </div>
+                    }
+                </div>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    @for (m of f.month_ends; track m.date) {
+                        <span class="rounded-full bg-surface-100 px-3 py-1 dark:bg-surface-800"
+                            >Fin {{ m.date | date: 'MMMM' }} : <strong class="tabular-nums" [class.text-red-600]="Number(m.cautious) < 0">{{ money(m.cautious) }}</strong></span
+                        >
+                    }
+                </div>
+                <p class="!m-0 text-xs text-muted-color">
+                    Hypothèses : factures émises encaissées à leur échéance ; factures déjà en retard ({{ money(f.overdue) }}) non comptées dans le scénario prudent ; dépenses de {{ money(f.monthly_outflow) }} par mois,
+                    {{ f.outflow_history_days ? 'total des sorties des ' + Math.min(f.outflow_history_days, 90) + ' derniers jours, réparti sur ' + f.outflow_basis_days + ' jours' : 'aucun historique pour l’instant' }} (écritures annulées exclues).
+                    Les ventes sans facture ne sont pas prévues.
+                </p>
             </section>
         }
 
@@ -203,6 +243,7 @@ export class Cash implements OnInit {
     private readonly company = inject(CompanyService);
 
     readonly cash = signal<CashPosition | null>(null);
+    readonly forecast = signal<CashForecast | null>(null);
     readonly currency = signal('XAF');
     readonly movements = signal<CashMovement[]>([]);
     readonly methods = signal<PaymentMethod[]>([]);
@@ -253,6 +294,10 @@ export class Cash implements OnInit {
                 this.cash.set(summary.cash);
             },
             error: (error) => this.error.set(apiErrorMessage(error))
+        });
+        this.billing.getForecast().subscribe({
+            next: (forecast) => this.forecast.set(forecast),
+            error: () => this.forecast.set(null) // the page works without it
         });
         this.loadPage(1);
     }

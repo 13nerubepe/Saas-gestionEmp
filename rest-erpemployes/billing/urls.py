@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from billing.views import (
+    CashForecastView,
     CashMovementListView,
     CashMovementReversalView,
     ClientFinancialsView,
@@ -18,6 +19,7 @@ urlpatterns = [
     *router.urls,
     path("rules/", InvoicingRulesView.as_view(), name="invoicing-rules"),
     path("summary/", FinancialSummaryView.as_view(), name="financial-summary"),
+    path("forecast/", CashForecastView.as_view(), name="cash-forecast"),
     path("payments/<uuid:pk>/reverse/", PaymentReversalView.as_view(), name="payment-reverse"),
     path("cash-movements/", CashMovementListView.as_view(), name="cash-movements"),
     path(

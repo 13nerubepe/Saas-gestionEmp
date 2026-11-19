@@ -10,6 +10,7 @@ from billing import services
 from billing.models import CashMovement, Invoice, Payment
 from billing.rules import rules_for
 from billing.selectors import (
+    cash_forecast,
     cash_position,
     client_financials,
     filter_invoices,
@@ -17,6 +18,7 @@ from billing.selectors import (
     receivables_by_client,
 )
 from billing.serializers import (
+    CashForecastSerializer,
     CashMovementSerializer,
     ClientFinancialsSerializer,
     FinancialSummarySerializer,
@@ -265,3 +267,21 @@ class CashMovementReversalView(CompanyScopedMixin, generics.GenericAPIView):
             self.get_object(), user=request.user, **serializer.validated_data
         )
         return Response(CashMovementSerializer(reversal).data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema(
+    tags=["billing"], parameters=[COMPANY_HEADER_PARAMETER], responses=CashForecastSerializer
+)
+class CashForecastView(APIView):
+    """US-17: cash in 30, 60 and 90 days, cautious and if overdue invoices are paid."""
+
+    permission_classes = [IsCompanyFounder]
+
+    def get(self, request):
+        company = request.company
+        rules = rules_for(company.country)
+        data = {
+            **cash_forecast(company),
+            "currency": rules.currency if rules else company.currency,
+        }
+        return Response(CashForecastSerializer(data).data)

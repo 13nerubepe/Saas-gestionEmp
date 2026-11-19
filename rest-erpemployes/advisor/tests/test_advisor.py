@@ -312,3 +312,13 @@ def test_facts_say_which_prospects_already_have_a_follow_up(founder, books):
         f for f in company_facts(founder.company, today=TODAY) if f.topic == "dormant_client"
     )
     assert "no follow-up planned" in silent.text
+
+
+def test_forecast_fact_gives_month_ends(founder, books):
+    fact = next(
+        f for f in company_facts(founder.company, today=TODAY) if f.topic == "cash_forecast"
+    )
+    assert "At the month ends:" in fact.text
+    month_end = (TODAY.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+    assert month_end.isoformat() in fact.text
+    assert "above zero" in fact.text or "under zero" in fact.text  # no threshold set

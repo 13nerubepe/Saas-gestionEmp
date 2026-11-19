@@ -18,6 +18,7 @@ import { AdvisorAnswerView } from './advisor-answer-view';
 const SUGGESTED_QUESTIONS = [
     { icon: 'pi-wallet', text: 'Qui me doit de l’argent, et qui relancer en priorité ?' },
     { icon: 'pi-chart-line', text: 'Comment améliorer ma trésorerie ce mois-ci ?' },
+    { icon: 'pi-calendar', text: 'Aurai-je assez d’argent dans 3 mois ?' },
     { icon: 'pi-shopping-cart', text: 'Où partent mes dépenses, et lesquelles réduire ?' },
     { icon: 'pi-megaphone', text: 'Quels prospects relancer cette semaine, et comment ?' },
     { icon: 'pi-heart', text: 'Quels clients risquent de partir, et comment les fidéliser ?' },
