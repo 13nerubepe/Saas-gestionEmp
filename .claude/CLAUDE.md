@@ -98,8 +98,9 @@ API error `code`) and `agents/`. The API URL is in `src/environments/`.
   later stories (created-user, created-entreprise, assistant-ai,
   prochain-event, activated-desactived, liste-tableau-departement,
   reinitialisation) are kept in the code but not routed.
-- Sprint 3 plan (finance and clients, after the teacher's feedback):
-  `docs/sprints/sprint-03.md`.
+- Product Backlog (29 US, status, value, priority, history):
+  `docs/product-backlog.md`. Sprint plans: `docs/sprints/` (sprint 3: finance
+  and clients; sprint 4: "Ma journée", follow-ups, cash forecast, obligations).
 
 ## Backend architecture
 
