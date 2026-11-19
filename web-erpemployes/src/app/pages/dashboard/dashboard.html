@@ -5,6 +5,8 @@
     <app-my-day />
     <!-- Shortcuts to the daily tasks, with counts from the API -->
     <app-stats-widget />
-    <!-- Legal question (US-02) -->
+    <!-- Legal question (US-02), for founders: the API refuses employees -->
+    @if (isFounder()) {
     <app-legal-question class="block w-full" />
+    }
 </div>

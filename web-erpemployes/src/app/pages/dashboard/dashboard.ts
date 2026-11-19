@@ -15,6 +15,7 @@ const countryNames = new Intl.DisplayNames(['fr'], { type: 'region' });
 })
 export class Dashboard {
     private readonly auth = inject(AuthService);
+    readonly isFounder = this.auth.isFounder;
 
     readonly greeting = computed(() => {
         const firstName = this.auth.user()?.first_name;

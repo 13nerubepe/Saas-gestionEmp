@@ -2,6 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { LegalService } from '@/app/core/agents/legal.service';
 import { CrmService } from '@/app/core/crm/crm.service';
+import { AuthService } from '@/app/core/auth/auth.service';
 import { AppConstantRoute } from '@/app/constants';
 
 interface Shortcut {
@@ -22,7 +23,7 @@ interface Shortcut {
     selector: 'app-stats-widget',
     imports: [RouterModule],
     template: `
-        <nav aria-label="Raccourcis" class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <nav aria-label="Raccourcis" class="grid grid-cols-1 gap-3 sm:grid-cols-2" [class.sm:grid-cols-3]="shortcuts().length > 2">
             @for (s of shortcuts(); track s.label) {
                 <a
                     [routerLink]="s.link"
@@ -45,6 +46,7 @@ interface Shortcut {
 export class StatsWidget implements OnInit {
     private readonly legal = inject(LegalService);
     private readonly crm = inject(CrmService);
+    private readonly auth = inject(AuthService);
 
     private readonly clientCount = signal<number | null>(null);
     private readonly conversationCount = signal<number | null>(null);
@@ -52,7 +54,7 @@ export class StatsWidget implements OnInit {
     readonly shortcuts = computed<Shortcut[]>(() => {
         const clients = this.clientCount();
         const conversations = this.conversationCount();
-        return [
+        const shortcuts: Shortcut[] = [
             {
                 label: 'Clients',
                 hint: clients === null ? 'Fiches et historique des échanges' : plural(clients, 'fiche client', 'fiches clients'),
@@ -67,7 +69,11 @@ export class StatsWidget implements OnInit {
                 color: 'bg-green-100 text-green-700 dark:bg-green-400/10 dark:text-green-300',
                 link: '/' + AppConstantRoute.Clients_PATH,
                 queryParams: { nouveau: '1' }
-            },
+            }
+        ];
+        if (!this.auth.isFounder()) return shortcuts; // the legal assistant is for founders
+        return [
+            ...shortcuts,
             {
                 label: 'Assistant juridique',
                 hint: conversations === null ? 'Questions et réponses sourcées' : plural(conversations, 'conversation', 'conversations'),
@@ -81,6 +87,7 @@ export class StatsWidget implements OnInit {
     ngOnInit(): void {
         // A failed count just leaves the generic hint: the shortcut still works.
         this.crm.listClients(1).subscribe({ next: (page) => this.clientCount.set(page.count), error: () => undefined });
+        if (!this.auth.isFounder()) return;
         this.legal.listConversations().subscribe({ next: (page) => this.conversationCount.set(page.count), error: () => undefined });
     }
 }

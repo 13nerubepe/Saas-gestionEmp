@@ -7,7 +7,8 @@ import { authGuard, founderGuard } from '@/app/core/auth/auth.guard';
 
 export const appRoutes: Routes = [
     {
-        // Signed-in area, inside the main layout.
+        // Signed-in area, inside the main layout. Pages with founderGuard (legal
+        // assistant, cash, advisor, invoices) are for founders: the API refuses employees.
         path: '',
         component: AppLayout,
         canActivate: [authGuard],
@@ -41,7 +42,6 @@ export const appRoutes: Routes = [
                 canActivate: [founderGuard],
                 data: { breadcrumb: 'Conseiller financier' }
             },
-            // Founder-only pages below: invoices, cash, advisor (the API refuses employees).
             // US-14 invoices. Static paths first: 'nouvelle' must not be read as an id.
             {
                 path: AppConstantRoute.Invoices_PATH,
