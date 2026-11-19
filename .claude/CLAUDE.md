@@ -92,10 +92,12 @@ API error `code`) and `agents/`. The API URL is in `src/environments/`.
   reversals, credit notes, AI payment reminder draft; `core/billing/`,
   `pages/invoices/`), "Ma journée" on the dashboard (follow-ups due, overdue
   invoices, alerts; `pages/dashboard/my-day.ts`), follow-ups on the client
-  record (`pages/clients/client-follow-ups.ts`), cash for founders (balance, alert threshold, movements;
-  `pages/cash/`), financial advisor for founders (key figures, who owes what,
+  record (`pages/clients/client-follow-ups.ts`), cash for founders (balance, alert threshold, movements,
+  forecast at 30/60/90 days; `pages/cash/`), contact import from CSV for
+  founders (`pages/clients/client-import.ts`), financial advisor for founders (key figures, who owes what,
   AI advisor; `core/advisor/`, `pages/advisor/`), client financial card. Dates and numbers use the `fr` locale (`app.config.ts`). The legal form is hidden for employees
-  (`AuthService.isFounder`). Product name: `APP_NAME` in `src/app/constants.ts`.
+  (`AuthService.isFounder`); founder-only pages (invoices, cash, advisor, legal
+  assistant) are behind `founderGuard`. Product name: `APP_NAME` in `src/app/constants.ts`.
 - The Sakai template demos were removed. Work-in-progress components for
   later stories (created-user, created-entreprise, assistant-ai,
   prochain-event, activated-desactived, liste-tableau-departement,
