@@ -20,7 +20,8 @@ const MESSAGES_BY_CODE: Record<string, string> = {
     invoice_has_payments: "Annulez d'abord les paiements de cette facture.",
     invoice_not_cancellable: 'Seule une facture émise peut être annulée par un avoir.',
     already_reversed: 'Cette écriture est déjà annulée.',
-    invalid_category: 'Cette catégorie ne correspond pas au sens du mouvement.'
+    invalid_category: 'Cette catégorie ne correspond pas au sens du mouvement.',
+    follow_up_closed: 'Ce suivi est déjà fait.'
 };
 
 /** A message to show the user for any failed API call. */

@@ -16,6 +16,7 @@ import { AuthService } from '@/app/core/auth/auth.service';
 import { BillingService, ClientFinancials } from '@/app/core/billing/billing.service';
 import { formatMoney } from '@/app/core/billing/money';
 import { ClientForm } from './client-form';
+import { ClientFollowUps } from './client-follow-ups';
 
 /** Local date-time for <input type="datetime-local">, e.g. 2026-11-05T14:30. */
 function nowLocal(): string {
@@ -27,7 +28,7 @@ function nowLocal(): string {
 @Component({
     selector: 'app-client-detail',
     standalone: true,
-    imports: [DatePipe, FormsModule, RouterLink, ButtonModule, ConfirmDialogModule, SelectModule, TagModule, TextareaModule, ClientForm],
+    imports: [DatePipe, FormsModule, RouterLink, ButtonModule, ConfirmDialogModule, SelectModule, TagModule, TextareaModule, ClientForm, ClientFollowUps],
     providers: [ConfirmationService],
     template: `
         <div class="mb-4">
@@ -80,7 +81,8 @@ function nowLocal(): string {
                         @if (auth.isFounder() && financials(); as f) {
                             <!-- Money side of the relationship, computed by the API. -->
                             <section class="flex flex-col gap-2 rounded-xl border border-surface-200 p-3 dark:border-surface-700" aria-labelledby="client-money-title">
-                                <h3 id="client-money-title" class="!m-0 text-sm font-semibold">Situation financière</h3>
+                                <!-- !text-sm: the Sakai typography sizes h3 outside Tailwind layers. -->
+                                <h3 id="client-money-title" class="!m-0 !text-sm !font-semibold">Situation financière</h3>
                                 @if (f.invoice_count === 0) {
                                     <p class="!m-0 text-sm text-muted-color">Aucune facture émise pour ce client.</p>
                                 } @else {
@@ -118,8 +120,9 @@ function nowLocal(): string {
                     </div>
                 </div>
 
-                <!-- History -->
-                <div class="col-span-12 lg:col-span-7">
+                <!-- Follow-ups (US-05) and history (US-04) -->
+                <div class="col-span-12 flex flex-col gap-6 lg:col-span-7">
+                    <app-client-follow-ups [clientId]="c.id" (completed)="loadInteractions(c.id, 1)" />
                     <div class="card !mb-0 flex flex-col gap-4">
                         <div>
                             <h2 class="!m-0 !text-lg font-semibold">Historique des échanges</h2>

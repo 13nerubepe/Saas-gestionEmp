@@ -209,6 +209,7 @@ def company_facts(company, *, today=None):
                 + f", on file for {_days_ago(prospect.created_at, today)} days, "
                 f"{prospect.interaction_count} recorded interactions"
                 + _last_interaction_text(prospect, today)
+                + _next_follow_up_text(prospect)
                 + ".",
                 "client",
                 str(prospect.id),
@@ -225,7 +226,9 @@ def company_facts(company, *, today=None):
         facts.append(
             Fact(
                 "dormant_client",
-                f"Active client {quoted(client.name)}: {silence}.",
+                f"Active client {quoted(client.name)}: {silence}"
+                + _next_follow_up_text(client)
+                + ".",
                 "client",
                 str(client.id),
             )
@@ -240,6 +243,16 @@ def _last_interaction_text(client, today):
         f", last one {_days_ago(client.last_interaction_at, today)} days ago "
         f"({client.last_interaction_kind}: "
         f"{quoted(client.last_interaction_summary, NOTE_LENGTH)})"
+    )
+
+
+def _next_follow_up_text(client):
+    """US-05: a follow-up already planned, so the advisor does not suggest it again."""
+    planned = getattr(client, "next_follow_up_date", None)
+    return (
+        f"; follow-up already planned on {planned.isoformat()}"
+        if planned
+        else "; no follow-up planned"
     )
 
 

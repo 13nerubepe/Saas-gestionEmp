@@ -297,3 +297,18 @@ def test_credit_note_cannot_be_reminded(founder, books, stub):
         services.draft_payment_reminder(
             membership=founder, invoice=note, channel="email", tone="firm"
         )
+
+
+def test_facts_say_which_prospects_already_have_a_follow_up(founder, books):
+    from crm.services import plan_follow_up
+
+    lead = Client.objects.get(name="Lead Bakery")
+    plan_follow_up(client=lead, user=None, due_date=TODAY + timedelta(days=2), reason="Devis")
+    prospect = next(f for f in company_facts(founder.company, today=TODAY) if f.topic == "prospect")
+    assert (
+        f"follow-up already planned on {(TODAY + timedelta(days=2)).isoformat()}" in prospect.text
+    )
+    silent = next(
+        f for f in company_facts(founder.company, today=TODAY) if f.topic == "dormant_client"
+    )
+    assert "no follow-up planned" in silent.text

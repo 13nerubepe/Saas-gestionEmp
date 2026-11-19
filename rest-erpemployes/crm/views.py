@@ -5,9 +5,16 @@ from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 
 from accounts.tenancy import COMPANY_HEADER_PARAMETER, CompanyScopedMixin
-from crm.models import Client
-from crm.selectors import search_clients
-from crm.serializers import ClientSerializer, InteractionSerializer
+from crm import services
+from crm.models import Client, FollowUp
+from crm.selectors import follow_ups, search_clients
+from crm.serializers import (
+    ClientSerializer,
+    CompleteFollowUpSerializer,
+    FollowUpSerializer,
+    InteractionSerializer,
+    PostponeFollowUpSerializer,
+)
 from crm.services import record_interaction
 
 SEARCH_PARAMETER = OpenApiParameter(
@@ -58,3 +65,91 @@ class ClientInteractionsView(CompanyScopedMixin, generics.ListCreateAPIView):
             client=client, user=request.user, **serializer.validated_data
         )
         return Response(self.get_serializer(interaction).data, status=status.HTTP_201_CREATED)
+
+
+DUE_PARAMETER = OpenApiParameter(
+    "due",
+    OpenApiTypes.STR,
+    enum=["today", "overdue", "upcoming", "done"],
+    description="today: open and due today or late. Omit for all.",
+)
+
+
+@extend_schema(tags=["crm"], parameters=[COMPANY_HEADER_PARAMETER, DUE_PARAMETER])
+class ClientFollowUpsView(CompanyScopedMixin, generics.ListCreateAPIView):
+    """US-05: a client's follow-ups (GET), plan a new one (POST)."""
+
+    queryset = Client.objects.all()
+    serializer_class = FollowUpSerializer
+
+    def get_client(self):
+        # Scoped by CompanyScopedMixin: another company's client is a 404.
+        return get_object_or_404(super().get_queryset(), pk=self.kwargs["client_id"])
+
+    def list(self, request, *args, **kwargs):
+        client = self.get_client()
+        rows = follow_ups(client.follow_ups.all(), due=request.query_params.get("due"))
+        page = self.paginate_queryset(rows)
+        return self.get_paginated_response(self.get_serializer(page, many=True).data)
+
+    def create(self, request, *args, **kwargs):
+        client = self.get_client()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        follow_up = services.plan_follow_up(
+            client=client, user=request.user, **serializer.validated_data
+        )
+        return Response(self.get_serializer(follow_up).data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema(tags=["crm"], parameters=[COMPANY_HEADER_PARAMETER, DUE_PARAMETER])
+class FollowUpListView(CompanyScopedMixin, generics.ListAPIView):
+    """US-05/US-06: the company's follow-ups, e.g. ?due=today for "Ma journée"."""
+
+    queryset = FollowUp.objects.all()
+    serializer_class = FollowUpSerializer
+
+    def get_queryset(self):
+        return follow_ups(super().get_queryset(), due=self.request.query_params.get("due"))
+
+
+class FollowUpActionView(CompanyScopedMixin, generics.GenericAPIView):
+    queryset = FollowUp.objects.select_related("client")
+
+
+@extend_schema(
+    tags=["crm"],
+    parameters=[COMPANY_HEADER_PARAMETER],
+    request=CompleteFollowUpSerializer,
+    responses=FollowUpSerializer,
+)
+class CompleteFollowUpView(FollowUpActionView):
+    """Mark the follow-up as done; the summary joins the client's history."""
+
+    serializer_class = CompleteFollowUpSerializer
+
+    def post(self, request, pk):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        follow_up = services.complete_follow_up(
+            self.get_object(), user=request.user, **serializer.validated_data
+        )
+        return Response(FollowUpSerializer(follow_up).data)
+
+
+@extend_schema(
+    tags=["crm"],
+    parameters=[COMPANY_HEADER_PARAMETER],
+    request=PostponeFollowUpSerializer,
+    responses=FollowUpSerializer,
+)
+class PostponeFollowUpView(FollowUpActionView):
+    """Move the follow-up to another day."""
+
+    serializer_class = PostponeFollowUpSerializer
+
+    def post(self, request, pk):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        follow_up = services.postpone_follow_up(self.get_object(), **serializer.validated_data)
+        return Response(FollowUpSerializer(follow_up).data)
