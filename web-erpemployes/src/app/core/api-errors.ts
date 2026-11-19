@@ -21,7 +21,12 @@ const MESSAGES_BY_CODE: Record<string, string> = {
     invoice_not_cancellable: 'Seule une facture émise peut être annulée par un avoir.',
     already_reversed: 'Cette écriture est déjà annulée.',
     invalid_category: 'Cette catégorie ne correspond pas au sens du mouvement.',
-    follow_up_closed: 'Ce suivi est déjà fait.'
+    follow_up_closed: 'Ce suivi est déjà fait.',
+    import_file_too_large: 'Fichier trop volumineux : 1 Mo au maximum.',
+    import_file_unreadable: "Ce fichier n'est pas un fichier CSV lisible. Dans Excel : Fichier › Enregistrer sous › CSV.",
+    import_file_empty: 'Le fichier est vide.',
+    import_name_column_missing: 'Le fichier doit contenir une colonne « Nom ».',
+    import_too_many_rows: 'Trop de lignes : 1000 contacts au maximum par import.'
 };
 
 /** A message to show the user for any failed API call. */

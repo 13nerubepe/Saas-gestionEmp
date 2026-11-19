@@ -16,6 +16,11 @@
 	# Django: API, admin, and the admin/API static files (served by WhiteNoise).
 	@django path /api/* /admin/* /static/*
 	handle @django {
+		# No request body above 2 MB (the contact import takes 1 MB at most):
+		# a huge upload is refused here, before it reaches gunicorn.
+		request_body {
+			max_size 2MB
+		}
 		reverse_proxy api:8000
 	}
 
