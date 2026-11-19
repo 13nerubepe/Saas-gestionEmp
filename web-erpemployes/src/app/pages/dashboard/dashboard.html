@@ -1,6 +1,8 @@
 <app-page-header [title]="greeting()" [subtitle]="companyLine()" />
 
 <div class="flex flex-col gap-6">
+    <!-- US-06: what to do today -->
+    <app-my-day />
     <!-- Shortcuts to the daily tasks, with counts from the API -->
     <app-stats-widget />
     <!-- Legal question (US-02) -->

@@ -28,7 +28,7 @@ export class AppMenu {
         {
             label: 'Menu',
             items: [
-                { label: 'Tableau de bord', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
+                { label: 'Ma journée', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
                 { label: 'Assistant juridique', icon: 'pi pi-fw pi-briefcase', routerLink: ['/' + AppConstantRoute.Legal_Assistant_PATH] },
                 { label: 'Clients', icon: 'pi pi-fw pi-users', routerLink: ['/' + AppConstantRoute.Clients_PATH] },
                 ...(this.auth.isFounder()

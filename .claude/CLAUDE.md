@@ -90,7 +90,9 @@ API error `code`) and `agents/`. The API URL is in `src/environments/`.
   (list, search, record, interaction history; `core/crm/`, `pages/clients/`),
   invoices for founders (list, draft editor, issue, print, payments and
   reversals, credit notes, AI payment reminder draft; `core/billing/`,
-  `pages/invoices/`), cash for founders (balance, alert threshold, movements;
+  `pages/invoices/`), "Ma journée" on the dashboard (follow-ups due, overdue
+  invoices, alerts; `pages/dashboard/my-day.ts`), follow-ups on the client
+  record (`pages/clients/client-follow-ups.ts`), cash for founders (balance, alert threshold, movements;
   `pages/cash/`), financial advisor for founders (key figures, who owes what,
   AI advisor; `core/advisor/`, `pages/advisor/`), client financial card. Dates and numbers use the `fr` locale (`app.config.ts`). The legal form is hidden for employees
   (`AuthService.isFounder`). Product name: `APP_NAME` in `src/app/constants.ts`.
@@ -111,12 +113,12 @@ One Django app per business domain:
 | `core` | abstract `BaseModel`, `CompanyOwnedModel`; health endpoint | shared |
 | `accounts` | `Company`, `User`, `Membership`, `DataRequest` | M1 |
 | `agents` | `Agent`, `Conversation`, `Query`, `Answer`, `Source`, `LegalReference`, `ProposedAction`, `AuditLogEntry`, `UsageRecord` | M2, M3 |
-| `crm` | `Client`, `Interaction` (in place); `FollowUp`, `Opportunity` (planned) | M5 |
+| `crm` | `Client`, `Interaction`, `FollowUp` (in place); `Opportunity` (planned) | M5 |
 | `billing` | `Invoice` (invoices and credit notes), `InvoiceLine`, `InvoiceSequence`, `Payment`, `CashMovement` | M4 |
 | `advisor` | `AdvisorExchange`; numbered facts from billing and crm (`facts.py`) | M4, M5 |
 | `documents` | `Document` | M3, M6 |
 | `hr` | `Employee`, `LeaveRequest`, `OnboardingPlan`, `OnboardingStep` | M6 |
-| `planning` | `Obligation`, `Alert`, `ExternalConnection` | M7 |
+| `planning` | "Ma journée" read (`selectors.my_day`, no model); `Obligation`, `Alert`, `ExternalConnection` (planned) | M7 |
 
 Rules:
 
