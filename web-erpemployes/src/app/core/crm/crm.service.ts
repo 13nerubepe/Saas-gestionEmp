@@ -66,6 +66,16 @@ export interface FollowUp {
 
 export type FollowUpPayload = Pick<FollowUp, 'due_date' | 'reason' | 'channel'>;
 
+/** US-23: what a CSV import did, or would do on a check (dry run). */
+export interface ClientImportResult {
+    dry_run: boolean;
+    rows: number;
+    new_count: number;
+    preview: string[];
+    skipped: { line: number; name?: string }[];
+    errors: { line: number; name?: string; messages?: string[] }[];
+}
+
 export type InteractionPayload = Pick<Interaction, 'kind' | 'occurred_at' | 'summary'>;
 
 /** US-03 client records and US-04 interaction history, in the active company. */
@@ -129,5 +139,13 @@ export class CrmService {
 
     postponeFollowUp(id: string, dueDate: string): Observable<FollowUp> {
         return this.http.post<FollowUp>(`${FOLLOW_UPS_URL}/${id}/postpone/`, { due_date: dueDate });
+    }
+
+    /** US-23: check (dryRun) or import a CSV of contacts. */
+    importClients(file: File, dryRun: boolean): Observable<ClientImportResult> {
+        const form = new FormData();
+        form.append('file', file);
+        form.append('dry_run', String(dryRun));
+        return this.http.post<ClientImportResult>(`${CLIENTS_URL}/import/`, form);
     }
 }

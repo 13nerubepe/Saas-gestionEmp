@@ -290,3 +290,46 @@ msgstr "Note"
 #: crm/models.py
 msgid "WhatsApp"
 msgstr "WhatsApp"
+
+#: crm/importing.py
+msgid "The file is not a readable text (CSV) file."
+msgstr "Le fichier n'est pas un fichier texte (CSV) lisible."
+
+#: crm/importing.py
+msgid "The file is empty."
+msgstr "Le fichier est vide."
+
+#: crm/importing.py
+msgid "The file needs a \"nom\" (name) column."
+msgstr "Le fichier doit avoir une colonne « Nom »."
+
+#: crm/importing.py
+#, python-format
+msgid "Unknown status: %(value)s."
+msgstr "Statut inconnu : %(value)s (prospect, client ou inactif)."
+
+#: crm/importing.py
+#, python-format
+msgid "Unknown type: %(value)s."
+msgstr "Type inconnu : %(value)s (entreprise ou particulier)."
+
+#: crm/importing.py
+#, python-format
+msgid "Invalid email: %(value)s."
+msgstr "Email invalide : %(value)s."
+
+#: crm/importing.py
+msgid "Country must be a 2-letter code (CM)."
+msgstr "Le pays doit être un code de 2 lettres (CM)."
+
+#: crm/importing.py
+msgid "The file is too large (1 MB at most)."
+msgstr "Le fichier est trop volumineux (1 Mo au maximum)."
+
+#: crm/importing.py
+msgid "Too many rows: 1000 at most per import."
+msgstr "Trop de lignes : 1 000 au maximum par import."
+
+#: crm/importing.py
+msgid "The name is missing."
+msgstr "Le nom est manquant."

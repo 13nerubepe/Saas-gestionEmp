@@ -2,13 +2,19 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import generics, status, viewsets
+from rest_framework.exceptions import APIException
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from accounts.tenancy import COMPANY_HEADER_PARAMETER, CompanyScopedMixin
+from accounts.tenancy import COMPANY_HEADER_PARAMETER, CompanyScopedMixin, IsCompanyMember
 from crm import services
+from crm.importing import ImportFileError, import_clients
 from crm.models import Client, FollowUp
 from crm.selectors import follow_ups, search_clients
 from crm.serializers import (
+    ClientImportRequestSerializer,
+    ClientImportResultSerializer,
     ClientSerializer,
     CompleteFollowUpSerializer,
     FollowUpSerializer,
@@ -153,3 +159,34 @@ class PostponeFollowUpView(FollowUpActionView):
         serializer.is_valid(raise_exception=True)
         follow_up = services.postpone_follow_up(self.get_object(), **serializer.validated_data)
         return Response(FollowUpSerializer(follow_up).data)
+
+
+class ImportFileInvalid(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_code = "import_file_invalid"
+
+
+@extend_schema(
+    tags=["crm"],
+    parameters=[COMPANY_HEADER_PARAMETER],
+    request={"multipart/form-data": ClientImportRequestSerializer},
+    responses=ClientImportResultSerializer,
+)
+class ClientImportView(APIView):
+    """US-23: import contacts from a CSV. Check first (dry_run), then import."""
+
+    permission_classes = [IsCompanyMember]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        serializer = ClientImportRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            result = import_clients(
+                company=request.company,
+                raw=serializer.validated_data["file"].read(),
+                dry_run=serializer.validated_data["dry_run"],
+            )
+        except ImportFileError as exc:
+            raise ImportFileInvalid(str(exc)) from exc
+        return Response(ClientImportResultSerializer(result).data)

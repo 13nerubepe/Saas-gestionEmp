@@ -3,6 +3,7 @@ from rest_framework.routers import SimpleRouter
 
 from crm.views import (
     ClientFollowUpsView,
+    ClientImportView,
     ClientInteractionsView,
     ClientViewSet,
     CompleteFollowUpView,
@@ -11,9 +12,12 @@ from crm.views import (
 )
 
 router = SimpleRouter()
+# Before the router's clients/<pk>/: "import" is not a client id.
+urlpatterns_first = [path("clients/import/", ClientImportView.as_view(), name="client-import")]
 router.register("clients", ClientViewSet, basename="client")
 
 urlpatterns = [
+    *urlpatterns_first,
     *router.urls,
     path(
         "clients/<uuid:client_id>/interactions/",

@@ -87,3 +87,25 @@ class CompleteFollowUpSerializer(serializers.Serializer):
 
 class PostponeFollowUpSerializer(serializers.Serializer):
     due_date = serializers.DateField()
+
+
+class ClientImportRequestSerializer(serializers.Serializer):
+    file = serializers.FileField(help_text="CSV, comma or semicolon separated, 1 MB at most")
+    dry_run = serializers.BooleanField(
+        default=True, help_text="Check only: nothing is created. Send false to import."
+    )
+
+
+class ImportLineSerializer(serializers.Serializer):
+    line = serializers.IntegerField()
+    name = serializers.CharField(required=False)
+    messages = serializers.ListField(child=serializers.CharField(), required=False)
+
+
+class ClientImportResultSerializer(serializers.Serializer):
+    dry_run = serializers.BooleanField()
+    rows = serializers.IntegerField()
+    new_count = serializers.IntegerField(help_text="Created, or to be created on a dry run")
+    preview = serializers.ListField(child=serializers.CharField())
+    skipped = ImportLineSerializer(many=True, help_text="Already in the client list")
+    errors = ImportLineSerializer(many=True)
