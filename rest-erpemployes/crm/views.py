@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import generics, status, viewsets
@@ -7,9 +8,13 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.tenancy import COMPANY_HEADER_PARAMETER, CompanyScopedMixin, IsCompanyMember
+from accounts.tenancy import (
+    COMPANY_HEADER_PARAMETER,
+    CompanyScopedMixin,
+    IsCompanyFounder,
+)
 from crm import services
-from crm.importing import ImportFileError, import_clients
+from crm.importing import MAX_BYTES, ImportFileError
 from crm.models import Client, FollowUp
 from crm.selectors import follow_ups, search_clients
 from crm.serializers import (
@@ -162,6 +167,10 @@ class PostponeFollowUpView(FollowUpActionView):
 
 
 class ImportFileInvalid(APIException):
+    """The file cannot be imported. The code says why: import_file_too_large,
+    import_file_unreadable, import_file_empty, import_name_column_missing,
+    import_too_many_rows."""
+
     status_code = status.HTTP_400_BAD_REQUEST
     default_code = "import_file_invalid"
 
@@ -175,18 +184,24 @@ class ImportFileInvalid(APIException):
 class ClientImportView(APIView):
     """US-23: import contacts from a CSV. Check first (dry_run), then import."""
 
-    permission_classes = [IsCompanyMember]
+    permission_classes = [IsCompanyFounder]
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
         serializer = ClientImportRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        file = serializer.validated_data["file"]
         try:
-            result = import_clients(
+            # Refuse a large file before reading it: it is never loaded into memory.
+            if file.size > MAX_BYTES:
+                raise ImportFileError(
+                    "import_file_too_large", _("The file is too large (1 MB at most).")
+                )
+            result = services.import_clients(
                 company=request.company,
-                raw=serializer.validated_data["file"].read(),
+                raw=file.read(MAX_BYTES + 1),
                 dry_run=serializer.validated_data["dry_run"],
             )
         except ImportFileError as exc:
-            raise ImportFileInvalid(str(exc)) from exc
+            raise ImportFileInvalid(str(exc), code=exc.code) from exc
         return Response(ClientImportResultSerializer(result).data)

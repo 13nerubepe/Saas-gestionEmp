@@ -12,6 +12,7 @@ import { TagModule } from 'primeng/tag';
 import { Client, CrmService } from '@/app/core/crm/crm.service';
 import { CLIENT_KIND_LABELS, CLIENT_STATUS_LABELS, CLIENT_STATUS_SEVERITY, localDate, relativeDay } from '@/app/core/crm/crm-labels';
 import { apiErrorMessage } from '@/app/core/api-errors';
+import { AuthService } from '@/app/core/auth/auth.service';
 import { AppConstantRoute } from '@/app/constants';
 import { EmptyState } from '@/app/commons/empty-state';
 import { mediaQuery, NARROW_SCREEN } from '@/app/commons/media';
@@ -30,7 +31,9 @@ import { ClientImport } from './client-import';
     imports: [DatePipe, FormsModule, RouterLink, ButtonModule, IconFieldModule, InputIconModule, InputTextModule, SkeletonModule, TableModule, TagModule, ClientForm, ClientImport, EmptyState, PageHeader],
     template: `
         <app-page-header title="Clients et prospects" [subtitle]="subtitle()">
-            <p-button label="Importer" icon="pi pi-upload" [outlined]="true" (onClick)="importVisible.set(true)" />
+            @if (auth.isFounder()) {
+                <p-button label="Importer" icon="pi pi-upload" [outlined]="true" (onClick)="importVisible.set(true)" />
+            }
             <p-button label="Nouveau client" icon="pi pi-plus" (onClick)="formVisible.set(true)" />
         </app-page-header>
 
@@ -65,7 +68,9 @@ import { ClientImport } from './client-import';
                     } @else {
                         <app-empty-state icon="pi-users" title="Aucun client pour l'instant." text="Créez une fiche pour chaque client ou prospect : vous y noterez vos appels, rendez-vous et messages.">
                             <p-button label="Créer une fiche client" icon="pi pi-plus" [outlined]="true" (onClick)="formVisible.set(true)" />
-                            <p-button label="Importer mes contacts" icon="pi pi-upload" [text]="true" (onClick)="importVisible.set(true)" />
+                            @if (auth.isFounder()) {
+                                <p-button label="Importer mes contacts" icon="pi pi-upload" [text]="true" (onClick)="importVisible.set(true)" />
+                            }
                         </app-empty-state>
                     }
                 }
@@ -173,6 +178,8 @@ import { ClientImport } from './client-import';
 })
 export class Clients implements OnInit {
     private readonly crm = inject(CrmService);
+    /** Import is for founders (US-23): employees create clients one by one. */
+    readonly auth = inject(AuthService);
     private readonly router = inject(Router);
 
     /** `?nouveau=1` (dashboard shortcut) opens the creation form directly. */

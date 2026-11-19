@@ -4,7 +4,8 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers, status
 from rest_framework.exceptions import APIException
 
-from crm.models import FollowUp, Interaction
+from crm import importing
+from crm.models import Client, FollowUp, Interaction
 
 
 class FollowUpClosed(APIException):
@@ -87,3 +88,53 @@ def postpone_follow_up(follow_up, *, due_date):
     follow_up.due_date = due_date
     follow_up.save(update_fields=["postponements", "due_date", "updated_at"])
     return follow_up
+
+
+def import_clients(*, company, raw, dry_run):
+    """US-23: check (dry_run) or import a contacts CSV.
+
+    Rows already in the client list (same name in any case, or same phone with
+    or without +237) are skipped, as are repeats inside the file. Invalid rows
+    are reported with their line number. Returns what was, or would be, done.
+    """
+    if len(raw) > importing.MAX_BYTES:
+        raise importing.ImportFileError(
+            "import_file_too_large", _("The file is too large (1 MB at most).")
+        )
+    rows = importing.parse(raw)
+
+    existing = Client.objects.filter(company=company)
+    names = {name.lower() for name in existing.values_list("name", flat=True)}
+    phones = {
+        key for key in map(importing.phone_key, existing.values_list("phone", flat=True)) if key
+    }
+
+    to_create, skipped, errors = [], [], []
+    for number, row in rows:
+        if not row.get("name"):
+            errors.append({"line": number, "messages": [_("The name is missing.")]})
+            continue
+        client, messages = importing.build_client(row, company)
+        if messages:
+            errors.append({"line": number, "name": row["name"], "messages": messages})
+            continue
+        phone = importing.phone_key(client.phone)
+        if client.name.lower() in names or (phone and phone in phones):
+            skipped.append({"line": number, "name": client.name})
+            continue
+        names.add(client.name.lower())
+        if phone:
+            phones.add(phone)
+        to_create.append(client)
+
+    if not dry_run and to_create:
+        with transaction.atomic():
+            Client.objects.bulk_create(to_create)
+    return {
+        "dry_run": dry_run,
+        "rows": len(rows),
+        "new_count": len(to_create),
+        "preview": [c.name for c in to_create[:10]],
+        "skipped": skipped,
+        "errors": errors,
+    }

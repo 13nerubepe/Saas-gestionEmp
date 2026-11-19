@@ -20,7 +20,7 @@ const TEMPLATE = '\ufeffNom;Statut;Type;Contact;Téléphone;Email;Ville;Pays;NIU
             <div class="flex flex-col gap-4 text-sm">
                 <p class="!m-0">
                     Fichier CSV avec une colonne <strong>Nom</strong> (obligatoire) et, si vous les avez : Statut (prospect, client, inactif), Type (entreprise, particulier), Contact, Téléphone, Email, Ville, Pays, NIU, Notes. Les contacts déjà
-                    présents (même nom ou même téléphone) sont ignorés.
+                    présents (même nom ou même téléphone) sont ignorés. Les exports Google Contacts et « Texte Unicode » d'Excel sont aussi acceptés.
                 </p>
                 <div>
                     <a [href]="templateUrl" download="modele-contacts.csv" class="font-medium text-primary"><i class="pi pi-download mr-1"></i>Télécharger un modèle</a>
@@ -28,7 +28,7 @@ const TEMPLATE = '\ufeffNom;Statut;Type;Contact;Téléphone;Email;Ville;Pays;NIU
 
                 <label class="flex flex-col gap-2">
                     <span class="font-medium">Votre fichier</span>
-                    <input #fileInput type="file" accept=".csv,text/csv" (change)="pick($event)" class="text-sm" />
+                    <input #fileInput type="file" accept=".csv,.txt,text/csv,text/plain" (change)="pick($event)" class="text-sm" />
                 </label>
 
                 @if (error()) {

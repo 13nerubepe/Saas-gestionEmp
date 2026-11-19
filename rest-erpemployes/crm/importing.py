@@ -1,15 +1,15 @@
-"""US-23: import contacts from a CSV file (Excel, Google Contacts, phone export).
+"""US-23: read a contacts CSV (Excel, Google Contacts, phone export).
 
-Two steps for the user: check (dry run), then import. Rows that already exist
-(same name, or same phone number) are skipped, invalid rows are reported with
-their line number, valid rows are created. Headers may be in French or English.
+Parsing and validation only: nothing here writes to the database. The import
+itself (duplicates against the client list, creation) is
+`crm.services.import_clients`. Headers may be in French or English.
 """
 
+import codecs
 import csv
 import io
 import re
 
-from django.db import transaction
 from django.utils.translation import gettext as _
 
 from crm.models import Client
@@ -49,6 +49,21 @@ HEADERS = {
     "tax_id": "tax_id",
     "notes": "notes",
     "note": "notes",
+    # Google Contacts export
+    "phone 1 - value": "phone",
+    "e-mail 1 - value": "email",
+    "address 1 - formatted": "address",
+    "address 1 - city": "city",
+    "organization name": "organization",
+    "organization 1 - name": "organization",
+    # Person names, joined into the client name when there is no "nom" column
+    "prénom": "first_name",
+    "prenom": "first_name",
+    "first name": "first_name",
+    "given name": "first_name",
+    "nom de famille": "last_name",
+    "last name": "last_name",
+    "family name": "last_name",
 }
 STATUSES = {
     "prospect": Client.Status.PROSPECT,
@@ -70,45 +85,77 @@ EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class ImportFileError(ValueError):
-    """The file as a whole cannot be read: nothing is imported."""
+    """The file as a whole cannot be read: nothing is imported.
+
+    `code` is the stable API error code the client translates.
+    """
+
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
 
 
-def _digits(phone):
-    return re.sub(r"\D", "", phone or "")[-9:]  # local part: +237 6xx… and 6xx… match
+def phone_key(phone):
+    """The local part of a phone number: +237 6xx… and 6xx… match."""
+    return re.sub(r"\D", "", phone or "")[-9:]
 
 
 def _decode(raw):
-    for encoding in ("utf-8-sig", "cp1252"):  # Excel on Windows saves CSV in cp1252
-        try:
-            return raw.decode(encoding)
-        except UnicodeDecodeError:
-            continue
-    raise ImportFileError(_("The file is not a readable text (CSV) file."))
+    if raw.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)):  # Excel "Unicode text"
+        return raw.decode("utf-16")
+    if b"\x00" in raw:  # a binary file: an .xlsx workbook, a picture...
+        raise ImportFileError(
+            "import_file_unreadable", _("The file is not a readable text (CSV) file.")
+        )
+    try:
+        return raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return raw.decode("cp1252", errors="replace")  # Excel on Windows saves CSV in cp1252
+
+
+def _delimiter(header_line):
+    """The separator the header uses: Excel in French writes ";", others ",".
+
+    Only the header is looked at, and quotes are always '"': guessing the
+    quote character from the data can swallow lines into a field.
+    """
+    return max(";,\t", key=header_line.count)
 
 
 def _rows(text):
-    try:
-        dialect = csv.Sniffer().sniff(text[:4096], delimiters=",;\t")
-    except csv.Error:
-        dialect = csv.excel
-    reader = csv.reader(io.StringIO(text), dialect)
+    """(line number, {field: value}) for each non-blank record."""
+    header_line = text.split("\n", 1)[0]
+    reader = csv.reader(io.StringIO(text), delimiter=_delimiter(header_line), quotechar='"')
     header = next(reader, None)
-    if not header:
-        raise ImportFileError(_("The file is empty."))
+    if not header or not any(h.strip() for h in header):
+        raise ImportFileError("import_file_empty", _("The file is empty."))
     columns = [HEADERS.get(h.strip().lower()) for h in header]
-    if "name" not in columns:
-        raise ImportFileError(_('The file needs a "nom" (name) column.'))
-    for number, values in enumerate(reader, start=2):  # line 1 is the header
+    person_name = "name" not in columns and ("first_name" in columns or "last_name" in columns)
+    if "name" not in columns and not person_name and "organization" not in columns:
+        raise ImportFileError(
+            "import_name_column_missing", _('The file needs a "nom" (name) column.')
+        )
+    line = reader.line_num
+    for values in reader:
+        number, line = line + 1, reader.line_num  # first line of this record
         if not any(v.strip() for v in values):
             continue
         row = {}
         for field, value in zip(columns, values, strict=False):
             if field and value.strip() and field not in row:
                 row[field] = value.strip()
+        if "name" not in row:
+            person = " ".join(filter(None, [row.get("first_name"), row.get("last_name")]))
+            if row.get("organization"):
+                row["name"] = row["organization"]
+                row.setdefault("contact_name", person)
+            elif person:
+                row["name"] = person
+                row.setdefault("kind", "particulier")
         yield number, row
 
 
-def _clean(row, company):
+def build_client(row, company):
     """A Client ready to save, or a list of error messages."""
     errors = []
     status = STATUSES.get(row.get("status", "prospect").lower())
@@ -141,44 +188,9 @@ def _clean(row, company):
     ), []
 
 
-def import_clients(*, company, raw, dry_run):
-    """Check (dry_run) or import a CSV. Returns what was, or would be, done."""
-    if len(raw) > MAX_BYTES:
-        raise ImportFileError(_("The file is too large (1 MB at most)."))
+def parse(raw):
+    """Decode and read a whole file: [(line number, row)], or ImportFileError."""
     rows = list(_rows(_decode(raw)))
     if len(rows) > MAX_ROWS:
-        raise ImportFileError(_("Too many rows: 1000 at most per import."))
-
-    existing = Client.objects.filter(company=company)
-    names = {name.lower() for name in existing.values_list("name", flat=True)}
-    phones = {_digits(p) for p in existing.values_list("phone", flat=True) if _digits(p)}
-
-    to_create, skipped, errors = [], [], []
-    for number, row in rows:
-        if not row.get("name"):
-            errors.append({"line": number, "messages": [_("The name is missing.")]})
-            continue
-        client, messages = _clean(row, company)
-        if messages:
-            errors.append({"line": number, "name": row["name"], "messages": messages})
-            continue
-        phone = _digits(client.phone)
-        if client.name.lower() in names or (phone and phone in phones):
-            skipped.append({"line": number, "name": client.name})
-            continue
-        names.add(client.name.lower())
-        if phone:
-            phones.add(phone)
-        to_create.append(client)
-
-    if not dry_run and to_create:
-        with transaction.atomic():
-            Client.objects.bulk_create(to_create)
-    return {
-        "dry_run": dry_run,
-        "rows": len(rows),
-        "new_count": len(to_create),
-        "preview": [c.name for c in to_create[:10]],
-        "skipped": skipped,
-        "errors": errors,
-    }
+        raise ImportFileError("import_too_many_rows", _("Too many rows: 1000 at most per import."))
+    return rows
