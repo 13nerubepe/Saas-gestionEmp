@@ -73,7 +73,7 @@ def test_founder_sees_everything_to_do_today(founder, day):
     )
     assert data["overdue_total"] == "100000.00"
     assert data["currency"] == "XAF"
-    assert {"code": "draft_invoices", "count": 1} in data["alerts"]
+    assert [(a["code"], a.get("count")) for a in data["alerts"]] == [("draft_invoices", 1)]
 
 
 def test_amounts_match_the_other_screens(founder, day):
@@ -140,3 +140,60 @@ def test_employee_sees_the_follow_ups_they_planned(founder, day):
     crm.plan_follow_up(client=client, user=employee.user, due_date=TODAY, reason="Le mien")
     data = api_for(employee).get(URL).data
     assert [f["reason"] for f in data["follow_ups"]] == ["Le mien"]
+
+
+def test_cash_alerts_without_threshold(founder):
+    company = founder.company
+    billing.record_cash_movement(
+        company=company,
+        direction="in",
+        category="opening_balance",
+        amount=Decimal(30000),
+        occurred_on=TODAY - timedelta(days=40),
+        method="cash",
+        label="Départ",
+        user=None,
+    )
+    billing.record_cash_movement(
+        company=company,
+        direction="out",
+        category="rent",
+        amount=Decimal(60000),
+        occurred_on=TODAY - timedelta(days=10),
+        method="cash",
+        label="Loyer",
+        user=None,
+    )
+    # 30 000 − 60 000 = −30 000 and no threshold: the limit is zero.
+    alerts = api_for(founder).get(URL).data["alerts"]
+    assert alerts[0]["code"] == "cash_below_threshold"
+    assert alerts[0]["threshold"] is None
+
+
+def test_cash_forecast_risk_alert(founder):
+    company = founder.company
+    company.cash_alert_threshold = Decimal(10000)
+    company.save()
+    billing.record_cash_movement(
+        company=company,
+        direction="in",
+        category="opening_balance",
+        amount=Decimal(100000),
+        occurred_on=TODAY - timedelta(days=30),
+        method="cash",
+        label="Départ",
+        user=None,
+    )
+    billing.record_cash_movement(
+        company=company,
+        direction="out",
+        category="rent",
+        amount=Decimal(60000),
+        occurred_on=TODAY - timedelta(days=5),
+        method="cash",
+        label="Loyer",
+        user=None,
+    )
+    # 40 000 today, 2 000 a day: under 10 000 after 15 days.
+    [alert] = api_for(founder).get(URL).data["alerts"]
+    assert (alert["code"], alert["date"]) == ("cash_forecast_risk", str(TODAY + timedelta(days=16)))

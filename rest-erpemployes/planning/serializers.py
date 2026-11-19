@@ -24,7 +24,7 @@ class AlertSerializer(serializers.Serializer):
         choices=["cash_below_threshold", "cash_forecast_risk", "draft_invoices"]
     )
     amount = _amount(required=False)
-    threshold = _amount(required=False)
+    threshold = _amount(required=False, allow_null=True, help_text="null: the limit is zero")
     count = serializers.IntegerField(required=False)
     date = serializers.DateField(required=False)
 

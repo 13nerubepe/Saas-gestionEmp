@@ -288,8 +288,12 @@ class CashForecastSerializer(serializers.Serializer):
     balance = _amount()
     overdue = _amount()
     monthly_outflow = _amount(help_text="Average money out per 30 days, from history")
-    outflow_history_days = serializers.IntegerField(help_text="Days of history behind the average")
+    outflow_history_days = serializers.IntegerField(help_text="Days of books behind the average")
+    outflow_basis_days = serializers.IntegerField(
+        help_text="Days the money out is divided by: the history, at least 30"
+    )
     horizons = ForecastHorizonSerializer(many=True)
+    month_ends = ForecastHorizonSerializer(many=True, help_text="This month's end and the next two")
     threshold = _amount(allow_null=True)
     risk_date = serializers.DateField(
         allow_null=True, help_text="First day the cautious balance falls under the threshold"

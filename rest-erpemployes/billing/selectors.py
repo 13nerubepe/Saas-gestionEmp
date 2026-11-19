@@ -12,6 +12,7 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from billing.models import CashMovement, Invoice, Payment
+from billing.rules import rules_for
 
 ZERO = Value(Decimal(0), output_field=DecimalField(max_digits=18, decimal_places=2))
 BALANCE = F("total") - F("amount_paid")
@@ -242,19 +243,35 @@ FORECAST_HORIZONS = (30, 60, 90)
 OUTFLOW_HISTORY_DAYS = 90
 
 
+def _month_ends(today, count):
+    """The last day of this month and of the next ones."""
+    ends, year, month = [], today.year, today.month
+    for _ in range(count):
+        month_after = date(year + month // 12, month % 12 + 1, 1)
+        ends.append(month_after - timedelta(days=1))
+        year, month = month_after.year, month_after.month
+    return ends
+
+
 def cash_forecast(company, *, today=None):
-    """US-17: cash in 30, 60 and 90 days, under stated assumptions.
+    """US-17: cash in 30, 60 and 90 days and at the next month ends.
 
     - Cautious: current balance + open invoices not yet overdue, received on
-      their due date − the average money out of the last 90 days, spread
-      evenly. Overdue invoices are not counted: nobody knows when they come.
+      their due date − the average money out, spread evenly. Overdue invoices
+      are not counted: nobody knows when they come.
     - If overdue invoices are paid: the cautious figure + what is overdue.
+    - Average money out: the last 90 days of the books (less if the books
+      are younger), divided by at least 30 days, so a rent paid last week is
+      a monthly expense, not a daily one. Entries cancelled by a reversal
+      are left out, with their reversal.
     - Risk date: the first day the cautious balance falls under the alert
       threshold (under zero when no threshold is set).
     Money in that is not an invoice (sales without invoice, contributions)
-    is not forecast. The average is taken over at least 30 days.
+    is not forecast.
     """
     today = today or timezone.localdate()
+    rules = rules_for(company.country)
+    step = Decimal(1).scaleb(-(rules.currency_decimals if rules else 2))
     balance = cash_position(company, today=today)["balance"]
     open_ = open_invoices(company)
     overdue = open_.filter(due_date__lt=today).aggregate(total=_sum(BALANCE))["total"]
@@ -265,47 +282,54 @@ def cash_forecast(company, *, today=None):
         .annotate(total=_sum(BALANCE))
     }
 
-    since = today - timedelta(days=OUTFLOW_HISTORY_DAYS)
-    movements = CashMovement.objects.filter(company=company)
-    spent = movements.filter(
-        direction=CashMovement.Direction.OUT, occurred_on__gte=since, occurred_on__lt=today
-    ).aggregate(total=_sum(F("amount")))["total"]
-    first = movements.filter(direction=CashMovement.Direction.OUT).aggregate(
-        first=Min("occurred_on")
-    )["first"]
-    # Average over the history we have, up to 90 days, but never under a
-    # month: rent paid three days ago is a monthly expense, not a daily one.
+    # Where the books start: the first entry of any kind.
+    firsts = [
+        CashMovement.objects.filter(company=company).aggregate(d=Min("occurred_on"))["d"],
+        Payment.objects.filter(company=company).aggregate(d=Min("paid_on"))["d"],
+    ]
+    first = min((d for d in firsts if d), default=None)
     history_days = min(OUTFLOW_HISTORY_DAYS, (today - first).days) if first else 0
-    daily_out = spent / max(history_days, 30) if history_days > 0 else Decimal(0)
+    basis_days = max(history_days, 30)
+    spent = CashMovement.objects.filter(
+        company=company,
+        direction=CashMovement.Direction.OUT,
+        occurred_on__gte=today - timedelta(days=OUTFLOW_HISTORY_DAYS),
+        occurred_on__lt=today,
+        reversal_of__isnull=True,  # not a reversal…
+        reversal__isnull=True,  # …and not reversed
+    ).aggregate(total=_sum(F("amount")))["total"]
+    daily_out = max(spent, Decimal(0)) / basis_days if history_days > 0 else Decimal(0)
 
     threshold = company.cash_alert_threshold
     floor = threshold if threshold is not None else Decimal(0)
-    risk_date = None
-    running = balance
-    horizons = []
-    for day in range(0, max(FORECAST_HORIZONS) + 1):
+    month_ends = set(_month_ends(today, 3))
+    last_day = max(max(FORECAST_HORIZONS), (max(month_ends) - today).days)
+    risk_date, running, horizons, ends = None, balance, [], []
+    for day in range(0, last_day + 1):
         date_ = today + timedelta(days=day)
         running += expected.get(date_, Decimal(0))
         cautious = running - daily_out * day
         if risk_date is None and cautious < floor:
             risk_date = date_
+        point = {
+            "days": day,
+            "date": date_,
+            "cautious": cautious.quantize(step),
+            "if_overdue_paid": (cautious + overdue).quantize(step),
+        }
         if day in FORECAST_HORIZONS:
-            cautious = cautious.quantize(Decimal(1))
-            horizons.append(
-                {
-                    "days": day,
-                    "date": date_,
-                    "cautious": cautious,
-                    "if_overdue_paid": cautious + overdue,
-                }
-            )
+            horizons.append(point)
+        if date_ in month_ends:
+            ends.append(point)
     return {
         "today": today,
         "balance": balance,
         "overdue": overdue,
-        "monthly_outflow": (daily_out * 30).quantize(Decimal(1)),
+        "monthly_outflow": (daily_out * 30).quantize(step),
         "outflow_history_days": history_days,
+        "outflow_basis_days": basis_days,
         "horizons": horizons,
+        "month_ends": ends,
         "threshold": threshold,
         "risk_date": risk_date,
     }

@@ -65,21 +65,54 @@ def test_cautious_and_optimistic_horizons(books):
     forecast = selectors.cash_forecast(books, today=TODAY)
 
     assert forecast["balance"] == 10000
-    assert (forecast["monthly_outflow"], forecast["outflow_history_days"]) == (90000, 30)
+    # Books start 60 days ago (opening balance): 90 000 out over 60 days.
+    assert (forecast["outflow_history_days"], forecast["outflow_basis_days"]) == (60, 60)
+    assert forecast["monthly_outflow"] == 45000
     assert forecast["overdue"] == 20000
     assert [(h["days"], h["cautious"], h["if_overdue_paid"]) for h in forecast["horizons"]] == [
-        (30, -30000, -10000),  # 10 000 + 50 000 − 30 × 3 000
-        (60, -120000, -100000),
-        (90, -210000, -190000),
+        (30, 15000, 35000),  # 10 000 + 50 000 − 30 × 1 500
+        (60, -30000, -10000),
+        (90, -75000, -55000),
     ]
-    # No threshold: the risk is going under zero, on day 4 (10 000 − 4 × 3 000).
-    assert forecast["risk_date"] == TODAY + timedelta(days=4)
+    # No threshold: the risk is going under zero, on day 7 (10 000 − 7 × 1 500).
+    assert forecast["risk_date"] == TODAY + timedelta(days=7)
+
+
+def test_month_ends(books):
+    ends = selectors.cash_forecast(books, today=TODAY)["month_ends"]
+    assert [e["date"] for e in ends] == [date(2026, 11, 30), date(2026, 12, 31), date(2027, 1, 31)]
+    # 30 November is day 11: the 50 000 due on day 10 is in.
+    assert ends[0]["cautious"] == 10000 + 50000 - 11 * 1500
 
 
 def test_risk_against_the_threshold(books):
     books.cash_alert_threshold = Decimal(5000)
     books.save()
-    assert selectors.cash_forecast(books, today=TODAY)["risk_date"] == TODAY + timedelta(days=2)
+    assert selectors.cash_forecast(books, today=TODAY)["risk_date"] == TODAY + timedelta(days=4)
+
+
+def test_reversed_entries_are_left_out(books):
+    wrong = services.record_cash_movement(
+        company=books,
+        direction="out",
+        category="supplies",
+        amount=Decimal(300000),
+        occurred_on=TODAY - timedelta(days=20),
+        method="cash",
+        label="erreur",
+        user=None,
+    )
+    services.reverse_cash_movement(wrong, reason="saisi deux fois", user=None)
+    assert selectors.cash_forecast(books, today=TODAY)["monthly_outflow"] == 45000
+
+
+def test_invoice_due_today_counts_and_cancelled_ones_do_not(books):
+    due_today = invoice(books, 7000, 0)
+    cancelled = invoice(books, 99000, 5)
+    services.create_credit_note(cancelled, reason="annulée")
+    forecast = selectors.cash_forecast(books, today=TODAY)
+    assert forecast["horizons"][0]["cautious"] == 15000 + 7000
+    assert due_today.balance_due == 7000
 
 
 def test_a_short_history_is_averaged_over_a_month(company, monkeypatch):
@@ -87,7 +120,7 @@ def test_a_short_history_is_averaged_over_a_month(company, monkeypatch):
     move(company, "in", "opening_balance", 500000, 10)
     move(company, "out", "rent", 150000, 3)  # rent paid 3 days ago
     forecast = selectors.cash_forecast(company, today=TODAY)
-    assert forecast["outflow_history_days"] == 3
+    assert (forecast["outflow_history_days"], forecast["outflow_basis_days"]) == (10, 30)
     assert forecast["monthly_outflow"] == 150000  # not 150 000 / 3 days × 30
     assert forecast["horizons"][0]["cautious"] == 200000  # 350 000 − 150 000
 

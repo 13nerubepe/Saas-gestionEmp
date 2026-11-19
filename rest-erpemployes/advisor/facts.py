@@ -139,24 +139,28 @@ def company_facts(company, *, today=None):
 
     if cash["has_entries"] or summary["open_count"]:
         forecast = billing.cash_forecast(company, today=today)
-        points = "; ".join(
-            f"in {h['days']} days ({h['date'].isoformat()}) {money(h['cautious'])}, "
-            f"or {money(h['if_overdue_paid'])} if overdue invoices are paid"
-            for h in forecast["horizons"]
-        )
+        limit = "the alert threshold" if forecast["threshold"] is not None else "zero"
+
+        def points(rows):
+            return "; ".join(
+                f"{h['date'].isoformat()}: {money(h['cautious'])} "
+                f"({money(h['if_overdue_paid'])} if overdue invoices are paid)"
+                for h in rows
+            )
+
         risk = (
-            f" The cautious balance falls under the "
-            f"{'alert threshold' if forecast['threshold'] is not None else 'zero line'} "
-            f"around {forecast['risk_date'].isoformat()}."
+            f" The cautious balance falls under {limit} around {forecast['risk_date'].isoformat()}."
             if forecast["risk_date"]
-            else " The cautious balance stays above the threshold for 90 days."
+            else f" The cautious balance stays above {limit} for the whole period."
         )
         facts.append(
             Fact(
                 "cash_forecast",
                 "Cash forecast, cautious (open invoices received on their due date, overdue "
-                f"ones not counted, money out at {money(forecast['monthly_outflow'])} per month "
-                f"from {forecast['outflow_history_days']} days of history): {points}." + risk,
+                f"ones not counted, money out at {money(forecast['monthly_outflow'])} per month, "
+                f"average over {forecast['outflow_basis_days']} days). In 30, 60 and 90 days: "
+                f"{points(forecast['horizons'])}. At the month ends: "
+                f"{points(forecast['month_ends'])}." + risk,
             )
         )
 

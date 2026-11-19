@@ -124,9 +124,17 @@ function today(): string {
                         </div>
                     }
                 </div>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    @for (m of f.month_ends; track m.date) {
+                        <span class="rounded-full bg-surface-100 px-3 py-1 dark:bg-surface-800"
+                            >Fin {{ m.date | date: 'MMMM' }} : <strong class="tabular-nums" [class.text-red-600]="Number(m.cautious) < 0">{{ money(m.cautious) }}</strong></span
+                        >
+                    }
+                </div>
                 <p class="!m-0 text-xs text-muted-color">
                     Hypothèses : factures émises encaissées à leur échéance ; factures déjà en retard ({{ money(f.overdue) }}) non comptées dans le scénario prudent ; dépenses de {{ money(f.monthly_outflow) }} par mois,
-                    {{ f.outflow_history_days ? 'moyenne des ' + f.outflow_history_days + ' derniers jours' : 'aucun historique de dépenses pour l’instant' }}. Les ventes sans facture ne sont pas prévues.
+                    {{ f.outflow_history_days ? 'total des sorties des ' + Math.min(f.outflow_history_days, 90) + ' derniers jours, réparti sur ' + f.outflow_basis_days + ' jours' : 'aucun historique pour l’instant' }} (écritures annulées exclues).
+                    Les ventes sans facture ne sont pas prévues.
                 </p>
             </section>
         }

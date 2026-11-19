@@ -159,6 +159,13 @@ export interface CashMovement {
 
 export type CashMovementPayload = Pick<CashMovement, 'direction' | 'category' | 'amount' | 'occurred_on' | 'method' | 'label'>;
 
+export interface ForecastPoint {
+    days: number;
+    date: string;
+    cautious: string;
+    if_overdue_paid: string;
+}
+
 /** US-17: cash in 30, 60 and 90 days, with the assumptions behind it. */
 export interface CashForecast {
     currency: string;
@@ -167,7 +174,11 @@ export interface CashForecast {
     overdue: string;
     monthly_outflow: string;
     outflow_history_days: number;
-    horizons: { days: number; date: string; cautious: string; if_overdue_paid: string }[];
+    /** Days the money out is divided by: the history, at least 30. */
+    outflow_basis_days: number;
+    horizons: ForecastPoint[];
+    /** This month's end and the next two. */
+    month_ends: ForecastPoint[];
     threshold: string | null;
     risk_date: string | null;
 }
