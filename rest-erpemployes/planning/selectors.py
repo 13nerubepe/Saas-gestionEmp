@@ -53,6 +53,10 @@ def my_day(membership, *, today=None):
                 "threshold": cash["alert_threshold"],
             }
         )
+    forecast = billing.cash_forecast(company, today=today)
+    # Already under the threshold today: the cash alert above says it.
+    if forecast["risk_date"] and forecast["risk_date"] > today and not cash["below_threshold"]:
+        alerts.append({"code": "cash_forecast_risk", "date": forecast["risk_date"]})
     if summary["draft_count"]:
         alerts.append({"code": "draft_invoices", "count": summary["draft_count"]})
 

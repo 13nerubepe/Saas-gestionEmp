@@ -53,6 +53,12 @@ import { FollowUp } from '@/app/core/crm/crm.service';
                             <span class="flex-1"><strong>Trésorerie sous votre seuil</strong> : {{ money(alert.amount) }} pour un seuil de {{ money(alert.threshold) }}.</span>
                             <i class="pi pi-chevron-right" aria-hidden="true"></i>
                         </a>
+                    } @else if (alert.code === 'cash_forecast_risk') {
+                        <a [routerLink]="['/', paths.cash]" class="flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 no-underline dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
+                            <i class="pi pi-chart-line text-xl" aria-hidden="true"></i>
+                            <span class="flex-1"><strong>Risque de trésorerie</strong> : au rythme actuel, votre trésorerie passerait sous le seuil vers le {{ alert.date | date: 'd MMMM' }}.</span>
+                            <i class="pi pi-chevron-right" aria-hidden="true"></i>
+                        </a>
                     } @else if (alert.code === 'draft_invoices') {
                         <a
                             [routerLink]="['/', paths.invoices]"

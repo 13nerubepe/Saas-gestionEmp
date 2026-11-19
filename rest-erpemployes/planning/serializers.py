@@ -20,10 +20,13 @@ class OverdueInvoiceSerializer(serializers.Serializer):
 class AlertSerializer(serializers.Serializer):
     """A stable `code` the client translates, plus the figures it needs."""
 
-    code = serializers.ChoiceField(choices=["cash_below_threshold", "draft_invoices"])
+    code = serializers.ChoiceField(
+        choices=["cash_below_threshold", "cash_forecast_risk", "draft_invoices"]
+    )
     amount = _amount(required=False)
     threshold = _amount(required=False)
     count = serializers.IntegerField(required=False)
+    date = serializers.DateField(required=False)
 
 
 class MyDaySerializer(serializers.Serializer):

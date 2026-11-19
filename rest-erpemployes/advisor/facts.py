@@ -137,6 +137,29 @@ def company_facts(company, *, today=None):
             )
             facts.append(Fact("cash", f"Money out this month by category: {spent}."))
 
+    if cash["has_entries"] or summary["open_count"]:
+        forecast = billing.cash_forecast(company, today=today)
+        points = "; ".join(
+            f"in {h['days']} days ({h['date'].isoformat()}) {money(h['cautious'])}, "
+            f"or {money(h['if_overdue_paid'])} if overdue invoices are paid"
+            for h in forecast["horizons"]
+        )
+        risk = (
+            f" The cautious balance falls under the "
+            f"{'alert threshold' if forecast['threshold'] is not None else 'zero line'} "
+            f"around {forecast['risk_date'].isoformat()}."
+            if forecast["risk_date"]
+            else " The cautious balance stays above the threshold for 90 days."
+        )
+        facts.append(
+            Fact(
+                "cash_forecast",
+                "Cash forecast, cautious (open invoices received on their due date, overdue "
+                f"ones not counted, money out at {money(forecast['monthly_outflow'])} per month "
+                f"from {forecast['outflow_history_days']} days of history): {points}." + risk,
+            )
+        )
+
     for row in billing.receivables_by_client(company, today=today, limit=MAX_DEBTORS):
         client = Client.objects.get(pk=row["client_id"], company=company)
         account = billing.client_financials(client, today=today)

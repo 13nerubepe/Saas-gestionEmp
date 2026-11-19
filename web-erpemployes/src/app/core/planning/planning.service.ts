@@ -14,7 +14,7 @@ export interface OverdueInvoice {
     days_late: number;
 }
 
-export type MyDayAlert = { code: 'cash_below_threshold'; amount: string; threshold: string } | { code: 'draft_invoices'; count: number };
+export type MyDayAlert = { code: 'cash_below_threshold'; amount: string; threshold: string } | { code: 'cash_forecast_risk'; date: string } | { code: 'draft_invoices'; count: number };
 
 /** US-06. Financial blocks are null for employees. */
 export interface MyDay {

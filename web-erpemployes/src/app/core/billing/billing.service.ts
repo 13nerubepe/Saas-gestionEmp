@@ -159,6 +159,19 @@ export interface CashMovement {
 
 export type CashMovementPayload = Pick<CashMovement, 'direction' | 'category' | 'amount' | 'occurred_on' | 'method' | 'label'>;
 
+/** US-17: cash in 30, 60 and 90 days, with the assumptions behind it. */
+export interface CashForecast {
+    currency: string;
+    today: string;
+    balance: string;
+    overdue: string;
+    monthly_outflow: string;
+    outflow_history_days: number;
+    horizons: { days: number; date: string; cautious: string; if_overdue_paid: string }[];
+    threshold: string | null;
+    risk_date: string | null;
+}
+
 export interface FinancialSummary {
     currency: string;
     today: string;
@@ -257,6 +270,10 @@ export class BillingService {
 
     reverseCashMovement(id: string, reason: string): Observable<CashMovement> {
         return this.http.post<CashMovement>(`${BILLING_URL}/cash-movements/${id}/reverse/`, { reason });
+    }
+
+    getForecast(): Observable<CashForecast> {
+        return this.http.get<CashForecast>(`${BILLING_URL}/forecast/`);
     }
 
     getSummary(): Observable<FinancialSummary> {
