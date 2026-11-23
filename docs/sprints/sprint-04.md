@@ -258,8 +258,11 @@ démonstration se fait sur un poste de l'équipe (`docker compose`, puis
    deux scénarios et la date de risque.
 5. Question au conseiller : « Aurai-je assez d'argent dans 3 mois ? ». La
    réponse cite la prévision et affiche sa fiabilité.
-6. Clients → « Importer » : un fichier exporté d'Excel est vérifié (créés,
-   doublons ignorés, lignes refusées), puis importé.
+6. Clients → « Importer » avec `docs/demo/contacts-demo-gestionemp.csv`
+   (13 lignes fictives) : la vérification annonce 8 contacts créés, 3 doublons
+   ignorés (même nom en majuscules, même téléphone sans +237, ligne répétée)
+   et 2 lignes refusées (statut inconnu, email invalide), puis l'import crée
+   les 8 contacts. Les doublons s'appuient sur les clients de `seed_demo`.
 
 ## Rétrospective
 
