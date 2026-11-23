@@ -1,0 +1,14 @@
+﻿Nom;Statut;Type;Contact;Téléphone;Email;Ville;Pays;NIU;Notes
+Quincaillerie Ndokoti;prospect;entreprise;Mme Ekambi;+237 600 00 01 01;contact@quincaillerie-ndokoti.example;Douala;CM;;Rencontrée au salon PROMOTE
+Cabinet Médical Bastos;client;entreprise;Dr Abena;+237 600 00 01 02;accueil@cabinet-bastos.example;Yaoundé;CM;;Contrat de maintenance annuel
+Imprimerie Akwa Nord;prospect;entreprise;M. Tchoupo;+237 600 00 01 03;;Douala;CM;;Demande de devis pour flyers
+École Les Petits Génies;client;entreprise;Mme Fouda;+237 600 00 01 04;direction@petitsgenies.example;Yaoundé;CM;;Paie à 30 jours
+Transports Sanaga Express;prospect;entreprise;M. Biyong;+237 600 00 01 05;;Edéa;CM;;Recommandé par l'Hôtel Akwa Palace
+Marie-Claire Ngo Bassa;client;particulier;;+237 600 00 01 06;mc.ngobassa@example.cm;Kribi;CM;;Cliente fidèle depuis 2024
+Agence Immobilière Bonapriso;prospect;entreprise;M. Kamga;600000107;;Douala;CM;;Rappeler après le 15
+Restaurant Chez Mama Africa;client;entreprise;Mme Nkeng;+237 600 00 01 08;;Bafoussam;CM;;
+PHARMACIE DU CENTRE (DÉMO);client;entreprise;;;;Yaoundé;CM;;Doublon : même nom qu'un client existant
+Réception Akwa Palace;client;entreprise;;600000001;;Douala;CM;;Doublon : même téléphone que l'Hôtel Akwa Palace
+Imprimerie Akwa Nord;prospect;entreprise;;;;Douala;CM;;Doublon : déjà plus haut dans le fichier
+Boutique Mode Mokolo;partenaire;entreprise;;+237 600 00 01 09;;Yaoundé;CM;;Erreur : statut inconnu
+Garage Mvan;prospect;entreprise;;+237 600 00 01 10;garage-mvan-sans-arobase;Yaoundé;CM;;Erreur : email invalide
